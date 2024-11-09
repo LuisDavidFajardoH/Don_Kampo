@@ -5,7 +5,9 @@
   max-width: 1000px;
   margin: 0 auto;
   background-color: #f9f9f9;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.337);
   border-radius: 8px;
+  margin-top: 2%;
 }
 
 .cart-title {
@@ -161,4 +163,24 @@
 
 .checkout-button:hover {
   background-color: #EE7723;
+}
+
+:where(.css-dev-only-do-not-override-apn68).ant-btn-variant-outlined:not(:disabled):not(.ant-btn-disabled):hover, :where(.css-dev-only-do-not-override-apn68).ant-btn-variant-dashed:not(:disabled):not(.ant-btn-disabled):hover {
+  color: #00983A;
+  border-color: #00983A;
+  background: #ffffff;
+}
+.registro_modal{
+  margin-left: 2%;
+}
+
+:where(.css-dev-only-do-not-override-apn68).ant-btn-variant-solid {
+  color: #fff;
+  background: #00983A;
+}
+
+:where(.css-dev-only-do-not-override-apn68).ant-btn-variant-outlined:not(:disabled):not(.ant-btn-disabled):hover, :where(.css-dev-only-do-not-override-apn68).ant-btn-variant-dashed:not(:disabled):not(.ant-btn-disabled):hover {
+  color: #ffffff;
+  border-color: #EE7723;
+  background: #EE7723;
 }

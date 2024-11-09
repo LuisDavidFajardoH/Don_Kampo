@@ -1,14 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import Navbar from '../../components/navbar/Navbar';
 import { useCart } from '../products/CartContext';
-import { Card, Button, message, Divider } from 'antd';
+import { Card, Button, message, Divider, Modal } from 'antd';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 import './Cart.css';
 
 const Cart = () => {
   const { cart, removeFromCart, addToCart } = useCart();
   const [cartDetails, setCartDetails] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const navigate = useNavigate();
   const shippingCost = 5000; // Envío fijo
 
   useEffect(() => {
@@ -56,6 +59,34 @@ const Cart = () => {
 
   const total = calculateSubtotal() + shippingCost;
 
+  const handleCheckout = () => {
+    const loginData = JSON.parse(localStorage.getItem('loginData'));
+    if (loginData && loginData.user) {
+      // Si el usuario está autenticado, redirige a la página de confirmación de compra
+      navigate('/confirmacion-compra');
+    } else {
+      // Si no está autenticado, muestra el modal
+      setIsModalVisible(true);
+    }
+  };
+
+  const handleModalCancel = () => {
+    setIsModalVisible(false);
+  };
+
+  const handleLogin = () => {
+    navigate('/login');
+  };
+
+  const handleRegister = () => {
+    navigate('/register');
+  };
+
+  const handleContinueHopping = () => {
+    navigate('/products');
+  }
+
+
   return (
     <>
       <Navbar />
@@ -91,7 +122,7 @@ const Cart = () => {
                   </div>
                 </Card>
               ))}
-              <Button className="continue-shopping-button">← Seguir Comprando</Button>
+              <Button   className="continue-shopping-button" onClick={handleContinueHopping}>← Seguir Comprando</Button>
             </div>
             <div className="cart-summary">
               <h3>Total del Carrito</h3>
@@ -100,10 +131,22 @@ const Cart = () => {
               <p>Envío: <span>${shippingCost.toLocaleString()}</span></p>
               <Divider />
               <p><strong>Total: <span>${total.toLocaleString()}</span></strong></p>
-              <Button className="checkout-button">Finalizar Compra</Button>
+              <Button className="checkout-button" onClick={handleCheckout}>Finalizar Compra</Button>
             </div>
           </div>
         )}
+        <Modal
+          title="Inicia Sesión o Regístrate"
+          visible={isModalVisible}
+          onCancel={handleModalCancel}
+          footer={null}
+        >
+          <p>Para finalizar tu compra, necesitas iniciar sesión o registrarte.</p>
+          <div className="modal-buttons">
+            <Button type="primary" onClick={handleLogin}>Iniciar Sesión</Button>
+            <Button onClick={handleRegister} className='registro_modal'>Registrarse</Button>
+          </div>
+        </Modal>
       </div>
     </>
   );
