@@ -62,11 +62,9 @@ const Cart = () => {
   const handleCheckout = () => {
     const loginData = JSON.parse(localStorage.getItem('loginData'));
     if (loginData && loginData.user) {
-      // Si el usuario está autenticado, redirige a la página de confirmación de compra
-      navigate('/confirmacion-compra');
+      navigate('/checkout'); // Navega al componente Checkout si el usuario está autenticado
     } else {
-      // Si no está autenticado, muestra el modal
-      setIsModalVisible(true);
+      setIsModalVisible(true); // Muestra el modal para iniciar sesión o registrarse
     }
   };
 
