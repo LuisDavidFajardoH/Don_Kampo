@@ -7,33 +7,85 @@
     align-items: center;
     padding: 0 20px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  }
-  
-  .logo {
+}
+
+.logo {
     color: white;
     font-family: 'Merriweather', serif;
     font-size: 24px;
     font-weight: bold;
     cursor: pointer;
-  }
-  
-  .menu {
+}
+
+.menu {
     background-color: transparent;
     flex-grow: 1;
     justify-content: flex-end;
-  }
-  
-  .menu .ant-menu-item {
+}
+
+.menu .ant-menu-item {
     color: white;
     font-weight: bold;
-  }
-  
-  .menu .ant-menu-item:hover {
-    color: #00983A; /* Color secundario de la marca en hover */
-  }
-  
-  .menu .ant-menu-item-selected {
+    transition: color 0.3s ease;
+}
+
+/* Color secundario para el elemento seleccionado o en hover */
+.menu .ant-menu-item-selected,
+.menu .ant-menu-item:hover {
+    color: #00983A !important; /* Color secundario de la marca */
+}
+
+.menu .ant-menu-item .anticon {
+    transition: color 0.3s ease;
+}
+
+/* Cambia el color del ícono también cuando el item está seleccionado o en hover */
+.menu .ant-menu-item-selected .anticon,
+.menu .ant-menu-item:hover .anticon {
+    color: #00983A; /* Color secundario de la marca */
+}
+
+
+:where(.css-dev-only-do-not-override-apn68).ant-menu-light.ant-menu-horizontal >.ant-menu-item-selected::after, :where(.css-dev-only-do-not-override-apn68).ant-menu-light>.ant-menu.ant-menu-horizontal >.ant-menu-item-selected::after, :where(.css-dev-only-do-not-override-apn68).ant-menu-light.ant-menu-horizontal >.ant-menu-submenu-selected::after, :where(.css-dev-only-do-not-override-apn68).ant-menu-light>.ant-menu.ant-menu-horizontal >.ant-menu-submenu-selected::after {
+    border-bottom-width: 2px;
+    border-bottom-color: #00983A;
+}
+
+
+/* Responsive*/
+
+.logo {
+    color: white;
+    font-family: 'Merriweather', serif;
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.menu-desktop {
+    display: flex;
+    flex-grow: 1; /* Hace que el menú crezca y ocupe el espacio restante */
+    justify-content: flex-end;
     background-color: transparent;
-    border-bottom: 2px solid #00983A; /* Color secundario para la selección */
-  }
-  
+}
+
+:where(.css-dev-only-do-not-override-apn68).ant-badge .ant-badge-count {
+    background: #4dff87;
+}
+
+
+/* Oculta el botón de menú en pantallas grandes */
+.menu-mobile-button {
+    display: none;
+    color: white;
+}
+
+/* Mostrar el botón de menú solo en pantallas pequeñas */
+@media (max-width: 768px) {
+    .menu-desktop {
+        display: none;
+    }
+    .menu-mobile-button {
+        display: inline-flex;
+    }
+}
