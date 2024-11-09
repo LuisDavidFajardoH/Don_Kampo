@@ -1,0 +1,72 @@
+/* Variables de color y fuentes basadas en el manual de identidad */
+:root {
+  --primary-color: #EE7723; /* Naranja principal */
+  --secondary-color: #00983A; /* Verde secundario */
+  --font-family-primary: 'Roboto', sans-serif;
+  --font-family-secondary: 'Merriweather', serif;
+  --text-color: #2a2a2a; /* Color de texto principal */
+  --background-color: #f5f5f5; /* Fondo claro */
+}
+
+/* Estilos básicos */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-family-primary);
+  background-color: var(--background-color);
+  color: var(--text-color);
+}
+
+/* Títulos para seguir la paleta de color */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-family-secondary);
+  color: var(--primary-color);
+  margin: 0;
+}
+
+/* Botones */
+button {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  font-family: var(--font-family-primary);
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: var(--secondary-color);
+}
+
+/* Enlaces */
+a {
+  color: var(--primary-color);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--secondary-color);
+  text-decoration: underline;
+}
+
+/* Tarjetas de productos */
+.product-card {
+  border: 1px solid #ddd;
+  padding: 20px;
+  background-color: white;
+  border-radius: 5px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.product-card h3 {
+  font-family: var(--font-family-secondary);
+  color: var(--primary-color);
+}
+
+.product-card p {
+  color: var(--text-color);
+}
+
+/* Estilos adicionales según necesidad */

@@ -1,0 +1,39 @@
+/* Navbar.css */
+
+.navbar {
+    background-color: #EE7723; /* Color principal de la marca */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  }
+  
+  .logo {
+    color: white;
+    font-family: 'Merriweather', serif;
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  
+  .menu {
+    background-color: transparent;
+    flex-grow: 1;
+    justify-content: flex-end;
+  }
+  
+  .menu .ant-menu-item {
+    color: white;
+    font-weight: bold;
+  }
+  
+  .menu .ant-menu-item:hover {
+    color: #00983A; /* Color secundario de la marca en hover */
+  }
+  
+  .menu .ant-menu-item-selected {
+    background-color: transparent;
+    border-bottom: 2px solid #00983A; /* Color secundario para la selección */
+  }
+  

@@ -1,0 +1,12 @@
+:root {
+  --font-family-primary: 'Roboto', sans-serif;
+  --font-family-secondary: 'Merriweather', serif;
+}
+
+body {
+  font-family: var(--font-family-primary);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-family-secondary);
+}
