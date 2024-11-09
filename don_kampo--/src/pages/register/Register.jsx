@@ -21,7 +21,7 @@ const Register = () => {
       user_password,
       user_type,
     } = values;
-
+  
     setLoading(true);
     try {
       const response = await axios.post("/api/createusers", {
@@ -30,22 +30,23 @@ const Register = () => {
         email,
         phone,
         city,
+        address: " ", 
+        neighborhood: " ",
         user_password,
         user_type,
       });
-
-      // Muestra un mensaje de éxito
+  
       message.success(response.data.msg);
-      navigate("/login"); // Redirige a la página de inicio de sesión después del registro
+      navigate("/login");
     } catch (error) {
       message.error(
-        error.response?.data?.msg ||
-          "Error al registrar el usuario. Inténtalo nuevamente."
+        error.response?.data?.msg || "Error al registrar el usuario. Inténtalo nuevamente."
       );
     } finally {
       setLoading(false);
     }
   };
+  
 
   return (
     <>

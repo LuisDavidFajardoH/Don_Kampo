@@ -65,7 +65,18 @@ const Checkout = () => {
     const loginData = JSON.parse(localStorage.getItem('loginData'));
     if (loginData && loginData.user) {
       try {
-        await axios.put(`/api/updateusers/${loginData.user.id}`, userData);
+        // Crear un objeto solo con los campos del formulario
+        const updatedData = {
+          user_name: userData.user_name,
+          lastname: userData.lastname,
+          email: userData.email,
+          phone: userData.phone,
+          city: userData.city,
+          address: userData.address,
+          neighborhood: userData.neighborhood,
+        };
+  
+        await axios.put(`/api/updateusers/${loginData.user.id}`, updatedData);
         message.success('Datos actualizados exitosamente.');
         navigate('/confirmation');
       } catch (error) {
@@ -74,6 +85,7 @@ const Checkout = () => {
       }
     }
   };
+  
 
   const total = calculateSubtotal() + shippingCost;
 
