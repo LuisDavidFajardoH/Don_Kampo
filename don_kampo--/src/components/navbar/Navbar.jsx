@@ -48,6 +48,9 @@ const Navbar = () => {
       case "/register":
         setSelectedKey("register");
         break;
+      case "/cart":
+        setSelectedKey("cart");
+        break;
       default:
         setSelectedKey("home");
         break;
