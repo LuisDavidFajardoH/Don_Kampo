@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Form, Input, Button, message, Divider, Checkbox } from 'antd';
+import { Form, Input, Button, message, Divider, Checkbox, Row, Col } from 'antd';
 import axios from 'axios';
 import Navbar from '../../components/navbar/Navbar';
 import { useNavigate } from 'react-router-dom';
@@ -65,7 +65,6 @@ const Checkout = () => {
     const loginData = JSON.parse(localStorage.getItem('loginData'));
     if (loginData && loginData.user) {
       try {
-        // Crear un objeto solo con los campos del formulario
         const updatedData = {
           user_name: userData.user_name,
           lastname: userData.lastname,
@@ -75,17 +74,29 @@ const Checkout = () => {
           address: userData.address,
           neighborhood: userData.neighborhood,
         };
-  
+
         await axios.put(`/api/updateusers/${loginData.user.id}`, updatedData);
         message.success('Datos actualizados exitosamente.');
-        navigate('/confirmation');
       } catch (error) {
         message.error('Error al actualizar los datos del usuario.');
         console.error(error);
       }
     }
   };
-  
+
+  const validateForm = () => {
+    const requiredFields = ['user_name', 'lastname', 'email', 'phone', 'city', 'address', 'neighborhood'];
+    return requiredFields.every((field) => userData?.[field]?.trim());
+  };
+
+  const handlePlaceOrder = () => {
+    if (validateForm()) {
+      message.success('Pedido realizado exitosamente.');
+      navigate('/order-confirmation');
+    } else {
+      message.error('Por favor, complete todos los campos antes de realizar el pedido.');
+    }
+  };
 
   const total = calculateSubtotal() + shippingCost;
 
@@ -97,30 +108,48 @@ const Checkout = () => {
         <div className="checkout-content">
           {userData ? (
             <Form layout="vertical" className="checkout-form">
-              <Form.Item label="Nombre">
-                <Input name="user_name" value={userData.user_name} onChange={handleInputChange} />
-              </Form.Item>
-              <Form.Item label="Apellido">
-                <Input name="lastname" value={userData.lastname} onChange={handleInputChange} />
-              </Form.Item>
-              <Form.Item label="Email">
-                <Input name="email" value={userData.email} onChange={handleInputChange} />
-              </Form.Item>
-              <Form.Item label="Teléfono">
-                <Input name="phone" value={userData.phone} onChange={handleInputChange} />
-              </Form.Item>
-              <Form.Item label="Ciudad">
-                <Input name="city" value={userData.city} onChange={handleInputChange} />
-              </Form.Item>
-              <Form.Item label="Dirección">
-                <Input name="address" value={userData.address} onChange={handleInputChange} />
-              </Form.Item>
-              <Form.Item label="Barrio">
-                <Input name="neighborhood" value={userData.neighborhood} onChange={handleInputChange} />
-              </Form.Item>
-              <Button type="primary" className="confirm-order-button" onClick={handleUpdateUser}>
-                Actualizar Datos y Confirmar Compra
-              </Button>
+              <Row gutter={16}>
+                <Col xs={24} sm={12}>
+                  <Form.Item label="Nombre">
+                    <Input name="user_name" value={userData.user_name} onChange={handleInputChange} />
+                  </Form.Item>
+                </Col>
+                <Col xs={24} sm={12}>
+                  <Form.Item label="Apellido">
+                    <Input name="lastname" value={userData.lastname} onChange={handleInputChange} />
+                  </Form.Item>
+                </Col>
+                <Col xs={24} sm={12}>
+                  <Form.Item label="Email">
+                    <Input name="email" value={userData.email} onChange={handleInputChange} />
+                  </Form.Item>
+                </Col>
+                <Col xs={24} sm={12}>
+                  <Form.Item label="Teléfono">
+                    <Input name="phone" value={userData.phone} onChange={handleInputChange} />
+                  </Form.Item>
+                </Col>
+                <Col xs={24} sm={12}>
+                  <Form.Item label="Ciudad">
+                    <Input name="city" value={userData.city} onChange={handleInputChange} />
+                  </Form.Item>
+                </Col>
+                <Col xs={24} sm={12}>
+                  <Form.Item label="Dirección">
+                    <Input name="address" value={userData.address} onChange={handleInputChange} />
+                  </Form.Item>
+                </Col>
+                <Col xs={24} sm={12}>
+                  <Form.Item label="Barrio">
+                    <Input name="neighborhood" value={userData.neighborhood} onChange={handleInputChange} />
+                  </Form.Item>
+                </Col>
+                <Col xs={24} sm={12}>
+                  <Button type="primary" className="confirm-data-button" onClick={handleUpdateUser}>
+                    Confirmar Datos
+                  </Button>
+                </Col>
+              </Row>
             </Form>
           ) : (
             <p>Cargando datos del usuario...</p>
@@ -139,10 +168,15 @@ const Checkout = () => {
             <p>Envío: <span>${shippingCost.toLocaleString()}</span></p>
             <Divider />
             <h4>Total: <span>${total.toLocaleString()}</span></h4>
-            <Checkbox>
-              He leído y estoy de acuerdo con los términos y condiciones
-            </Checkbox>
-            <Button type="primary" className="place-order-button">REALIZAR EL PEDIDO</Button>
+            
+            <Button 
+              type="primary" 
+              className="place-order-button" 
+              onClick={handlePlaceOrder}
+              disabled={!validateForm()}
+            >
+              REALIZAR EL PEDIDO
+            </Button>
           </div>
         </div>
       </div>

@@ -1,62 +1,73 @@
 .checkout-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px;
-  }
-  
-  .checkout-content {
-    display: flex;
-    justify-content: space-between;
-    gap: 20px;
-    width: 100%;
-    max-width: 1200px;
-  }
-  
-  .checkout-form {
-    flex: 1;
-    padding: 20px;
-    background-color: #f9f9f9;
-    border-radius: 8px;
-  }
-  
-  .order-summary {
-    width: 300px;
-    padding: 20px;
-    border: 1px solid #f57c00;
-    border-radius: 8px;
-  }
-  
-  .order-summary h3 {
-    color: #f57c00;
-    margin-bottom: 10px;
-    font-size: 1.2em;
-  }
-  
-  .order-summary-item {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 10px;
-  }
-  
-  .order-summary p {
-    display: flex;
-    justify-content: space-between;
-    margin: 8px 0;
-    font-weight: bold;
-  }
-  
-  .place-order-button {
-    width: 100%;
-    background-color: #f57c00;
-    color: white;
-    border: none;
-    padding: 12px;
-    margin-top: 20px;
-  }
-  
-  .place-order-button:hover {
-    background-color: #e07000;
-    color: white;
-  }
-  
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+}
+
+.checkout-content {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  width: 100%;
+  max-width: 1200px;
+  margin-top: 1%;
+}
+
+.checkout-form {
+  flex: 1;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.checkout-form .ant-row > .ant-col {
+  margin-bottom: 16px;
+}
+
+.order-summary {
+  width: 300px;
+  padding: 20px;
+  border: 1px solid #f57c00;
+  border-radius: 8px;
+  background-color: #fff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.order-summary h3 {
+  color: #f57c00;
+  margin-bottom: 10px;
+  font-size: 1.2em;
+  font-weight: bold;
+}
+
+.order-summary-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-weight: 500;
+}
+
+.order-summary p {
+  display: flex;
+  justify-content: space-between;
+  margin: 8px 0;
+}
+
+.place-order-button,
+.confirm-data-button {
+  width: 100%;
+  background-color: #f57c00;
+  color: white;
+  border: none;
+  padding: 12px;
+  margin-top: 30px;
+  font-weight: bold;
+}
+
+.place-order-button:hover,
+.confirm-data-button:hover {
+  background-color: #e07000;
+  color: white;
+}
