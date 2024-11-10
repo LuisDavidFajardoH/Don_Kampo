@@ -19,13 +19,13 @@ const Cart = () => {
       setLoading(true);
       try {
         const productDetails = await Promise.all(
-          Object.keys(cart).map(async (productId) => {
+          Object.keys(cart).map(async (product_id) => {
             try {
-              const response = await axios.get(`/api/getproduct/${productId}`);
-              return { ...response.data, quantity: cart[productId].quantity };
+              const response = await axios.get(`/api/getproduct/${product_id}`);
+              return { ...response.data, quantity: cart[product_id].quantity };
             } catch (error) {
               if (error.response && error.response.status === 404) {
-                console.warn(`Producto con ID ${productId} no encontrado.`);
+                console.warn(`Producto con ID ${product_id} no encontrado.`);
                 return null;
               } else {
                 throw error;

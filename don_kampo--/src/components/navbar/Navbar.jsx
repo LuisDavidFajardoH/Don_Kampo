@@ -67,13 +67,18 @@ const Navbar = () => {
   // Función para cerrar sesión
   const handleLogout = () => {
     localStorage.removeItem("loginData");
+    localStorage.removeItem("cart");
     handleMenuClick("login", "/login");
   };
 
   return (
     <Header className="navbar">
       <div className="logo" onClick={() => handleMenuClick("home", "/home")}>
-        Don Kampo
+        <img
+          src="/images/1.png"
+          alt="Don Kampo Logo"
+          style={{ height: "88px" }}
+        />
       </div>
 
       {/* Menú para pantallas grandes */}
