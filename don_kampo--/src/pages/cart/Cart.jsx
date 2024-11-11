@@ -1,47 +1,76 @@
-import React, { useEffect, useState } from 'react';
-import Navbar from '../../components/navbar/Navbar';
-import { useCart } from '../products/CartContext';
-import { Card, Button, message, Divider, Modal } from 'antd';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
-import './Cart.css';
+import React, { useEffect, useState } from "react";
+import Navbar from "../../components/navbar/Navbar";
+import { useCart } from "../products/CartContext";
+import { Card, Button, message, Divider, Modal } from "antd";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import "./Cart.css";
 
 const Cart = () => {
   const { cart, removeFromCart, addToCart } = useCart();
   const [cartDetails, setCartDetails] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isFirstOrder, setIsFirstOrder] = useState(false);
+
   const navigate = useNavigate();
-  const shippingCost = 5000; // Envío fijo
+  const [shippingCost, setShippingCost] = useState(5000);
 
   // Obtener el tipo de usuario desde localStorage
-  const userType = JSON.parse(localStorage.getItem('loginData'))?.user?.user_type;
+  const userType = JSON.parse(localStorage.getItem("loginData"))?.user
+    ?.user_type;
 
   useEffect(() => {
     const fetchCartDetails = async () => {
       setLoading(true);
-      try {
-        const productDetails = await Promise.all(
-          Object.keys(cart).map(async (product_id) => {
-            try {
-              const response = await axios.get(`/api/getproduct/${product_id}`);
-              return { ...response.data, quantity: cart[product_id].quantity };
-            } catch (error) {
-              if (error.response && error.response.status === 404) {
-                console.warn(`Producto con ID ${product_id} no encontrado.`);
-                return null;
-              } else {
-                throw error;
+      const loginData = JSON.parse(localStorage.getItem("loginData"));
+
+      if (loginData && loginData.user) {
+        try {
+          const productDetails = await Promise.all(
+            Object.keys(cart).map(async (product_id) => {
+              try {
+                const response = await axios.get(
+                  `/api/getproduct/${product_id}`
+                );
+                return {
+                  ...response.data,
+                  quantity: cart[product_id].quantity,
+                };
+              } catch (error) {
+                if (error.response && error.response.status === 404) {
+                  console.warn(`Producto con ID ${product_id} no encontrado.`);
+                  return null;
+                } else {
+                  throw error;
+                }
               }
+            })
+          );
+          setCartDetails(productDetails.filter((item) => item !== null));
+
+          // Verificar si es la primera orden
+          const userResponse = await axios.get(
+            `/api/users/${loginData.user.id}`
+          );
+          const hasOrders =
+            userResponse.data.orders && userResponse.data.orders.length > 0;
+          setIsFirstOrder(!hasOrders);
+
+          // Aplica el descuento de envío si es la primera orden
+          if (!hasOrders) {
+            if (userType === "hogar") {
+              setShippingCost(2500); // 50% de descuento en el envío para "hogar"
+            } else {
+              setShippingCost(0); // Envío gratis para otros tipos de usuario en la primera orden
             }
-          })
-        );
-        setCartDetails(productDetails.filter((item) => item !== null));
-      } catch (error) {
-        message.error('Error al cargar los detalles del carrito.');
-        console.error('Error al obtener detalles del carrito:', error);
-      } finally {
-        setLoading(false);
+          }
+        } catch (error) {
+          message.error("Error al cargar los detalles del carrito.");
+          console.error("Error al obtener detalles del carrito:", error);
+        } finally {
+          setLoading(false);
+        }
       }
     };
 
@@ -67,7 +96,9 @@ const Cart = () => {
   // Función para convertir el buffer de imagen en una URL base64
   const getBase64Image = (photo) => {
     if (photo && photo.data) {
-      const base64String = btoa(String.fromCharCode(...new Uint8Array(photo.data)));
+      const base64String = btoa(
+        String.fromCharCode(...new Uint8Array(photo.data))
+      );
       return `data:image/jpeg;base64,${base64String}`;
     }
     return "path_to_placeholder_image"; // Cambia este valor si tienes una imagen de placeholder
@@ -82,15 +113,19 @@ const Cart = () => {
   };
 
   const calculateSubtotal = () => {
-    return cartDetails.reduce((total, product) => total + getPriceByUserType(product) * product.quantity, 0);
+    return cartDetails.reduce(
+      (total, product) =>
+        total + getPriceByUserType(product) * product.quantity,
+      0
+    );
   };
 
   const total = calculateSubtotal() + shippingCost;
 
   const handleCheckout = () => {
-    const loginData = JSON.parse(localStorage.getItem('loginData'));
+    const loginData = JSON.parse(localStorage.getItem("loginData"));
     if (loginData && loginData.user) {
-      navigate('/checkout'); // Navega al componente Checkout si el usuario está autenticado
+      navigate("/checkout"); // Navega al componente Checkout si el usuario está autenticado
     } else {
       setIsModalVisible(true); // Muestra el modal para iniciar sesión o registrarse
     }
@@ -101,15 +136,15 @@ const Cart = () => {
   };
 
   const handleLogin = () => {
-    navigate('/login');
+    navigate("/login");
   };
 
   const handleRegister = () => {
-    navigate('/register');
+    navigate("/register");
   };
 
   const handleContinueShopping = () => {
-    navigate('/products');
+    navigate("/products");
   };
 
   return (
@@ -127,36 +162,78 @@ const Cart = () => {
               {cartDetails.map((product) => (
                 <Card key={product.product_id} className="cart-item">
                   <div className="cart-item-layout">
-                    <img src={getBase64Image(product.photo)} alt={product.name} className="cart-item-image" />
-                    
+                    <img
+                      src={getBase64Image(product.photo)}
+                      alt={product.name}
+                      className="cart-item-image"
+                    />
+
                     <div className="cart-item-details">
                       <h4 className="product-name">{product.name}</h4>
                       <p className="product-category">{product.category}</p>
-                      <p className="product-price">Precio: ${getPriceByUserType(product).toLocaleString()}</p>
+                      <p className="product-price">
+                        Precio: ${getPriceByUserType(product).toLocaleString()}
+                      </p>
                     </div>
 
                     <div className="cart-item-quantity">
-                      <Button onClick={() => handleRemoveFromCart(product)}>-</Button>
+                      <Button onClick={() => handleRemoveFromCart(product)}>
+                        -
+                      </Button>
                       <span>{product.quantity}</span>
-                      <Button onClick={() => handleAddToCart(product)}>+</Button>
+                      <Button onClick={() => handleAddToCart(product)}>
+                        +
+                      </Button>
                     </div>
 
                     <div className="cart-item-subtotal">
-                      <p>Subtotal: ${(getPriceByUserType(product) * product.quantity).toLocaleString()}</p>
+                      <p>
+                        Subtotal: $
+                        {(
+                          getPriceByUserType(product) * product.quantity
+                        ).toLocaleString()}
+                      </p>
                     </div>
                   </div>
                 </Card>
               ))}
-              <Button className="continue-shopping-button" onClick={handleContinueShopping}>← Seguir Comprando</Button>
+              <Button
+                className="continue-shopping-button"
+                onClick={handleContinueShopping}
+              >
+                ← Seguir Comprando
+              </Button>
             </div>
             <div className="cart-summary">
               <h3>Total del Carrito</h3>
               <Divider />
-              <p>Subtotal: <span>${calculateSubtotal().toLocaleString()}</span></p>
-              <p>Envío: <span>${shippingCost.toLocaleString()}</span></p>
+              <p>
+                Subtotal: <span>${calculateSubtotal().toLocaleString()}</span>
+              </p>
+              <p>
+                Envío: <span>${shippingCost.toLocaleString()}</span>
+              </p>
+              {isFirstOrder && (
+                <p
+                  style={{
+                    fontSize: "12px",
+                    color: "#FF914D",
+                    marginTop: "5px",
+                  }}
+                >
+                  ¡Descuento aplicado al costo de envío por ser tu primer
+                  pedido!
+                </p>
+              )}
               <Divider />
-              <p><strong>Total: <span>${total.toLocaleString()}</span></strong></p>
-              <Button className="checkout-button" onClick={handleCheckout}>Finalizar Compra</Button>
+              <p>
+                <strong>
+                  Total: <span>${total.toLocaleString()}</span>
+                </strong>
+              </p>
+              <Button className="checkout-button" onClick={handleCheckout}>
+                Finalizar Compra
+              </Button>
             </div>
           </div>
         )}
@@ -166,10 +243,16 @@ const Cart = () => {
           onCancel={handleModalCancel}
           footer={null}
         >
-          <p>Para finalizar tu compra, necesitas iniciar sesión o registrarte.</p>
+          <p>
+            Para finalizar tu compra, necesitas iniciar sesión o registrarte.
+          </p>
           <div className="modal-buttons">
-            <Button type="primary" onClick={handleLogin}>Iniciar Sesión</Button>
-            <Button onClick={handleRegister} className='registro_modal'>Registrarse</Button>
+            <Button type="primary" onClick={handleLogin}>
+              Iniciar Sesión
+            </Button>
+            <Button onClick={handleRegister} className="registro_modal">
+              Registrarse
+            </Button>
           </div>
         </Modal>
       </div>

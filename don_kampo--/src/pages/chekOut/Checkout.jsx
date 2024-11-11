@@ -44,7 +44,7 @@ const Checkout = () => {
             if (userType === "hogar") {
               setShippingCost(2500); // 50% de descuento en el envío para "hogar"
             } else {
-              setShippingCost(0); // Envío gratis para otros tipos de usuario en la primera orden
+              setShippingCost(1); // Envío gratis para otros tipos de usuario en la primera orden
             }
           }
         } catch (error) {

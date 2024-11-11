@@ -5,6 +5,7 @@ import Products from './pages/products/Products';
 import Cart from './pages/cart/Cart.jsx';
 import Checkout from './pages/chekOut/Checkout.jsx';
 import CreateProduct from './pages/createProduct/CreateProduct.jsx';
+import Profile from './pages/proflile/Profile.jsx';
 import { CartProvider } from './pages/products/CartContext.jsx';
 import './App.css';
 
@@ -21,6 +22,7 @@ const App = () => {
         <Route path="/cart" element={<Cart />} />
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/createproduct" element={<CreateProduct />} />
+        <Route path="/profile" element={<Profile />} />
       </Routes>
       </CartProvider>
     </Router>
