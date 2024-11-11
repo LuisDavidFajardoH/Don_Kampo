@@ -2,8 +2,6 @@
 :root {
   --primary-color: #EE7723; /* Naranja principal */
   --secondary-color: #00983A; /* Verde secundario */
-  --font-family-primary: 'Roboto', sans-serif;
-  --font-family-secondary: 'Merriweather', serif;
   --text-color: #2a2a2a; /* Color de texto principal */
   --background-color: #f5f5f5; /* Fondo claro */
 }

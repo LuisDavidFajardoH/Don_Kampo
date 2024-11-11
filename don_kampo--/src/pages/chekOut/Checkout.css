@@ -1,3 +1,4 @@
+/* Container */
 .checkout-container {
   display: flex;
   flex-direction: column;
@@ -5,6 +6,7 @@
   padding: 20px;
 }
 
+/* Content Layout */
 .checkout-content {
   display: flex;
   justify-content: space-between;
@@ -14,6 +16,7 @@
   margin-top: 1%;
 }
 
+/* Form */
 .checkout-form {
   flex: 1;
   padding: 20px;
@@ -22,10 +25,12 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
+/* Column Spacing in Form */
 .checkout-form .ant-row > .ant-col {
   margin-bottom: 16px;
 }
 
+/* Order Summary */
 .order-summary {
   width: 300px;
   padding: 20px;
@@ -40,6 +45,7 @@
   margin-bottom: 10px;
   font-size: 1.2em;
   font-weight: bold;
+  text-align: center;
 }
 
 .order-summary-item {
@@ -55,6 +61,7 @@
   margin: 8px 0;
 }
 
+/* Buttons */
 .place-order-button,
 .confirm-data-button {
   width: 100%;
@@ -72,8 +79,46 @@
   color: white;
 }
 
+/* Hover Effect */
 :where(.css-dev-only-do-not-override-apn68).ant-btn-variant-solid:not(:disabled):not(.ant-btn-disabled):hover {
   background: #00983A;
   border-color: #EE7723;
   color: #fff;
+}
+
+/* Media Queries for Responsive Design */
+@media (max-width: 768px) {
+  .checkout-content {
+    flex-direction: column;
+  }
+
+  .order-summary {
+    width: 80%;
+    margin-top: 20px;
+    margin-left: 7%;
+  }
+
+  .checkout-form .ant-row > .ant-col {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .checkout-container {
+    padding: 10px;
+  }
+
+  .checkout-content {
+    gap: 10px;
+  }
+
+  .order-summary {
+    padding: 15px;
+  }
+
+  .place-order-button,
+  .confirm-data-button {
+    padding: 10px;
+    font-size: 14px;
+  }
 }

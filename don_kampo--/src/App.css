@@ -1,8 +1,20 @@
-:root {
-  --font-family-primary: 'Roboto', sans-serif;
-  --font-family-secondary: 'Merriweather', serif;
+/* Importa Montserrat desde Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
+
+/* Configura Cotane Beach */
+@font-face {
+  font-family: 'Cotane Beach';
+  src: url('./fonts/CotaneBeach.otf') format('truetype'); /* Ajusta el path si está en otra ubicación */
+  font-weight: normal;
+  font-style: normal;
 }
 
+:root {
+  --font-family-primary: 'Cotane Beach', sans-serif;
+  --font-family-secondary: 'Montserrat', sans-serif;
+}
+
+/* Aplica las variables de fuente */
 body {
   font-family: var(--font-family-primary);
 }

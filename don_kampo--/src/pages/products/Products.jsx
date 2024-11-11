@@ -21,17 +21,18 @@ const Products = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get(
-          '/api/products', 
-          { withCredentials: true } 
-        );
+        const response = await axios.get("/api/products", {
+          withCredentials: true,
+        });
         setProducts(response.data);
         setFilteredProducts(response.data);
+        
 
         const uniqueCategories = [
           "Todas",
           ...new Set(response.data.map((product) => product.category)),
         ];
+        
         setCategories(uniqueCategories);
       } catch (error) {
         message.error("Error al cargar los productos.");
@@ -56,20 +57,34 @@ const Products = () => {
   };
 
   const normalizeString = (str) => {
-    return str
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .toLowerCase();
+    return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
   };
 
   const filterProducts = (category, query) => {
     const filtered = products.filter((product) => {
-      const matchesCategory = category === "Todas" || product.category === category;
-      const matchesSearch = normalizeString(product.name).includes(normalizeString(query));
+      const matchesCategory =
+        category === "Todas" || product.category === category;
+      const matchesSearch = normalizeString(product.name).includes(
+        normalizeString(query)
+      );
       return matchesCategory && matchesSearch;
     });
     setFilteredProducts(filtered);
   };
+
+  // Función para convertir el buffer en una URL base64 para la imagen
+  const getBase64Image = (photo) => {
+    if (photo && photo.data) {
+      const base64String = btoa(
+        String.fromCharCode(...new Uint8Array(photo.data))
+      );
+      console.log("base64String", base64String);
+      return `data:image/jpeg;base64,${base64String}`;
+    }
+    return "path_to_placeholder_image";
+  };
+  
+  
 
   return (
     <>
@@ -106,10 +121,11 @@ const Products = () => {
         ) : (
           filteredProducts.map((product) => (
             <Card
-              key={product.id}
+              key={product.product_id}
               className="product-card"
               hoverable
-              cover={<img alt={product.name} src="path_to_image_placeholder" />}
+              cover={<img alt={product.name} src={getBase64Image(product.photo)} />}
+
             >
               <div className="product-info">
                 <h3 className="product-name">{product.name}</h3>
@@ -117,7 +133,7 @@ const Products = () => {
                 <p className="product-category">
                   <strong>Categoría:</strong> {product.category}
                 </p>
-                {cart[product.id] ? (
+                {cart[product.product_id] ? (
                   <div className="quantity-controls">
                     <Button
                       onClick={() => removeFromCart(product)}
@@ -125,7 +141,7 @@ const Products = () => {
                     >
                       -
                     </Button>
-                    <span>{cart[product.id].quantity}</span>
+                    <span>{cart[product.product_id].quantity}</span>
                     <Button
                       onClick={() => addToCart(product)}
                       className="add-to-cart-button"
