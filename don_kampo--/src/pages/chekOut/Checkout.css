@@ -81,7 +81,7 @@
 
 /* Hover Effect */
 :where(.css-dev-only-do-not-override-apn68).ant-btn-variant-solid:not(:disabled):not(.ant-btn-disabled):hover {
-  background: #00983A;
+  background: #EE7723;
   border-color: #EE7723;
   color: #fff;
 }

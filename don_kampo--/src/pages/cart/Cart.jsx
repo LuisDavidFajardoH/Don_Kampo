@@ -14,6 +14,9 @@ const Cart = () => {
   const navigate = useNavigate();
   const shippingCost = 5000; // Envío fijo
 
+  // Obtener el tipo de usuario desde localStorage
+  const userType = JSON.parse(localStorage.getItem('loginData'))?.user?.user_type;
+
   useEffect(() => {
     const fetchCartDetails = async () => {
       setLoading(true);
@@ -45,6 +48,31 @@ const Cart = () => {
     fetchCartDetails();
   }, [cart]);
 
+  // Función para obtener el precio según el tipo de usuario
+  const getPriceByUserType = (product) => {
+    switch (userType) {
+      case "hogar":
+        return parseFloat(product.price_home) || 0;
+      case "supermercado":
+        return parseFloat(product.price_supermarket) || 0;
+      case "restaurante":
+        return parseFloat(product.price_restaurant) || 0;
+      case "fruver":
+        return parseFloat(product.price_fruver) || 0;
+      default:
+        return parseFloat(product.price_home) || 0; // Valor por defecto
+    }
+  };
+
+  // Función para convertir el buffer de imagen en una URL base64
+  const getBase64Image = (photo) => {
+    if (photo && photo.data) {
+      const base64String = btoa(String.fromCharCode(...new Uint8Array(photo.data)));
+      return `data:image/jpeg;base64,${base64String}`;
+    }
+    return "path_to_placeholder_image"; // Cambia este valor si tienes una imagen de placeholder
+  };
+
   const handleRemoveFromCart = (product) => {
     removeFromCart(product);
   };
@@ -54,7 +82,7 @@ const Cart = () => {
   };
 
   const calculateSubtotal = () => {
-    return cartDetails.reduce((total, product) => total + (product.price || 0) * product.quantity, 0);
+    return cartDetails.reduce((total, product) => total + getPriceByUserType(product) * product.quantity, 0);
   };
 
   const total = calculateSubtotal() + shippingCost;
@@ -80,10 +108,9 @@ const Cart = () => {
     navigate('/register');
   };
 
-  const handleContinueHopping = () => {
+  const handleContinueShopping = () => {
     navigate('/products');
-  }
-
+  };
 
   return (
     <>
@@ -98,14 +125,14 @@ const Cart = () => {
           <div className="cart-content">
             <div className="cart-items">
               {cartDetails.map((product) => (
-                <Card key={product.id} className="cart-item">
+                <Card key={product.product_id} className="cart-item">
                   <div className="cart-item-layout">
-                    <img src={'path_to_image_placeholder'} alt={product.name} className="cart-item-image" />
+                    <img src={getBase64Image(product.photo)} alt={product.name} className="cart-item-image" />
                     
                     <div className="cart-item-details">
                       <h4 className="product-name">{product.name}</h4>
                       <p className="product-category">{product.category}</p>
-                      <p className="product-price">Precio: ${product.price}</p>
+                      <p className="product-price">Precio: ${getPriceByUserType(product).toLocaleString()}</p>
                     </div>
 
                     <div className="cart-item-quantity">
@@ -115,12 +142,12 @@ const Cart = () => {
                     </div>
 
                     <div className="cart-item-subtotal">
-                      <p>Subtotal: ${product.price * product.quantity}</p>
+                      <p>Subtotal: ${(getPriceByUserType(product) * product.quantity).toLocaleString()}</p>
                     </div>
                   </div>
                 </Card>
               ))}
-              <Button   className="continue-shopping-button" onClick={handleContinueHopping}>← Seguir Comprando</Button>
+              <Button className="continue-shopping-button" onClick={handleContinueShopping}>← Seguir Comprando</Button>
             </div>
             <div className="cart-summary">
               <h3>Total del Carrito</h3>

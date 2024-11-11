@@ -5,6 +5,7 @@ import axios from "axios";
 import Navbar from "../../components/navbar/Navbar";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../products/CartContext";
+import useWindowSize from "react-use/lib/useWindowSize";
 import "./Checkout.css";
 
 const Checkout = () => {
@@ -13,17 +14,39 @@ const Checkout = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [orderId, setOrderId] = useState(null);
 
-  const { cart } = useCart();
+  const { cart, clearCart } = useCart();
   const navigate = useNavigate();
-  const shippingCost = 5000;
+  const { width, height } = useWindowSize();
+
+  // Obtener el tipo de usuario y órdenes desde localStorage
+  const loginData = JSON.parse(localStorage.getItem("loginData"));
+  const userType = loginData?.user?.user_type;
+
+  const [shippingCost, setShippingCost] = useState(5000);
+
+  // Verificar si el usuario tiene órdenes previas
+  const [isFirstOrder, setIsFirstOrder] = useState(false);
+
 
   useEffect(() => {
     const fetchUserData = async () => {
-      const loginData = JSON.parse(localStorage.getItem("loginData"));
       if (loginData && loginData.user) {
         try {
           const response = await axios.get(`/api/users/${loginData.user.id}`);
-          setUserData(response.data);
+          const user = response.data.user;
+          setUserData(user);
+
+          // Aplicar descuento de envío si es la primera orden
+          const hasOrders =
+            response.data.orders && response.data.orders.length > 0;
+          if (!hasOrders) {
+            setIsFirstOrder(true);
+            if (userType === "hogar") {
+              setShippingCost(2500); // 50% de descuento en el envío para "hogar"
+            } else {
+              setShippingCost(0); // Envío gratis para otros tipos de usuario en la primera orden
+            }
+          }
         } catch (error) {
           message.error("Error al cargar los datos del usuario.");
           console.error(error);
@@ -54,11 +77,28 @@ const Checkout = () => {
     };
 
     fetchCartDetails();
-  }, [cart, setCartDetails]);
+  }, [cart]);
+
+  // Función para obtener el precio según el tipo de usuario
+  const getPriceByUserType = (product) => {
+    switch (userType) {
+      case "hogar":
+        return parseFloat(product.price_home) || 0;
+      case "supermercado":
+        return parseFloat(product.price_supermarket) || 0;
+      case "restaurante":
+        return parseFloat(product.price_restaurant) || 0;
+      case "fruver":
+        return parseFloat(product.price_fruver) || 0;
+      default:
+        return parseFloat(product.price_home) || 0;
+    }
+  };
 
   const calculateSubtotal = () => {
     return (cartDetails || []).reduce(
-      (total, product) => total + (product.price || 0) * product.quantity,
+      (total, product) =>
+        total + getPriceByUserType(product) * product.quantity,
       0
     );
   };
@@ -69,7 +109,6 @@ const Checkout = () => {
   };
 
   const handleUpdateUser = async () => {
-    const loginData = JSON.parse(localStorage.getItem("loginData"));
     if (loginData && loginData.user) {
       try {
         const updatedData = {
@@ -106,24 +145,23 @@ const Checkout = () => {
 
   const handlePlaceOrder = async () => {
     if (validateForm()) {
-      const loginData = JSON.parse(localStorage.getItem("loginData"));
-
       // Calcular la fecha de entrega estimada sumando 4 días a la fecha actual
       const currentDate = new Date();
-      currentDate.setDate(currentDate.getDate() + 1);
-      const estimatedDelivery = currentDate.toISOString(); // Formato de fecha en ISO
+      currentDate.setDate(currentDate.getDate() + 4);
+      const estimatedDelivery = currentDate.toISOString();
 
       const orderData = {
         userId: loginData?.user?.id,
         cartDetails: cartDetails.map((product) => ({
-          productId: product.product_id, // Asegúrate de usar el campo correcto para el ID del producto
+          productId: product.product_id,
           quantity: product.quantity,
-          price: 2000,
+          price: getPriceByUserType(product),
         })),
         total: calculateSubtotal() + shippingCost,
         shippingCost: shippingCost,
         shippingMethod: "Overnight",
-        estimatedDelivery: estimatedDelivery, // Fecha calculada
+        estimatedDelivery: estimatedDelivery,
+        actual_delivery: currentDate,
         userData: {
           user_name: userData.user_name,
           lastname: userData.lastname,
@@ -136,8 +174,14 @@ const Checkout = () => {
       };
 
       try {
-        await axios.post("/api/orders/placeOrder", orderData);
-        message.success("Pedido realizado exitosamente.");
+        const response = await axios.post("/api/orders/placeOrder", orderData);
+        if (response.status === 201) {
+          setOrderId(response.data.orderId);
+          clearCart();
+          setIsModalVisible(true);
+        } else {
+          message.error("Error al realizar el pedido. Inténtalo nuevamente.");
+        }
       } catch (error) {
         message.error("Error al realizar el pedido.");
         console.error(error);
@@ -246,7 +290,10 @@ const Checkout = () => {
                   {product.name} x {product.quantity}
                 </span>
                 <span>
-                  ${(product.price * product.quantity).toLocaleString()}
+                  $
+                  {(
+                    getPriceByUserType(product) * product.quantity
+                  ).toLocaleString()}
                 </span>
               </div>
             ))}
@@ -257,6 +304,14 @@ const Checkout = () => {
             <p>
               Envío: <span>${shippingCost.toLocaleString()}</span>
             </p>
+            {isFirstOrder && (
+              <p
+                style={{ fontSize: "12px", color: "#FF914D", marginTop: "5px" }}
+              >
+                ¡Descuento aplicado al costo de envío por ser tu primer pedido!
+              </p>
+            )}
+
             <Divider />
             <h4>
               Total: <span>${total.toLocaleString()}</span>
@@ -270,6 +325,39 @@ const Checkout = () => {
             >
               REALIZAR EL PEDIDO
             </Button>
+
+            <Modal
+              title="Pedido Confirmado"
+              visible={isModalVisible}
+              onOk={() => {
+                setIsModalVisible(false);
+                navigate("/products");
+              }}
+              onCancel={() => setIsModalVisible(false)}
+              footer={[
+                <Button
+                  key="confirm"
+                  type="primary"
+                  onClick={() => navigate("/products")}
+                >
+                  Ver más productos
+                </Button>,
+              ]}
+            >
+              <p>
+                ¡{userData?.user_name}, tu pedido ha sido realizado
+                exitosamente!
+              </p>
+              <p>
+                ID de la orden: <strong>{orderId}</strong>
+              </p>
+              <Confetti
+                width={width}
+                height={height}
+                numberOfPieces={300}
+                x={width * 0.25} // Ajuste para mover el confeti hacia la izquierda
+              />
+            </Modal>
           </div>
         </div>
       </div>

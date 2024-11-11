@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import Navbar from "../../components/navbar/Navbar";
 import { Card, Button, message, Select, Input } from "antd";
 import axios from "axios";
-import { useCart } from "../../pages/products/CartContext"; // Usa el contexto del carrito
+import { useCart } from "../../pages/products/CartContext";
 import "./Products.css";
 
 const { Option } = Select;
@@ -15,8 +15,10 @@ const Products = () => {
   const [selectedCategory, setSelectedCategory] = useState("Todas");
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Usa funciones de contexto del carrito
   const { cart, addToCart, removeFromCart } = useCart();
+
+  // Obtener el tipo de usuario desde localStorage
+  const userType = JSON.parse(localStorage.getItem("loginData"))?.user?.user_type;
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -26,17 +28,15 @@ const Products = () => {
         });
         setProducts(response.data);
         setFilteredProducts(response.data);
-        
 
         const uniqueCategories = [
           "Todas",
           ...new Set(response.data.map((product) => product.category)),
         ];
-        
         setCategories(uniqueCategories);
       } catch (error) {
         message.error("Error al cargar los productos.");
-        console.error("el error es: ", error);
+        console.error("Error:", error);
       } finally {
         setLoading(false);
       }
@@ -72,19 +72,31 @@ const Products = () => {
     setFilteredProducts(filtered);
   };
 
-  // Función para convertir el buffer en una URL base64 para la imagen
   const getBase64Image = (photo) => {
     if (photo && photo.data) {
       const base64String = btoa(
         String.fromCharCode(...new Uint8Array(photo.data))
       );
-      console.log("base64String", base64String);
       return `data:image/jpeg;base64,${base64String}`;
     }
-    return "path_to_placeholder_image";
+    return "path_to_placeholder_image"; // Cambia este valor si tienes una imagen de placeholder
   };
-  
-  
+
+  // Función para obtener el precio según el tipo de usuario
+  const getPriceByUserType = (product) => {
+    switch (userType) {
+      case "hogar":
+        return product.price_home;
+      case "supermercado":
+        return product.price_supermarket;
+      case "restaurante":
+        return product.price_restaurant;
+      case "fruver":
+        return product.price_fruver;
+      default:
+        return product.price_home; // Valor por defecto
+    }
+  };
 
   return (
     <>
@@ -124,27 +136,31 @@ const Products = () => {
               key={product.product_id}
               className="product-card"
               hoverable
-              cover={<img alt={product.name} src={getBase64Image(product.photo)} />}
-
+              cover={
+                <img
+                  alt={product.name}
+                  src={getBase64Image(product.photo)}
+                />
+              }
             >
               <div className="product-info">
+                <p className="product-category">{product.category}</p>
                 <h3 className="product-name">{product.name}</h3>
-                <p className="product-description">{product.description}</p>
-                <p className="product-category">
-                  <strong>Categoría:</strong> {product.category}
+                <p className="product-price">
+                  ${parseFloat(getPriceByUserType(product)).toLocaleString()}
                 </p>
                 {cart[product.product_id] ? (
                   <div className="quantity-controls">
                     <Button
                       onClick={() => removeFromCart(product)}
-                      className="remove-from-cart-button"
+                      className="quantity-button"
                     >
                       -
                     </Button>
-                    <span>{cart[product.product_id].quantity}</span>
+                    <span className="quantity-text">{cart[product.product_id].quantity}</span>
                     <Button
                       onClick={() => addToCart(product)}
-                      className="add-to-cart-button"
+                      className="quantity-button"
                     >
                       +
                     </Button>
