@@ -167,6 +167,7 @@ const Cart = () => {
                       alt={product.name}
                       className="cart-item-image"
                     />
+                    
 
                     <div className="cart-item-details">
                       <h4 className="product-name">{product.name}</h4>
