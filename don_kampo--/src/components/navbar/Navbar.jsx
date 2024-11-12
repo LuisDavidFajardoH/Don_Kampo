@@ -7,6 +7,7 @@ import {
   LogoutOutlined,
   MenuOutlined,
   ShoppingCartOutlined,
+  PlusOutlined,
 } from "@ant-design/icons";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useCart } from "../../pages/products/CartContext"; // Importa el hook de contexto de carrito
@@ -21,6 +22,7 @@ const Navbar = () => {
   // Obtener el loginData del localStorage
   const loginData = JSON.parse(localStorage.getItem("loginData"));
   const isLoggedIn = Boolean(loginData && loginData.user);
+  const isAdmin = isLoggedIn && loginData.user.user_type === "admin"; // Verifica si el usuario es admin
 
   // Estado para la ruta seleccionada y para el drawer en pantallas pequeñas
   const [selectedKey, setSelectedKey] = useState("");
@@ -50,6 +52,9 @@ const Navbar = () => {
         break;
       case "/cart":
         setSelectedKey("cart");
+        break;
+      case "/createproduct":
+        setSelectedKey("createproduct");
         break;
       default:
         setSelectedKey("home");
@@ -117,6 +122,15 @@ const Navbar = () => {
 
           {isLoggedIn ? (
             <>
+              {isAdmin && (
+                <Menu.Item
+                  key="createproduct"
+                  icon={<PlusOutlined />}
+                  onClick={() => handleMenuClick("createproduct", "/createproduct")}
+                >
+                  Agregar Productos
+                </Menu.Item>
+              )}
               <Menu.Item
                 key="profile"
                 icon={<UserOutlined />}
@@ -193,6 +207,15 @@ const Navbar = () => {
 
           {isLoggedIn ? (
             <>
+              {isAdmin && (
+                <Menu.Item
+                  key="createproduct"
+                  icon={<PlusOutlined />}
+                  onClick={() => handleMenuClick("createproduct", "/createproduct")}
+                >
+                  Agregar Productos
+                </Menu.Item>
+              )}
               <Menu.Item
                 key="profile"
                 icon={<UserOutlined />}
