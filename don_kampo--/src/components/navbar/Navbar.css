@@ -82,7 +82,11 @@
 
 :where(.css-dev-only-do-not-override-apn68).ant-badge .ant-badge-count {
   background: #4dff87;
+  font-size: 14px;
+  min-width: 50px; /* Ancho mínimo más grande */
+  padding: 0 8px; /* Mayor padding para espacio adicional */
 }
+
 
 /* Oculta el botón de menú en pantallas grandes */
 .menu-mobile-button {
