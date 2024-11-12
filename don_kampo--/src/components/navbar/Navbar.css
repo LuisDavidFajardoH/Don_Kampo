@@ -1,105 +1,105 @@
-/* Navbar.css */
+  /* Navbar.css */
 
-.navbar {
-  background-color: #ee7723; /* Color principal de la marca */
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-}
+  .navbar {
+    background-color: #ee7723; /* Color principal de la marca */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  }
 
-.logo img {
-  cursor: pointer;
-  transition: transform 0.2s ease;
-  margin-top: 10%;
-;
-}
+  .logo img {
+    cursor: pointer;
+    transition: transform 0.2s ease;
+    margin-top: 10%;
+  ;
+  }
 
-.logo img:hover {
-  transform: scale(1.05);
-}
-
-
-
-.menu {
-  background-color: transparent;
-  flex-grow: 1;
-  justify-content: flex-end;
-}
-
-.menu .ant-menu-item {
-  color: white;
-  font-weight: bold;
-  transition: color 0.3s ease;
-}
-
-/* Color secundario para el elemento seleccionado o en hover */
-.menu .ant-menu-item-selected,
-.menu .ant-menu-item:hover {
-  color: #00983a !important; /* Color secundario de la marca */
-}
-
-.menu .ant-menu-item .anticon {
-  transition: color 0.3s ease;
-}
-
-/* Cambia el color del ícono también cuando el item está seleccionado o en hover */
-.menu .ant-menu-item-selected .anticon,
-.menu .ant-menu-item:hover .anticon {
-  color: #00983a; /* Color secundario de la marca */
-}
-
-:where(.css-dev-only-do-not-override-apn68).ant-menu-light.ant-menu-horizontal
-  > .ant-menu-item-selected::after,
-:where(.css-dev-only-do-not-override-apn68).ant-menu-light
-  > .ant-menu.ant-menu-horizontal
-  > .ant-menu-item-selected::after,
-:where(.css-dev-only-do-not-override-apn68).ant-menu-light.ant-menu-horizontal
-  > .ant-menu-submenu-selected::after,
-:where(.css-dev-only-do-not-override-apn68).ant-menu-light
-  > .ant-menu.ant-menu-horizontal
-  > .ant-menu-submenu-selected::after {
-  border-bottom-width: 2px;
-  border-bottom-color: #00983a;
-}
-
-/* Responsive*/
-
-.logo {
-  color: white;
-  font-size: 24px;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-.menu-desktop {
-  display: flex;
-  flex-grow: 1; /* Hace que el menú crezca y ocupe el espacio restante */
-  justify-content: flex-end;
-  background-color: transparent;
-}
-
-:where(.css-dev-only-do-not-override-apn68).ant-badge .ant-badge-count {
-  background: #4dff87;
-  font-size: 14px;
-  min-width: 50px; /* Ancho mínimo más grande */
-  padding: 0 8px; /* Mayor padding para espacio adicional */
-}
+  .logo img:hover {
+    transform: scale(1.05);
+  }
 
 
-/* Oculta el botón de menú en pantallas grandes */
-.menu-mobile-button {
-  display: none;
-  color: white;
-}
 
-/* Mostrar el botón de menú solo en pantallas pequeñas */
-@media (max-width: 768px) {
+  .menu {
+    background-color: transparent;
+    flex-grow: 1;
+    justify-content: flex-end;
+  }
+
+  .menu .ant-menu-item {
+    color: white;
+    font-weight: bold;
+    transition: color 0.3s ease;
+  }
+
+  /* Color secundario para el elemento seleccionado o en hover */
+  .menu .ant-menu-item-selected,
+  .menu .ant-menu-item:hover {
+    color: #00983a !important; /* Color secundario de la marca */
+  }
+
+  .menu .ant-menu-item .anticon {
+    transition: color 0.3s ease;
+  }
+
+  /* Cambia el color del ícono también cuando el item está seleccionado o en hover */
+  .menu .ant-menu-item-selected .anticon,
+  .menu .ant-menu-item:hover .anticon {
+    color: #00983a; /* Color secundario de la marca */
+  }
+
+  :where(.css-dev-only-do-not-override-apn68).ant-menu-light.ant-menu-horizontal
+    > .ant-menu-item-selected::after,
+  :where(.css-dev-only-do-not-override-apn68).ant-menu-light
+    > .ant-menu.ant-menu-horizontal
+    > .ant-menu-item-selected::after,
+  :where(.css-dev-only-do-not-override-apn68).ant-menu-light.ant-menu-horizontal
+    > .ant-menu-submenu-selected::after,
+  :where(.css-dev-only-do-not-override-apn68).ant-menu-light
+    > .ant-menu.ant-menu-horizontal
+    > .ant-menu-submenu-selected::after {
+    border-bottom-width: 2px;
+    border-bottom-color: #00983a;
+  }
+
+  /* Responsive*/
+
+  .logo {
+    color: white;
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+
   .menu-desktop {
-    display: none;
+    display: flex;
+    flex-grow: 1; /* Hace que el menú crezca y ocupe el espacio restante */
+    justify-content: flex-end;
+    background-color: transparent;
   }
+
+  :where(.css-dev-only-do-not-override-apn68).ant-badge .ant-badge-count {
+    background: #4dff87;
+    font-size: 14px;
+    min-width: 50px; /* Ancho mínimo más grande */
+    padding: 0 8px; /* Mayor padding para espacio adicional */
+  }
+
+
+  /* Oculta el botón de menú en pantallas grandes */
   .menu-mobile-button {
-    display: inline-flex;
+    display: none;
+    color: white;
   }
-}
+
+  /* Mostrar el botón de menú solo en pantallas pequeñas */
+  @media (max-width: 768px) {
+    .menu-desktop {
+      display: none;
+    }
+    .menu-mobile-button {
+      display: inline-flex;
+    }
+  }

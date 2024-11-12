@@ -12,6 +12,7 @@ import {
   Table,
   Modal,
   DatePicker,
+  Badge,
 } from "antd";
 import Navbar from "../../components/navbar/Navbar";
 import axios from "axios";
@@ -85,17 +86,34 @@ const Profile = () => {
     }
   };
 
+  // Función para renderizar el estado con color
   const renderStatus = (statusId) => {
+    let statusText = "";
+    let color = "";
+
     switch (statusId) {
       case 1:
-        return "Activa";
+        statusText = "Pendiente";
+        color = "orange";
+        break;
       case 2:
-        return "Enviada";
+        statusText = "Enviado";
+        color = "blue";
+        break;
       case 3:
-        return "Entregada";
+        statusText = "Entregado";
+        color = "green";
+        break;
+      case 4:
+        statusText = "Cancelado";
+        color = "red";
+        break;
       default:
-        return "Desconocido";
+        statusText = "Desconocido";
+        color = "grey";
     }
+
+    return <Badge color={color} text={statusText} />;
   };
 
   const handleSearch = (e) => {
@@ -113,7 +131,7 @@ const Profile = () => {
     const filtered = orders.filter((order) => {
       const matchTerm =
         order.id.toString().includes(term) ||
-        renderStatus(order.status_id).toLowerCase().includes(term);
+        renderStatus(order.status_id).props.text.toLowerCase().includes(term);
 
       const matchDate =
         !range ||
@@ -293,92 +311,91 @@ const Profile = () => {
       visible={isModalVisible}
       onCancel={() => setIsModalVisible(false)}
       footer={[
-        <Button key="close" onClick
-        ={() => setIsModalVisible(false)}>
-        Cerrar
-      </Button>,
-    ]}
-  >
-    {selectedOrder && (
-      <>
-        <div className="order-detail">
-          <p>
-            <strong>Cliente:</strong> {selectedOrder.order.customer_name}
-          </p>
-          <p>
-            <strong>Email:</strong> {selectedOrder.order.customer_email}
-          </p>
-          <p>
-            <strong>Fecha:</strong>{" "}
-            {new Date(selectedOrder.order.order_date).toLocaleDateString()}
-          </p>
-          <p>
-            <strong>Estado:</strong> {renderStatus(selectedOrder.order.status_id)}
-          </p>
-          <p>
-            <strong>Total:</strong> $
-            {parseFloat(selectedOrder.order.total).toLocaleString()}
-          </p>
-        </div>
-        <Divider />
-        <h4>Productos:</h4>
-        <div className="order-items">
-          {selectedOrder.items.map((item) => (
-            <div key={item.product_id} className="order-item-detail">
-              <p>
-                <strong>Producto:</strong> {item.product_name}
-              </p>
-              <p>
-                <strong>Descripción:</strong> {item.product_description}
-              </p>
-              <p>
-                <strong>Cantidad:</strong> {item.quantity}
-              </p>
-              <p>
-                <strong>Precio:</strong> $
-                {parseFloat(item.price).toLocaleString()}
-              </p>
-              <Divider />
-            </div>
-          ))}
-        </div>
-        <h4>Información de Envío:</h4>
-        <div className="shipping-info">
-          <p>
-            <strong>Método de Envío:</strong>{" "}
-            {selectedOrder.shippingInfo.shipping_method}
-          </p>
-          <p>
-            <strong>Número de Rastreo:</strong>{" "}
-            {selectedOrder.shippingInfo.tracking_number}
-          </p>
-          <p>
-            <strong>Fecha Estimada de Entrega:</strong>{" "}
-            {new Date(
-              selectedOrder.shippingInfo.estimated_delivery
-            ).toLocaleDateString()}
-          </p>
-          <p>
-            <strong>Fecha de Entrega:</strong>{" "}
-            {new Date(selectedOrder.shippingInfo.actual_delivery).toLocaleDateString()}
-          </p>
-        </div>
-      </>
-    )}
-  </Modal>
-);
+        <Button key="close" onClick={() => setIsModalVisible(false)}>
+          Cerrar
+        </Button>,
+      ]}
+    >
+      {selectedOrder && (
+        <>
+          <div className="order-detail">
+            <p>
+              <strong>Cliente:</strong> {selectedOrder.order.customer_name}
+            </p>
+            <p>
+              <strong>Email:</strong> {selectedOrder.order.customer_email}
+            </p>
+            <p>
+              <strong>Fecha:</strong>{" "}
+              {new Date(selectedOrder.order.order_date).toLocaleDateString()}
+            </p>
+            <p>
+              <strong>Estado:</strong> {renderStatus(selectedOrder.order.status_id)}
+            </p>
+            <p>
+              <strong>Total:</strong> $
+              {parseFloat(selectedOrder.order.total).toLocaleString()}
+            </p>
+          </div>
+          <Divider />
+          <h4>Productos:</h4>
+          <div className="order-items">
+            {selectedOrder.items.map((item) => (
+              <div key={item.product_id} className="order-item-detail">
+                <p>
+                  <strong>Producto:</strong> {item.product_name}
+                </p>
+                <p>
+                  <strong>Descripción:</strong> {item.product_description}
+                </p>
+                <p>
+                  <strong>Cantidad:</strong> {item.quantity}
+                </p>
+                <p>
+                  <strong>Precio:</strong> $
+                  {parseFloat(item.price).toLocaleString()}
+                </p>
+                <Divider />
+              </div>
+            ))}
+          </div>
+          <h4>Información de Envío:</h4>
+          <div className="shipping-info">
+            <p>
+              <strong>Método de Envío:</strong>{" "}
+              {selectedOrder.shippingInfo.shipping_method}
+            </p>
+            <p>
+              <strong>Número de Rastreo:</strong>{" "}
+              {selectedOrder.shippingInfo.tracking_number}
+            </p>
+            <p>
+              <strong>Fecha Estimada de Entrega:</strong>{" "}
+              {new Date(
+                selectedOrder.shippingInfo.estimated_delivery
+              ).toLocaleDateString()}
+            </p>
+            <p>
+              <strong>Fecha de Entrega:</strong>{" "}
+              {new Date(selectedOrder.shippingInfo.actual_delivery).toLocaleDateString()}
+            </p>
+          </div>
+        </>
+      )}
+    </Modal>
+  );
 
-return (
-  <>
-    <Navbar />
-    <div className="user-profile-container">
-      {view === "welcome" && renderWelcome()}
-      {view === "profile" && renderProfile()}
-      {view === "orders" && renderOrders()}
-      {renderOrderDetailsModal()}
-    </div>
-  </>
-);
+  return (
+    <>
+      <Navbar />
+      <div className="user-profile-container">
+        {view === "welcome" && renderWelcome()}
+        {view === "profile" && renderProfile()}
+        {view === "orders" && renderOrders()}
+        {renderOrderDetailsModal()}
+      </div>
+    </>
+  );
 };
 
 export default Profile;
