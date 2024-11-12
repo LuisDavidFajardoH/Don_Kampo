@@ -23,33 +23,32 @@ const Cart = () => {
   useEffect(() => {
     const fetchCartDetails = async () => {
       setLoading(true);
-      const loginData = JSON.parse(localStorage.getItem("loginData"));
 
-      if (loginData && loginData.user) {
-        try {
-          const productDetails = await Promise.all(
-            Object.keys(cart).map(async (product_id) => {
-              try {
-                const response = await axios.get(
-                  `/api/getproduct/${product_id}`
-                );
-                return {
-                  ...response.data,
-                  quantity: cart[product_id].quantity,
-                };
-              } catch (error) {
-                if (error.response && error.response.status === 404) {
-                  console.warn(`Producto con ID ${product_id} no encontrado.`);
-                  return null;
-                } else {
-                  throw error;
-                }
+      try {
+        // Cargar detalles de productos en el carrito
+        const productDetails = await Promise.all(
+          Object.keys(cart).map(async (product_id) => {
+            try {
+              const response = await axios.get(`/api/getproduct/${product_id}`);
+              return {
+                ...response.data,
+                quantity: cart[product_id].quantity,
+              };
+            } catch (error) {
+              if (error.response && error.response.status === 404) {
+                console.warn(`Producto con ID ${product_id} no encontrado.`);
+                return null;
+              } else {
+                throw error;
               }
-            })
-          );
-          setCartDetails(productDetails.filter((item) => item !== null));
+            }
+          })
+        );
+        setCartDetails(productDetails.filter((item) => item !== null));
 
-          // Verificar si es la primera orden
+        // Verificar si el usuario está autenticado para aplicar descuento
+        const loginData = JSON.parse(localStorage.getItem("loginData"));
+        if (loginData && loginData.user) {
           const userResponse = await axios.get(
             `/api/users/${loginData.user.id}`
           );
@@ -65,12 +64,12 @@ const Cart = () => {
               setShippingCost(0); // Envío gratis para otros tipos de usuario en la primera orden
             }
           }
-        } catch (error) {
-          message.error("Error al cargar los detalles del carrito.");
-          console.error("Error al obtener detalles del carrito:", error);
-        } finally {
-          setLoading(false);
         }
+      } catch (error) {
+        message.error("Error al cargar los detalles del carrito.");
+        console.error("Error al obtener detalles del carrito:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -167,8 +166,6 @@ const Cart = () => {
                       alt={product.name}
                       className="cart-item-image"
                     />
-                    
-
                     <div className="cart-item-details">
                       <h4 className="product-name">{product.name}</h4>
                       <p className="product-category">{product.category}</p>

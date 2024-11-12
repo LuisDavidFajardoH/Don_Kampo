@@ -147,7 +147,7 @@ const Checkout = () => {
     if (validateForm()) {
       // Calcular la fecha de entrega estimada sumando 4 días a la fecha actual
       const currentDate = new Date();
-      currentDate.setDate(currentDate.getDate() + 4);
+      currentDate.setDate(currentDate.getDate() + 1);
       const estimatedDelivery = currentDate.toISOString();
 
       const orderData = {

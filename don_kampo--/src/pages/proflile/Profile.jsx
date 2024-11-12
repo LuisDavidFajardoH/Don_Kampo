@@ -11,6 +11,7 @@ import {
   Col,
   Table,
   Modal,
+  DatePicker,
 } from "antd";
 import Navbar from "../../components/navbar/Navbar";
 import axios from "axios";
@@ -18,6 +19,7 @@ import * as XLSX from "xlsx";
 import "./UserProfile.css";
 
 const { Option } = Select;
+const { RangePicker } = DatePicker;
 
 const Profile = () => {
   const [userData, setUserData] = useState(null);
@@ -28,6 +30,7 @@ const Profile = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [form] = Form.useForm();
   const [searchTerm, setSearchTerm] = useState("");
+  const [dateRange, setDateRange] = useState([]);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -37,7 +40,7 @@ const Profile = () => {
           const response = await axios.get(`/api/users/${loginData.user.id}`);
           const user = response.data.user;
           setUserData(user);
-          form.setFieldsValue(user); // Set form fields with user data
+          form.setFieldsValue(user);
 
           // Load orders and filter by user's customer_id
           const ordersResponse = await axios.get("/api/orders");
@@ -74,8 +77,8 @@ const Profile = () => {
   const fetchOrderDetails = async (orderId) => {
     try {
       const response = await axios.get(`/api/orders/${orderId}`);
-      setSelectedOrder(response.data); // Store order details
-      setIsModalVisible(true); // Show modal with order details
+      setSelectedOrder(response.data);
+      setIsModalVisible(true);
     } catch (error) {
       message.error("Error al cargar los detalles del pedido.");
       console.error(error);
@@ -98,11 +101,27 @@ const Profile = () => {
   const handleSearch = (e) => {
     const value = e.target.value.toLowerCase();
     setSearchTerm(value);
+    filterOrders(value, dateRange);
+  };
+
+  const handleDateRangeChange = (dates) => {
+    setDateRange(dates);
+    filterOrders(searchTerm, dates);
+  };
+
+  const filterOrders = (term, range) => {
     const filtered = orders.filter((order) => {
-      return (
-        order.id.toString().includes(value) ||
-        renderStatus(order.status_id).toLowerCase().includes(value)
-      );
+      const matchTerm =
+        order.id.toString().includes(term) ||
+        renderStatus(order.status_id).toLowerCase().includes(term);
+
+      const matchDate =
+        !range ||
+        (range.length === 0 ||
+          (new Date(order.order_date) >= range[0].startOf("day").toDate() &&
+            new Date(order.order_date) <= range[1].endOf("day").toDate()));
+
+      return matchTerm && matchDate;
     });
     setFilteredOrders(filtered);
   };
@@ -242,17 +261,20 @@ const Profile = () => {
             placeholder="Buscar por ID o Estado"
             value={searchTerm}
             onChange={handleSearch}
-            style={{ width: 200, marginBottom: "10px" }}
+            style={{ width: 200, marginRight: "10px" }}
           />
-          <Button onClick={handleExportToExcel} style={{ marginLeft: "10px" }}>
-            Exportar a Excel
-          </Button>
+          <RangePicker
+            onChange={handleDateRangeChange}
+            style={{ marginRight: "10px" }}
+          />
+          <Button onClick={handleExportToExcel}>Exportar a Excel</Button>
         </div>
         <Table
           dataSource={filteredOrders}
           columns={columns}
           rowKey="id"
           pagination={{ pageSize: 5 }}
+          className="orders-table"
         />
         <Button
           type="default"
@@ -271,13 +293,15 @@ const Profile = () => {
       visible={isModalVisible}
       onCancel={() => setIsModalVisible(false)}
       footer={[
-        <Button key="close" onClick={() => setIsModalVisible(false)}>
-          Cerrar
-        </Button>,
-      ]}
-    >
-      {selectedOrder && (
-        <>
+        <Button key="close" onClick
+        ={() => setIsModalVisible(false)}>
+        Cerrar
+      </Button>,
+    ]}
+  >
+    {selectedOrder && (
+      <>
+        <div className="order-detail">
           <p>
             <strong>Cliente:</strong> {selectedOrder.order.customer_name}
           </p>
@@ -295,10 +319,12 @@ const Profile = () => {
             <strong>Total:</strong> $
             {parseFloat(selectedOrder.order.total).toLocaleString()}
           </p>
-          <Divider />
-          <h4>Productos:</h4>
+        </div>
+        <Divider />
+        <h4>Productos:</h4>
+        <div className="order-items">
           {selectedOrder.items.map((item) => (
-            <div key={item.product_id}>
+            <div key={item.product_id} className="order-item-detail">
               <p>
                 <strong>Producto:</strong> {item.product_name}
               </p>
@@ -315,7 +341,9 @@ const Profile = () => {
               <Divider />
             </div>
           ))}
-          <h4>Información de Envío:</h4>
+        </div>
+        <h4>Información de Envío:</h4>
+        <div className="shipping-info">
           <p>
             <strong>Método de Envío:</strong>{" "}
             {selectedOrder.shippingInfo.shipping_method}
@@ -334,22 +362,23 @@ const Profile = () => {
             <strong>Fecha de Entrega:</strong>{" "}
             {new Date(selectedOrder.shippingInfo.actual_delivery).toLocaleDateString()}
           </p>
-        </>
-      )}
-    </Modal>
-  );
+        </div>
+      </>
+    )}
+  </Modal>
+);
 
-  return (
-    <>
-      <Navbar />
-      <div className="user-profile-container">
-        {view === "welcome" && renderWelcome()}
-        {view === "profile" && renderProfile()}
-        {view === "orders" && renderOrders()}
-        {renderOrderDetailsModal()}
-      </div>
-    </>
-  );
+return (
+  <>
+    <Navbar />
+    <div className="user-profile-container">
+      {view === "welcome" && renderWelcome()}
+      {view === "profile" && renderProfile()}
+      {view === "orders" && renderOrders()}
+      {renderOrderDetailsModal()}
+    </div>
+  </>
+);
 };
 
 export default Profile;
