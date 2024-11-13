@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Form, Input, Button, message, Divider, Modal, Row, Col } from "antd";
+import BotonWhatsapp from "../../components/botonWhatsapp/BotonWhatsapp";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 
@@ -408,6 +409,7 @@ const Checkout = () => {
           </div>
         </div>
       </div>
+      <BotonWhatsapp />
       <CustomFooter />
     </div>
   );

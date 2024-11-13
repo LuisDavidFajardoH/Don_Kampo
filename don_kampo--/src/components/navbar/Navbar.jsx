@@ -163,7 +163,21 @@ const Navbar = () => {
                 >
                   Agregar Productos
                 </Menu.Item>
+               
+
               )}
+              {isAdmin && (
+                 // createorder
+                 <Menu.Item
+                 key="createorder"
+                 icon={<PlusOutlined />}
+                 onClick={() =>
+                   handleMenuClick("createorder", "/createorder")
+                 }
+               >
+                 Crear Orden
+               </Menu.Item>
+               )}
               <Menu.Item
                 key="profile"
                 icon={<UserOutlined />}

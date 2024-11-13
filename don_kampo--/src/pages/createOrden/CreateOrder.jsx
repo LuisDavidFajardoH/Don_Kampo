@@ -12,12 +12,30 @@ const CreateOrder = () => {
   const [products, setProducts] = useState([]); // Lista de productos
   const [selectedProducts, setSelectedProducts] = useState([]); // Productos seleccionados para la orden
   const [loading, setLoading] = useState(false);
+  const [selectedUserData, setSelectedUserData] = useState(null); // Datos del usuario seleccionado
+
+
+  const fetchUserDetails = async (userId) => {
+    try {
+      const response = await axios.get(`/api/users/${userId}`);
+      setSelectedUserData(response.data.user);
+    } catch (error) {
+      message.error("Error al cargar los datos del usuario.");
+      console.error(error);
+    }
+  };
+
+  const handleUserChange = (userId) => {
+    fetchUserDetails(userId);
+  };
 
   useEffect(() => {
     // Fetch usuarios
     const fetchUsers = async () => {
       try {
-        const response = await axios.get("/api/users", { withCredentials: true });
+        const response = await axios.get("/api/users", {
+          withCredentials: true,
+        });
         setUsers(response.data);
       } catch (error) {
         message.error("Error al cargar los usuarios.");
@@ -28,7 +46,9 @@ const CreateOrder = () => {
     // Fetch productos
     const fetchProducts = async () => {
       try {
-        const response = await axios.get("/api/products", { withCredentials: true });
+        const response = await axios.get("/api/products", {
+          withCredentials: true,
+        });
         setProducts(response.data);
       } catch (error) {
         message.error("Error al cargar los productos.");
@@ -47,7 +67,9 @@ const CreateOrder = () => {
         const existingProduct = prev.find((p) => p.product_id === productId);
         if (existingProduct) {
           return prev.map((p) =>
-            p.product_id === productId ? { ...p, quantity: p.quantity + quantity } : p
+            p.product_id === productId
+              ? { ...p, quantity: p.quantity + quantity }
+              : p
           );
         }
         return [...prev, { ...product, quantity }];
@@ -66,35 +88,60 @@ const CreateOrder = () => {
   };
 
   const decrementQuantity = (productId) => {
-    setSelectedProducts((prevSelected) =>
-      prevSelected
-        .map((item) =>
-          item.product_id === productId
-            ? { ...item, quantity: item.quantity - 1 }
-            : item
-        )
-        .filter((item) => item.quantity > 0) // Elimina el producto si la cantidad llega a 0
+    setSelectedProducts(
+      (prevSelected) =>
+        prevSelected
+          .map((item) =>
+            item.product_id === productId
+              ? { ...item, quantity: item.quantity - 1 }
+              : item
+          )
+          .filter((item) => item.quantity > 0) // Elimina el producto si la cantidad llega a 0
     );
   };
 
   const handleSubmit = async (values) => {
-    const { userId, shippingMethod } = values;
-
+    if (!selectedUserData) {
+      message.error("Debe seleccionar un usuario válido.");
+      return;
+    }
+  
+    const { shippingMethod } = values;
+  
     if (selectedProducts.length === 0) {
       message.error("Debe seleccionar al menos un producto para la orden.");
       return;
     }
-
+  
+    const shippingCost = 5000; // Ejemplo de costo fijo
+    const total = selectedProducts.reduce(
+      (sum, product) => sum + product.quantity * product.price_home,
+      0
+    ) + shippingCost;
+  
     const orderData = {
-      userId,
-      products: selectedProducts.map(({ product_id, quantity, price_home }) => ({
+      userId: selectedUserData.id,
+      userData: {
+        user_name: selectedUserData.user_name,
+        lastname: selectedUserData.lastname,
+        email: selectedUserData.email,
+        phone: selectedUserData.phone,
+        address: selectedUserData.address,
+        city: selectedUserData.city,
+        neighborhood: selectedUserData.neighborhood,
+      },
+      cartDetails: selectedProducts.map(({ product_id, quantity, price_home }) => ({
         productId: product_id,
         quantity,
         price: price_home,
       })),
       shippingMethod,
+      shippingCost,
+      total,
+      actual_delivery: new Date().toISOString(),
+      estimatedDelivery: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(), // Ejemplo: 2 días después
     };
-
+  
     setLoading(true);
     try {
       const response = await axios.post("/api/orders/placeOrder", orderData);
@@ -109,6 +156,7 @@ const CreateOrder = () => {
       setLoading(false);
     }
   };
+  
 
   return (
     <div>
@@ -119,9 +167,14 @@ const CreateOrder = () => {
           <Form.Item
             label="Usuario"
             name="userId"
-            rules={[{ required: true, message: "Por favor seleccione un usuario" }]}
+            rules={[
+              { required: true, message: "Por favor seleccione un usuario" },
+            ]}
           >
-            <Select placeholder="Seleccione un usuario">
+            <Select
+              placeholder="Seleccione un usuario"
+              onChange={handleUserChange} // Llama a la función cuando cambia el usuario
+            >
               {users.map((user) => (
                 <Option key={user.id} value={user.id}>
                   {user.user_name} {user.lastname} - {user.email}
@@ -133,7 +186,12 @@ const CreateOrder = () => {
           <Form.Item
             label="Método de Envío"
             name="shippingMethod"
-            rules={[{ required: true, message: "Por favor seleccione un método de envío" }]}
+            rules={[
+              {
+                required: true,
+                message: "Por favor seleccione un método de envío",
+              },
+            ]}
           >
             <Select placeholder="Seleccione un método de envío">
               <Option value="standard">Estándar</Option>
@@ -148,16 +206,27 @@ const CreateOrder = () => {
                 <div key={product.product_id} className="product-item">
                   <p>{product.name}</p>
                   <p>${product.price_home.toLocaleString()}</p>
-                  {selectedProducts.find((p) => p.product_id === product.product_id) ? (
+                  {selectedProducts.find(
+                    (p) => p.product_id === product.product_id
+                  ) ? (
                     <div className="quantity-controls">
-                      <Button onClick={() => decrementQuantity(product.product_id)}>-</Button>
+                      <Button
+                        onClick={() => decrementQuantity(product.product_id)}
+                      >
+                        -
+                      </Button>
                       <span className="quantity-text">
                         {
-                          selectedProducts.find((p) => p.product_id === product.product_id)
-                            .quantity
+                          selectedProducts.find(
+                            (p) => p.product_id === product.product_id
+                          ).quantity
                         }
                       </span>
-                      <Button onClick={() => incrementQuantity(product.product_id)}>+</Button>
+                      <Button
+                        onClick={() => incrementQuantity(product.product_id)}
+                      >
+                        +
+                      </Button>
                     </div>
                   ) : (
                     <Button
@@ -177,8 +246,13 @@ const CreateOrder = () => {
             {selectedProducts.length > 0 ? (
               selectedProducts.map((product) => (
                 <div key={product.product_id} className="selected-product-item">
-                  <p>{product.name} x {product.quantity}</p>
-                  <p>Total: ${(product.quantity * product.price_home).toLocaleString()}</p>
+                  <p>
+                    {product.name} x {product.quantity}
+                  </p>
+                  <p>
+                    Total: $
+                    {(product.quantity * product.price_home).toLocaleString()}
+                  </p>
                 </div>
               ))
             ) : (
