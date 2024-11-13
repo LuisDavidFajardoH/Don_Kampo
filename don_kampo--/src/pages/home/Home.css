@@ -25,11 +25,12 @@
     left: 5%;
     color: #fff;
     text-align: left;
-    background-color: rgba(234, 106, 7, 0.533); /* Fondo oscuro con opacidad */
+    background-color: rgba(13, 160, 33, 0.781); /* Fondo oscuro con opacidad */
     padding: 20px;
     border-radius: 8px;
     max-width: 40%;
     z-index: 2; /* Aseguramos que esté en el frente */
+    
 }
 
 .carousel-title {

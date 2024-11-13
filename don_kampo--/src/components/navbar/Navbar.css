@@ -8,6 +8,39 @@
     padding: 0 20px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   }
+  .navbar-left {
+    display: flex;
+    align-items: center;
+  }
+  
+  .logo {
+    margin-right: 10px;
+  }
+  
+  .cart-icon {
+    margin-right: 36px;
+  }
+  
+  .cart-icon .ant-badge {
+    cursor: pointer;
+  }
+  
+  /* Asegura el diseño en pantallas pequeñas */
+  @media (max-width: 768px) {
+    .navbar-left {
+      flex: 1; /* Ocupa el espacio disponible */
+      justify-content: space-between;
+    }
+  
+    .menu-desktop {
+      display: none;
+    }
+  
+    .menu-mobile-button {
+      display: inline-flex;
+    }
+  }
+  
 
   .logo img {
     cursor: pointer;
