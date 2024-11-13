@@ -9,6 +9,7 @@ import CustomFooter from "../../components/footer/Footer";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../products/CartContext";
 import useWindowSize from "react-use/lib/useWindowSize";
+import BotonWhatsapp from "../../components/botonWhatsapp/BotonWhatsapp";
 import "./Checkout.css";
 
 const Checkout = () => {
@@ -421,6 +422,7 @@ const Checkout = () => {
           </div>
         </div>
       </div>
+      <BotonWhatsapp />
       <CustomFooter />
     </div>
   );

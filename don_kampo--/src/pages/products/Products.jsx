@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Navbar from "../../components/navbar/Navbar";
 import CustomFooter from "../../components/footer/Footer";
-import { useLocation } from "react-router-dom";
+import BotonWhatsapp from "../../components/botonWhatsapp/BotonWhatsapp";
 import { Card, Button, message, Select, Input } from "antd";
 import axios from "axios";
 import { useCart } from "../../pages/products/CartContext";
@@ -190,6 +190,7 @@ const Products = () => {
           ))
         )}
       </div>
+      <BotonWhatsapp />
       <CustomFooter />
     </>
   );

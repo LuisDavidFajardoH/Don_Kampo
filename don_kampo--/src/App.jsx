@@ -9,6 +9,7 @@ import CreateProduct from './pages/createProduct/CreateProduct.jsx';
 import Profile from './pages/proflile/Profile.jsx';
 import AdminProfile from './pages/admin/AdminProfile.jsx';
 import Home from './pages/home/Home.jsx';
+
 import { CartProvider } from './pages/products/CartContext.jsx';
 import './App.css';
 
@@ -22,30 +23,35 @@ const App = () => {
 
   return (
     <Router>
-      <CartProvider>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/products" element={<Products />} />
-          <Route path="/cart" element={<Cart />} />
-          <Route path="/checkout" element={<Checkout />} />
-          <Route path="/createproduct" element={<CreateProduct />} />
-          {/* Ruta condicional para el perfil */}
-          <Route
-            path="/profile"
-            element={
-              userType === "admin" ? (
-                <AdminProfile />
-              ) : userType ? (
-                <Profile />
-              ) : (
-                <Navigate to="/login" replace />
-              )
-            }
-          />
-        </Routes>
-      </CartProvider>
+      <div id="root">
+        <CartProvider>
+          <div className="main-content">
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/products" element={<Products />} />
+              <Route path="/cart" element={<Cart />} />
+              <Route path="/checkout" element={<Checkout />} />
+              <Route path="/createproduct" element={<CreateProduct />} />
+              {/* Ruta condicional para el perfil */}
+              <Route
+                path="/profile"
+                element={
+                  userType === "admin" ? (
+                    <AdminProfile />
+                  ) : userType ? (
+                    <Profile />
+                  ) : (
+                    <Navigate to="/login" replace />
+                  )
+                }
+              />
+            </Routes>
+          </div>
+        </CartProvider>
+       
+      </div>
     </Router>
   );
 };

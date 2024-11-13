@@ -3,6 +3,7 @@ import { Carousel, Button, Card, Typography, Row, Col } from "antd";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 import Navbar from "../../components/navbar/Navbar";
 import CustomFooter from "../../components/footer/Footer";
+import BotonWhatsapp from "../../components/botonWhatsapp/BotonWhatsapp";
 import "./Home.css";
 
 const { Title, Paragraph } = Typography;
@@ -116,6 +117,7 @@ const Home = () => {
           </Row>
         </div>
       </div>
+      <BotonWhatsapp />
       <CustomFooter />
     </>
   );

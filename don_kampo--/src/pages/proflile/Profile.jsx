@@ -15,6 +15,7 @@ import {
   Badge,
 } from "antd";
 import Navbar from "../../components/navbar/Navbar";
+import CustomFooter from "../../components/footer/Footer";
 import axios from "axios";
 import * as XLSX from "xlsx";
 import "./UserProfile.css";
@@ -394,6 +395,7 @@ const Profile = () => {
         {view === "orders" && renderOrders()}
         {renderOrderDetailsModal()}
       </div>
+      <CustomFooter />
     </>
   );
 };

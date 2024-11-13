@@ -3,6 +3,7 @@ import Navbar from "../../components/navbar/Navbar";
 import CustomFooter from "../../components/footer/Footer";
 import { useCart } from "../products/CartContext";
 import { Card, Button, message, Divider, Modal } from "antd";
+import BotonWhatsapp from "../../components/botonWhatsapp/BotonWhatsapp";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "./Cart.css";
@@ -265,6 +266,7 @@ const Cart = () => {
           </div>
         </Modal>
       </div>
+      <BotonWhatsapp />
       <CustomFooter />
     </>
   );

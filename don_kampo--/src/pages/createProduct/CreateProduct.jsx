@@ -4,6 +4,7 @@ import CustomFooter from "../../components/footer/Footer";
 import { Form, Input, Button, message, Upload, InputNumber, Select, Row, Col, Table, Divider } from "antd";
 import { UploadOutlined, DownloadOutlined } from "@ant-design/icons";
 import axios from "axios";
+import BotonWhatsapp from "../../components/botonWhatsapp/BotonWhatsapp";
 import * as XLSX from "xlsx";
 import "./CreateProduct.css";
 
@@ -254,6 +255,7 @@ const CreateProduct = () => {
           )}
         </div>
       </div>
+      <BotonWhatsapp /> 
       <CustomFooter />
     </>
   );

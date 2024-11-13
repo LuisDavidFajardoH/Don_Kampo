@@ -3,6 +3,7 @@ import { Form, Input, Button, message } from 'antd';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import CustomFooter from '../../components/footer/Footer';
+import BotonWhatsapp from '../../components/botonWhatsapp/BotonWhatsapp';
 import './Login.css';
 import Navbar from '../../components/navbar/Navbar';
 
@@ -80,6 +81,7 @@ const Login = () => {
         </div>
       </Form>
     </div>
+    <BotonWhatsapp />
     <CustomFooter />
     </>
   );
