@@ -47,6 +47,12 @@ const CustomFooter = () => {
       </div>
       <div className="footer-bottom">
         <p>© 2024 Don Kampo. Todos los derechos reservados.</p>
+        <p>
+          Diseñado y Desarrollado por{" "}
+          <a href="https://www.cre8tive.pro/" target="_blank" rel="noopener noreferrer">
+            Cre8tive Agency
+          </a>.
+        </p>
       </div>
     </Footer>
   );

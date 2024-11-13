@@ -16,6 +16,16 @@
   margin-bottom: 16px;
 }
 
+.footer-bottom a {
+  color: #00983a; /* Cambia este color si deseas otro */
+  text-decoration: none;
+}
+
+.footer-bottom a:hover {
+  text-decoration: underline;
+}
+
+
 .social-icons .icon {
   font-size: 24px;
   margin: 0 10px;
