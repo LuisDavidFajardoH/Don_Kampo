@@ -1,17 +1,15 @@
 /* Importa Montserrat desde Google Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
 
-/* Configura Cotane Beach */
-@font-face {
-  font-family: 'Cotane Beach';
-  src: url('./fonts/CotaneBeach.otf') format('truetype'); /* Ajusta el path si está en otra ubicación */
-  font-weight: normal;
-  font-style: normal;
-}
+/* Importa Quicksand desde Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;600;700&display=swap');
+
+
+
 
 :root {
   --font-family-primary: 'Montserrat', sans-serif;
-  --font-family-secondary: 'Cotane Beach', sans-serif;
+  --font-family-primary: 'Quicksand', sans-serif;
 }
 
 /* Aplica las variables de fuente */
