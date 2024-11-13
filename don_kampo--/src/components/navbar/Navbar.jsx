@@ -56,6 +56,20 @@ const Navbar = () => {
       case "/createproduct":
         setSelectedKey("createproduct");
         break;
+      case "/createorder":
+        setSelectedKey("createorder");
+        break;
+      case "/manageproducts":
+        setSelectedKey("manageproducts");
+        break;
+      case "/checkout":
+        setSelectedKey("checkout");
+        break;
+      case "/adminprofile":
+        setSelectedKey("adminprofile");
+        break;
+      
+
       default:
         setSelectedKey("home");
         break;
@@ -163,21 +177,28 @@ const Navbar = () => {
                 >
                   Agregar Productos
                 </Menu.Item>
-               
-
               )}
               {isAdmin && (
-                 // createorder
-                 <Menu.Item
-                 key="createorder"
-                 icon={<PlusOutlined />}
-                 onClick={() =>
-                   handleMenuClick("createorder", "/createorder")
-                 }
-               >
-                 Crear Orden
-               </Menu.Item>
-               )}
+                <Menu.Item
+                  key="manageproducts"
+                  icon={<AppstoreOutlined />}
+                  onClick={() =>
+                    handleMenuClick("manageproducts", "/manageproducts")
+                  }
+                  >
+                  Gestionar Productos
+                  </Menu.Item>
+                )}
+              {isAdmin && (
+                // createorder
+                <Menu.Item
+                  key="createorder"
+                  icon={<PlusOutlined />}
+                  onClick={() => handleMenuClick("createorder", "/createorder")}
+                >
+                  Crear Orden
+                </Menu.Item>
+              )}
               <Menu.Item
                 key="profile"
                 icon={<UserOutlined />}

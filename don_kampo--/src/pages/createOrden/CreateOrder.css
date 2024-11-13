@@ -7,7 +7,6 @@
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.337);
   margin-top: 2%;
-    margin-left: 2%;
   margin-bottom: 8%;
   }
   
@@ -70,3 +69,83 @@
     align-items: center;
     justify-content: center;
   }
+
+  /* Para pantallas pequeñas (smartphones y tablets, hasta 768px) */
+@media (max-width: 768px) {
+  .create-order-container {
+    padding: 1rem;
+    margin: 5% auto;
+    width: 100%;
+    box-shadow: none;
+  }
+
+  .products-list {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .product-item {
+    width: 90%; /* Ajustar el ancho para pantallas pequeñas */
+    margin-bottom: 10px;
+  }
+
+  .quantity-controls {
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .selected-product-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .selected-product-item p {
+    margin-bottom: 5px;
+  }
+
+  .ant-input,
+  .ant-btn {
+    width: 100%; /* Asegura que inputs y botones ocupen todo el ancho */
+  }
+}
+
+/* Para pantallas medianas (tablets y laptops pequeños, entre 768px y 1024px) */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .create-order-container {
+    padding: 1.5rem;
+    margin: 3% auto;
+    width: 90%;
+  }
+
+  .products-list {
+    gap: 12px;
+  }
+
+  .product-item {
+    width: 180px;
+  }
+
+  .selected-product-item {
+    padding: 8px 0;
+  }
+}
+
+/* Para pantallas grandes (monitores de hasta 1920px) */
+@media (min-width: 1400px) {
+  .create-order-container {
+    max-width: 1600px;
+    padding: 3rem;
+  }
+
+  .products-list {
+    gap: 20px;
+  }
+
+  .product-item {
+    width: 250px;
+  }
+
+  .quantity-controls {
+    gap: 15px;
+  }
+}

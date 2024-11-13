@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Form, Select, Button, message } from "antd";
+import { Form, Select, Button, message, Input } from "antd";
 import { jsPDF } from "jspdf";
 
 import axios from "axios";
@@ -7,7 +7,6 @@ import Navbar from "../../components/navbar/Navbar";
 import CustomFooter from "../../components/footer/Footer";
 import "./CreateOrder.css";
 import { useNavigate } from "react-router-dom";
-
 
 const { Option } = Select;
 
@@ -18,36 +17,49 @@ const CreateOrder = () => {
   const [loading, setLoading] = useState(false);
   const [selectedUserData, setSelectedUserData] = useState(null); // Datos del usuario seleccionado
   const [form] = Form.useForm(); // Crea una instancia del formulario
+  const [searchText, setSearchText] = useState(""); // Texto para filtrar productos
+
   const navigate = useNavigate();
 
-
+  const filteredProducts = products.filter((product) =>
+    product.name.toLowerCase().includes(searchText.toLowerCase())
+  );
 
   const generatePDF = (orderData) => {
     const doc = new jsPDF();
     doc.setFontSize(12);
     doc.text("Detalles de la Orden", 10, 10);
-  
-    doc.text(`Usuario: ${orderData.userData.user_name} ${orderData.userData.lastname}`, 10, 20);
+
+    doc.text(
+      `Usuario: ${orderData.userData.user_name} ${orderData.userData.lastname}`,
+      10,
+      20
+    );
     doc.text(`Correo: ${orderData.userData.email}`, 10, 30);
     doc.text(`Teléfono: ${orderData.userData.phone}`, 10, 40);
-    doc.text(`Dirección: ${orderData.userData.address}, ${orderData.userData.city}`, 10, 50);
-  
+    doc.text(
+      `Dirección: ${orderData.userData.address}, ${orderData.userData.city}`,
+      10,
+      50
+    );
+
     doc.text("Productos:", 10, 60);
     let yPosition = 70;
     orderData.cartDetails.forEach((product, index) => {
       doc.text(
-        `${index + 1}. ${product.productId} - Cantidad: ${product.quantity} - Precio: $${product.price}`,
+        `${index + 1}. ${product.productId} - Cantidad: ${
+          product.quantity
+        } - Precio: $${product.price}`,
         10,
         yPosition
       );
       yPosition += 10;
     });
-  
+
     doc.text(`Costo de Envío: $${orderData.shippingCost}`, 10, yPosition + 10);
     doc.text(`Total: $${orderData.total}`, 10, yPosition + 20);
-  
+
     doc.save(`Orden_${orderData.userId}.pdf`);
-    
   };
 
   const fetchUserDetails = async (userId) => {
@@ -140,20 +152,21 @@ const CreateOrder = () => {
       message.error("Debe seleccionar un usuario válido.");
       return;
     }
-  
+
     const { shippingMethod } = values;
-  
+
     if (selectedProducts.length === 0) {
       message.error("Debe seleccionar al menos un producto para la orden.");
       return;
     }
-  
+
     const shippingCost = 5000;
-    const total = selectedProducts.reduce(
-      (sum, product) => sum + product.quantity * product.price_home,
-      0
-    ) + shippingCost;
-  
+    const total =
+      selectedProducts.reduce(
+        (sum, product) => sum + product.quantity * product.price_home,
+        0
+      ) + shippingCost;
+
     const orderData = {
       userId: selectedUserData.id,
       userData: {
@@ -165,44 +178,45 @@ const CreateOrder = () => {
         city: selectedUserData.city,
         neighborhood: selectedUserData.neighborhood,
       },
-      cartDetails: selectedProducts.map(({ product_id, quantity, price_home }) => ({
-        productId: product_id,
-        quantity,
-        price: price_home,
-      })),
+      cartDetails: selectedProducts.map(
+        ({ product_id, quantity, price_home }) => ({
+          productId: product_id,
+          quantity,
+          price: price_home,
+        })
+      ),
       shippingMethod,
       shippingCost,
       total,
       actual_delivery: new Date().toISOString(),
-      estimatedDelivery: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
+      estimatedDelivery: new Date(
+        Date.now() + 2 * 24 * 60 * 60 * 1000
+      ).toISOString(),
     };
-  
+
     setLoading(true);
     try {
-        const response = await axios.post("/api/orders/placeOrder", orderData);
-        console.log("Respuesta de la API:", response);
-      
-        if (response.status === 201) {
-          console.log("La orden fue creada exitosamente.");
-          message.success("Orden creada exitosamente.");
-          generatePDF(orderData); // Generar el PDF
-          form.resetFields(); // Limpiar el formulario
-          setSelectedProducts([]); // Limpiar los productos seleccionados
-          navigate("/profile");
-        } else {
-          console.error("Estado inesperado:", response.status);
-          message.error("Ocurrió un problema al crear la orden.");
-        }
-      } catch (error) {
-        console.error("Error en el bloque catch:", error);
-        message.error("Error al crear la orden.");
-      } finally {
-        setLoading(false);
+      const response = await axios.post("/api/orders/placeOrder", orderData);
+      console.log("Respuesta de la API:", response);
+
+      if (response.status === 201) {
+        console.log("La orden fue creada exitosamente.");
+        message.success("Orden creada exitosamente.");
+        generatePDF(orderData); // Generar el PDF
+        form.resetFields(); // Limpiar el formulario
+        setSelectedProducts([]); // Limpiar los productos seleccionados
+        navigate("/profile");
+      } else {
+        console.error("Estado inesperado:", response.status);
+        message.error("Ocurrió un problema al crear la orden.");
       }
-      
+    } catch (error) {
+      console.error("Error en el bloque catch:", error);
+      message.error("Error al crear la orden.");
+    } finally {
+      setLoading(false);
+    }
   };
-  
-  
 
   return (
     <div>
@@ -247,8 +261,14 @@ const CreateOrder = () => {
 
           <div className="product-selection">
             <h3>Seleccionar Productos</h3>
+            <Input
+              placeholder="Buscar producto por nombre"
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              style={{ marginBottom: "16px" }}
+            />
             <div className="products-list">
-              {products.map((product) => (
+              {filteredProducts.map((product) => (
                 <div key={product.product_id} className="product-item">
                   <p>{product.name}</p>
                   <p>${product.price_home.toLocaleString()}</p>

@@ -16,6 +16,8 @@ import {
 } from "antd";
 import Navbar from "../../components/navbar/Navbar";
 import CustomFooter from "../../components/footer/Footer";
+
+import { SearchOutlined } from "@ant-design/icons";
 import BotonWhatsapp from "../../components/botonWhatsapp/BotonWhatsapp";
 import axios from "axios";
 import * as XLSX from "xlsx";
@@ -31,6 +33,23 @@ const AdminProfile = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [isUserModalVisible, setIsUserModalVisible] = useState(false);
   const [isOrderModalVisible, setIsOrderModalVisible] = useState(false);
+  const [globalSearchText, setGlobalSearchText] = useState("");
+
+  const getFilteredUsers = () => {
+    if (!globalSearchText) return users;
+
+    return users.filter((user) => {
+      const statusText = renderUserStatus(user.is_active); // Convierte el estado a texto legible
+      return (
+        (user.user_name &&
+          user.user_name.toLowerCase().includes(globalSearchText)) ||
+        (user.email && user.email.toLowerCase().includes(globalSearchText)) ||
+        (user.user_type &&
+          user.user_type.toLowerCase().includes(globalSearchText)) ||
+        statusText.toLowerCase().includes(globalSearchText)
+      );
+    });
+  };
 
   const [isCreateUserModalVisible, setIsCreateUserModalVisible] =
     useState(false);
@@ -97,10 +116,17 @@ const AdminProfile = () => {
       const response = await axios.get(`/api/users/${user.id}`);
       setSelectedUser(response.data);
       setIsUserModalVisible(true);
+      form.setFieldsValue(response.data.user); // Actualiza los valores del formulario
     } catch (error) {
       message.error("Error al cargar los detalles del usuario.");
       console.error(error);
     }
+  };
+
+  const handleCancelUserModal = () => {
+    setIsUserModalVisible(false);
+    setSelectedUser(null);
+    form.resetFields(); // Limpia el formulario
   };
 
   const openOrderModal = async (orderId) => {
@@ -123,6 +149,19 @@ const AdminProfile = () => {
       setFilteredOrders(orders.filter((order) => order.status_id === value));
     }
   };
+
+  const updateUserDetails = async (values) => {
+    try {
+      await axios.put(`/api/updateusers/${selectedUser.user.id}`, values);
+      message.success("Usuario actualizado exitosamente.");
+      fetchUsers(); // Refresca la lista de usuarios después de actualizar
+      setIsUserModalVisible(false);
+    } catch (error) {
+      message.error("Error al actualizar el usuario.");
+      console.error(error);
+    }
+  };
+  
 
   const openCreateUserModal = () => {
     form.resetFields();
@@ -151,7 +190,45 @@ const AdminProfile = () => {
   const renderUserTable = () => {
     const userColumns = [
       { title: "Nombre", dataIndex: "user_name", key: "user_name" },
-      { title: "Email", dataIndex: "email", key: "email" },
+      // lastname
+      { title: "Apellido", dataIndex: "lastname", key: "lastname" },
+      {
+        title: "Email",
+        dataIndex: "email",
+        key: "email",
+        filterDropdown: ({
+          setSelectedKeys,
+          selectedKeys,
+          confirm,
+          clearFilters,
+        }) => (
+          <div style={{ padding: 8 }}>
+            <Input
+              placeholder="Buscar por correo"
+              value={selectedKeys[0]}
+              onChange={(e) =>
+                setSelectedKeys(e.target.value ? [e.target.value] : [])
+              }
+              onPressEnter={confirm}
+              style={{ marginBottom: 8, display: "block" }}
+            />
+            <Button
+              type="primary"
+              onClick={confirm}
+              icon={<SearchOutlined />}
+              size="small"
+              style={{ width: 90, marginRight: 8 }}
+            >
+              Buscar
+            </Button>
+            <Button onClick={clearFilters} size="small" style={{ width: 90 }}>
+              Limpiar
+            </Button>
+          </div>
+        ),
+        onFilter: (value, record) =>
+          record.email.toLowerCase().includes(value.toLowerCase()),
+      },
       { title: "Tipo", dataIndex: "user_type", key: "user_type" },
       {
         title: "Estado",
@@ -177,8 +254,15 @@ const AdminProfile = () => {
         >
           Crear Usuario
         </Button>
+        <Input
+          placeholder="Buscar en todos los campos"
+          allowClear
+          onChange={(e) => setGlobalSearchText(e.target.value.toLowerCase())}
+          style={{ marginBottom: 16, width: 300, marginLeft: 25 }}
+          prefix={<SearchOutlined />}
+        />
         <Table
-          dataSource={users}
+          dataSource={getFilteredUsers()}
           columns={userColumns}
           rowKey="id"
           pagination={{ pageSize: 5 }}
@@ -276,9 +360,9 @@ const AdminProfile = () => {
   const exportFilteredOrdersToExcel = async () => {
     const failedOrders = []; // Lista para almacenar los detalles de órdenes fallidas
     const detailedOrders = []; // Lista para almacenar los detalles exitosos
-  
+
     setLoading(true); // Activamos la rueda de carga
-  
+
     try {
       // Realizar todas las solicitudes en paralelo
       const responses = await Promise.all(
@@ -286,7 +370,7 @@ const AdminProfile = () => {
           try {
             const response = await axios.get(`/api/orders/${order.id}`);
             const { order: orderDetails, items, shippingInfo } = response.data;
-  
+
             // Combinar los detalles de la orden, ítems y envío en un solo objeto
             detailedOrders.push({
               "ID de Orden": orderDetails.id,
@@ -304,7 +388,8 @@ const AdminProfile = () => {
                   : orderDetails.status_id === 3
                   ? "Entregado"
                   : "Cancelado",
-              "Método de Envío": shippingInfo?.shipping_method || "No disponible",
+              "Método de Envío":
+                shippingInfo?.shipping_method || "No disponible",
               "Número de Rastreo":
                 shippingInfo?.tracking_number || "No disponible",
               Ítems:
@@ -326,10 +411,10 @@ const AdminProfile = () => {
           }
         })
       );
-  
+
       // Crear hojas de trabajo
       const workbook = XLSX.utils.book_new();
-  
+
       if (detailedOrders.length > 0) {
         const detailedWorksheet = XLSX.utils.json_to_sheet(detailedOrders);
         XLSX.utils.book_append_sheet(
@@ -338,15 +423,15 @@ const AdminProfile = () => {
           "Pedidos Detallados"
         );
       }
-  
+
       if (failedOrders.length > 0) {
         const failedWorksheet = XLSX.utils.json_to_sheet(failedOrders);
         XLSX.utils.book_append_sheet(workbook, failedWorksheet, "Errores");
       }
-  
+
       // Guardar el archivo Excel
       XLSX.writeFile(workbook, "Pedidos_Detallados_y_Errores.xlsx");
-  
+
       // Mensajes al usuario
       if (detailedOrders.length > 0) {
         message.success("Archivo Excel generado exitosamente.");
@@ -363,7 +448,6 @@ const AdminProfile = () => {
       setLoading(false); // Desactivamos la rueda de carga
     }
   };
-  
 
   return (
     <div>
@@ -378,44 +462,117 @@ const AdminProfile = () => {
         <Modal
           title="Detalles de Usuario"
           visible={isUserModalVisible}
-          onCancel={() => setIsUserModalVisible(false)}
-          footer={[
-            <Button key="close" onClick={() => setIsUserModalVisible(false)}>
-              Cerrar
-            </Button>,
-          ]}
+          onCancel={handleCancelUserModal} // Cambiar la función de cancelación
+          footer={null}
         >
           {selectedUser && (
-            <>
-              <p>
-                <strong>Nombre:</strong> {selectedUser.user.user_name}
-              </p>
-              <p>
-                <strong>Apellido:</strong> {selectedUser.user.lastname}
-              </p>
-              <p>
-                <strong>Email:</strong> {selectedUser.user.email}
-              </p>
-              <p>
-                <strong>Teléfono:</strong> {selectedUser.user.phone}
-              </p>
-              <p>
-                <strong>Ciudad:</strong> {selectedUser.user.city}
-              </p>
-              <p>
-                <strong>Dirección:</strong> {selectedUser.user.address}
-              </p>
-              <p>
-                <strong>Barrio:</strong> {selectedUser.user.neighborhood}
-              </p>
-              <p>
-                <strong>Tipo:</strong> {selectedUser.user.user_type}
-              </p>
-              <p>
-                <strong>Estado:</strong>{" "}
-                {renderUserStatus(selectedUser.user.is_active)}
-              </p>
-            </>
+            <Form form={form} onFinish={updateUserDetails} layout="vertical">
+              <Form.Item
+                label="Nombre"
+                name="user_name"
+                rules={[
+                  { required: true, message: "Por favor ingresa el nombre" },
+                ]}
+              >
+                <Input />
+              </Form.Item>
+              <Form.Item
+                label="Apellido"
+                name="lastname"
+                rules={[
+                  { required: true, message: "Por favor ingresa el apellido" },
+                ]}
+              >
+                <Input />
+              </Form.Item>
+              <Form.Item
+                label="Email"
+                name="email"
+                rules={[
+                  {
+                    required: true,
+                    message: "Por favor ingresa el correo electrónico",
+                  },
+                  {
+                    type: "email",
+                    message: "Ingresa un correo electrónico válido",
+                  },
+                ]}
+              >
+                <Input />
+              </Form.Item>
+              <Form.Item
+                label="Teléfono"
+                name="phone"
+                rules={[
+                  { required: true, message: "Por favor ingresa el teléfono" },
+                ]}
+              >
+                <Input />
+              </Form.Item>
+              <Form.Item
+                label="Ciudad"
+                name="city"
+                rules={[
+                  { required: true, message: "Por favor ingresa la ciudad" },
+                ]}
+              >
+                <Input />
+              </Form.Item>
+              <Form.Item
+                label="Dirección"
+                name="address"
+                rules={[
+                  { required: true, message: "Por favor ingresa la dirección" },
+                ]}
+              >
+                <Input />
+              </Form.Item>
+              <Form.Item
+                label="Barrio"
+                name="neighborhood"
+                rules={[
+                  { required: true, message: "Por favor ingresa el barrio" },
+                ]}
+              >
+                <Input />
+              </Form.Item>
+              <Form.Item
+                label="Tipo de Usuario"
+                name="user_type"
+                rules={[
+                  {
+                    required: true,
+                    message: "Por favor selecciona el tipo de usuario",
+                  },
+                ]}
+              >
+                <Select>
+                  <Option value="admin">Administrador</Option>
+                  <Option value="hogar">Hogar</Option>
+                  <Option value="restaurante">Restaurante</Option>
+                  <Option value="supermercado">Supermercado</Option>
+                  <Option value="fruver">Fruver</Option>
+                </Select>
+              </Form.Item>
+              <Form.Item
+                label="Estado"
+                name="is_active"
+                rules={[
+                  { required: true, message: "Por favor selecciona el estado" },
+                ]}
+              >
+                <Select>
+                  <Option value={true}>Activo</Option>
+                  <Option value={false}>Inactivo</Option>
+                </Select>
+              </Form.Item>
+              <Form.Item>
+                <Button type="primary" htmlType="submit" block>
+                  Guardar Cambios
+                </Button>
+              </Form.Item>
+            </Form>
           )}
         </Modal>
 
