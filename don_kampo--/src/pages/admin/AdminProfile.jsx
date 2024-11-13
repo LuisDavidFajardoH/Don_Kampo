@@ -48,14 +48,16 @@ const AdminProfile = () => {
 
   const updateOrderStatus = async (orderId, newStatus) => {
     try {
-      await axios.put(`/api/updateorders/${orderId}`, { status_id: newStatus });
+      // Cambiamos la URL para incluir directamente el id y el nuevo estado
+      await axios.put(`http://localhost:8080/api/updatestatus/${orderId}/${newStatus}`);
       message.success("Estado del pedido actualizado correctamente.");
-      fetchOrders();
+      fetchOrders(); // Refresca la lista de pedidos después de actualizar el estado
     } catch (error) {
       message.error("Error al actualizar el estado del pedido.");
       console.error(error);
     }
   };
+  
 
   const deleteOrder = async (orderId) => {
     try {
@@ -209,13 +211,14 @@ const AdminProfile = () => {
 
     return (
       <Card title="Gestión de Pedidos" style={{ marginTop: "20px" }}>
-        <div style={{ marginBottom: "10px" }}>
+        <div style={{ marginBottom: "20px"}}>
           <Select
             placeholder="Filtrar por estado"
             allowClear
             onChange={handleStatusFilterChange}
             style={{ width: 200 }}
           >
+            <Option value={null}>Todos</Option>
             <Option value={1}>Pendiente</Option>
             <Option value={2}>Enviado</Option>
             <Option value={3}>Entregado</Option>

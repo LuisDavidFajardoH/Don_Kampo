@@ -35,7 +35,7 @@ const Navbar = () => {
   useEffect(() => {
     const path = location.pathname;
     switch (path) {
-      case "/home":
+      case "/":
         setSelectedKey("home");
         break;
       case "/products":
@@ -78,7 +78,7 @@ const Navbar = () => {
 
   return (
     <Header className="navbar">
-      <div className="logo" onClick={() => handleMenuClick("home", "/home")}>
+      <div className="logo" onClick={() => handleMenuClick("home", "/")}>
         <img
           src="/images/1.png"
           alt="Don Kampo Logo"
@@ -97,7 +97,7 @@ const Navbar = () => {
           <Menu.Item
             key="home"
             icon={<HomeOutlined />}
-            onClick={() => handleMenuClick("home", "/home")}
+            onClick={() => handleMenuClick("home", "/")}
           >
             Inicio
           </Menu.Item>
@@ -200,7 +200,7 @@ const Navbar = () => {
           <Menu.Item
             key="home"
             icon={<HomeOutlined />}
-            onClick={() => handleMenuClick("home", "/home")}
+            onClick={() => handleMenuClick("home", "/")}
           >
             Inicio
           </Menu.Item>

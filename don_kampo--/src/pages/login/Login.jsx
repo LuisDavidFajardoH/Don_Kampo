@@ -25,7 +25,7 @@ const Login = () => {
 
       // Mensaje de éxito y redirección
       message.success(response.data.message);
-      navigate('/home');
+      navigate('/');
     } catch (error) {
       message.error('Email o contraseña incorrectos');
     } finally {

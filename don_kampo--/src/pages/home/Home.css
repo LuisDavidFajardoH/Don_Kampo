@@ -1,0 +1,117 @@
+.home-container {
+    padding: 20px;
+    background-color: #f9f9f9;
+}
+
+.carousel-wrapper {
+    position: relative;
+}
+
+.carousel-item {
+    position: relative;
+    width: 100%;
+    height: 450px;
+}
+
+.carousel-image {
+    width: 100%;
+    height: 450px;
+    object-fit: cover;
+}
+
+.carousel-overlay {
+    position: absolute;
+    bottom: 10%; /* Ajustado para mejorar visibilidad en diferentes resoluciones */
+    left: 5%;
+    color: #fff;
+    text-align: left;
+    background-color: rgba(234, 106, 7, 0.533); /* Fondo oscuro con opacidad */
+    padding: 20px;
+    border-radius: 8px;
+    max-width: 40%;
+    z-index: 2; /* Aseguramos que esté en el frente */
+}
+
+.carousel-title {
+    font-size: 2rem;
+    color: #ff914d;
+    margin: 0;
+    font-weight: bold;
+    z-index: 3;
+}
+
+.carousel-description {
+    font-size: 1.2rem;
+    color: #ffffff;
+    margin-top: 10px;
+}
+
+.carousel-button {
+    margin-top: 10px;
+    background-color: #00983a;
+    border-color: #00983a;
+    color: #fff;
+}
+
+.carousel-button:hover {
+    background-color: #ff914d;
+    border-color: #ff914d;
+}
+
+.carousel-control {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    font-size: 24px;
+    color: #00983a;
+    background-color: rgba(255, 255, 255, 0.8);
+    border: none;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+.carousel-control.left {
+    left: 10px;
+}
+
+.carousel-control.right {
+    right: 10px;
+}
+
+.categories-section {
+    margin-top: 40px;
+    text-align: center;
+}
+
+.categories-section .ant-typography h3 {
+    color: #00983a;
+}
+
+.category-card {
+    text-align: center;
+}
+
+.category-card img {
+    height: 150px;
+    object-fit: cover;
+}
+
+.info-section {
+    background-color: #ffffff;
+    padding: 40px 20px;
+    margin-top: 40px;
+}
+
+.info-section .info-image {
+    width: 100%;
+    border-radius: 8px;
+}
+
+.info-section h3 {
+    color: #00983a;
+}
