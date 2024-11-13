@@ -9,6 +9,7 @@ import CreateProduct from './pages/createProduct/CreateProduct.jsx';
 import Profile from './pages/proflile/Profile.jsx';
 import AdminProfile from './pages/admin/AdminProfile.jsx';
 import CreateOrder from "./pages/createOrden/CreateOrder.jsx";
+import ManageProducts from "./pages/deleteProduct/deleteProduct.jsx";
 import Home from './pages/home/Home.jsx';
 
 import { CartProvider } from './pages/products/CartContext.jsx';
@@ -36,6 +37,7 @@ const App = () => {
               <Route path="/checkout" element={<Checkout />} />
               <Route path="/createproduct" element={<CreateProduct />} />
               <Route path="/createorder" element={<CreateOrder />} />
+              <Route path="/manageproducts" element={<ManageProducts />} />
               {/* Ruta condicional para el perfil */}
               <Route
                 path="/profile"
