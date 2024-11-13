@@ -4,6 +4,7 @@ import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 import Navbar from "../../components/navbar/Navbar";
 import CustomFooter from "../../components/footer/Footer";
 import BotonWhatsapp from "../../components/botonWhatsapp/BotonWhatsapp";
+import InstallPrompt from "../install/InstallPrompt";
 import "./Home.css";
 
 const { Title, Paragraph } = Typography;
@@ -116,6 +117,7 @@ const Home = () => {
             </Col>
           </Row>
         </div>
+        <InstallPrompt />
       </div>
       <BotonWhatsapp />
       <CustomFooter />
