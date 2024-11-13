@@ -9,7 +9,6 @@ import CustomFooter from "../../components/footer/Footer";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../products/CartContext";
 import useWindowSize from "react-use/lib/useWindowSize";
-import BotonWhatsapp from "../../components/botonWhatsapp/BotonWhatsapp";
 import "./Checkout.css";
 
 const Checkout = () => {
@@ -55,27 +54,13 @@ const Checkout = () => {
           console.error(error);
         }
       } else {
-        if (!loginData || !loginData.user) {
-          localStorage.setItem("redirectTo", "/checkout"); // Almacena primero
-          console.log("No hay usuario logueado", localStorage.getItem("redirectTo"));
-          message.error("Debe iniciar sesión para realizar la compra.");
-          navigate("/login"); // Luego redirige
-        }
+        message.error("Debe iniciar sesión para realizar la compra.");
+        navigate("/login");
       }
     };
 
     fetchUserData();
   }, [navigate]);
-
-  useEffect(() => {
-    if (!loginData?.user) {
-      localStorage.setItem("redirectTo", "/checkout"); // Guarda la ruta
-      navigate("/login", { replace: true }); // Redirige correctamente
-    } else {
-      fetchUserData();
-    }
-  }, [loginData, navigate]);
-  
 
   useEffect(() => {
     const fetchCartDetails = async () => {
@@ -194,7 +179,7 @@ const Checkout = () => {
         const response = await axios.post("/api/orders/placeOrder", orderData);
         if (response.status === 201) {
           setOrderId(response.data.orderId);
-
+          
           setIsModalVisible(true);
         } else {
           message.error("Error al realizar el pedido. Inténtalo nuevamente.");
@@ -218,27 +203,27 @@ const Checkout = () => {
       message.error("No se pudo generar el PDF. Intenta nuevamente.");
       return;
     }
-
+  
     html2canvas(input).then((canvas) => {
       const imgData = canvas.toDataURL("image/png");
       const pdf = new jsPDF();
-
+  
       // Agregar la imagen al PDF
       const imgWidth = 190;
       const pageHeight = 295;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
       const position = 10; // Espaciado desde la parte superior
-
+  
       pdf.addImage(imgData, "PNG", 10, position, imgWidth, imgHeight);
       pdf.save(`Resumen_Pedido_${orderId}.pdf`); // Guardar el archivo con un nombre personalizado
-
+  
       // Limpiar el carrito después de guardar el PDF
       clearCart();
       message.success("El carrito ha sido vaciado después de generar el PDF.");
       navigate("/products");
-      localStorage.setItem("redirectTo", "/checkout");
     });
   };
+  
 
   return (
     <div>
@@ -380,6 +365,7 @@ const Checkout = () => {
               }}
               onCancel={() => setIsModalVisible(false)}
               footer={[
+              
                 <Button
                   key="pdf"
                   type="default"
@@ -422,7 +408,6 @@ const Checkout = () => {
           </div>
         </div>
       </div>
-      <BotonWhatsapp />
       <CustomFooter />
     </div>
   );

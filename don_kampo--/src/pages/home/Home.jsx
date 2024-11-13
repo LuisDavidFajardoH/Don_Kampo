@@ -32,10 +32,10 @@ const carouselItems = [
 ];
 
 const categories = [
-  { title: "Frutas", img: "/images/frutasProducto.jpg" },
+  { title: "frutas nacionales", img: "/images/frutasProducto.jpg" },
   { title: "Verduras", img: "/images/verdurasProducto.jpg" },
-  { title: "Lácteos", img: "/images/lecheProducto.jpg" },
-  { title: "Bebidas", img: "/images/slider.jpg" },
+  { title: "Frutas importadas", img: "/images/lecheProducto.jpg" },
+  { title: "Hortalizas", img: "/images/slider.jpg" },
 ];
 
 const Home = () => {
