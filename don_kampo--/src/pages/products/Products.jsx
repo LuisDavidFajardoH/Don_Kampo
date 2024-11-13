@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Navbar from "../../components/navbar/Navbar";
 import CustomFooter from "../../components/footer/Footer";
+import { useLocation } from "react-router-dom";
 import { Card, Button, message, Select, Input } from "antd";
 import axios from "axios";
 import { useCart } from "../../pages/products/CartContext";
@@ -19,7 +20,8 @@ const Products = () => {
   const { cart, addToCart, removeFromCart } = useCart();
 
   // Obtener el tipo de usuario desde localStorage
-  const userType = JSON.parse(localStorage.getItem("loginData"))?.user?.user_type;
+  const userType = JSON.parse(localStorage.getItem("loginData"))?.user
+    ?.user_type;
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -35,6 +37,12 @@ const Products = () => {
           ...new Set(response.data.map((product) => product.category)),
         ];
         setCategories(uniqueCategories);
+        const params = new URLSearchParams(location.search);
+        const initialCategory = params.get("category");
+        if (initialCategory) {
+          setSelectedCategory(initialCategory);
+          filterProducts(initialCategory, searchQuery);
+        }
       } catch (error) {
         message.error("Error al cargar los productos.");
         console.error("Error:", error);
@@ -58,7 +66,10 @@ const Products = () => {
   };
 
   const normalizeString = (str) => {
-    return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    return str
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase();
   };
 
   const filterProducts = (category, query) => {
@@ -138,10 +149,7 @@ const Products = () => {
               className="product-card"
               hoverable
               cover={
-                <img
-                  alt={product.name}
-                  src={getBase64Image(product.photo)}
-                />
+                <img alt={product.name} src={getBase64Image(product.photo)} />
               }
             >
               <div className="product-info">
@@ -158,7 +166,9 @@ const Products = () => {
                     >
                       -
                     </Button>
-                    <span className="quantity-text">{cart[product.product_id].quantity}</span>
+                    <span className="quantity-text">
+                      {cart[product.product_id].quantity}
+                    </span>
                     <Button
                       onClick={() => addToCart(product)}
                       className="quantity-button"

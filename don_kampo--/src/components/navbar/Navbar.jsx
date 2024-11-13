@@ -129,6 +129,20 @@ const Navbar = () => {
           >
             Inicio
           </Menu.Item>
+          <Button
+            type="primary"
+            className="cosechas-button"
+            onClick={() => navigate("/products?category=Cosecha")}
+            style={{
+              marginLeft: "0px",
+              backgroundColor: "#00983A",
+              borderColor: "#FF914D",
+              color: "#fff",
+              marginTop: "17px",
+            }}
+          >
+            Cosechas
+          </Button>
           <Menu.Item
             key="products"
             icon={<AppstoreOutlined />}
