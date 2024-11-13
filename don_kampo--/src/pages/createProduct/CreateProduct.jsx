@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import Navbar from "../../components/navbar/Navbar";
+import CustomFooter from "../../components/footer/Footer";
 import { Form, Input, Button, message, Upload, InputNumber, Select, Row, Col, Table, Divider } from "antd";
 import { UploadOutlined, DownloadOutlined } from "@ant-design/icons";
 import axios from "axios";
@@ -252,6 +253,7 @@ const CreateProduct = () => {
           )}
         </div>
       </div>
+      <CustomFooter />
     </>
   );
 };

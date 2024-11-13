@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Navbar from "../../components/navbar/Navbar";
+import CustomFooter from "../../components/footer/Footer";
 import { useCart } from "../products/CartContext";
 import { Card, Button, message, Divider, Modal } from "antd";
 import axios from "axios";
@@ -254,6 +255,7 @@ const Cart = () => {
           </div>
         </Modal>
       </div>
+      <CustomFooter />
     </>
   );
 };

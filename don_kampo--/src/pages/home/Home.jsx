@@ -2,6 +2,7 @@ import React, { useRef } from "react";
 import { Carousel, Button, Card, Typography, Row, Col } from "antd";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 import Navbar from "../../components/navbar/Navbar";
+import CustomFooter from "../../components/footer/Footer";
 import "./Home.css";
 
 const { Title, Paragraph } = Typography;
@@ -115,6 +116,7 @@ const Home = () => {
           </Row>
         </div>
       </div>
+      <CustomFooter />
     </>
   );
 };

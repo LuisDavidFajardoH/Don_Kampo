@@ -3,6 +3,7 @@ import { Form, Input, Button, message, Divider, Modal, Row, Col } from "antd";
 import Confetti from "react-confetti";
 import axios from "axios";
 import Navbar from "../../components/navbar/Navbar";
+import CustomFooter from "../../components/footer/Footer";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../products/CartContext";
 import useWindowSize from "react-use/lib/useWindowSize";
@@ -361,6 +362,7 @@ const Checkout = () => {
           </div>
         </div>
       </div>
+      <CustomFooter />
     </div>
   );
 };

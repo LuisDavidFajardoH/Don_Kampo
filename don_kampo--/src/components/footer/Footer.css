@@ -1,0 +1,44 @@
+.footer {
+    background-color: #ee7723; /* Color corporativo */
+    color: white;
+    padding: 40px 20px;
+    text-align: center;
+  }
+  
+  .footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  .footer-title {
+    color: #00983a; /* Color secundario */
+    font-weight: bold;
+    margin-bottom: 16px;
+  }
+  
+  .social-icons .icon {
+    font-size: 24px;
+    margin: 0 10px;
+    color: white;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+  }
+  
+  .social-icons .icon:hover {
+    color: #00983a; /* Color secundario en hover */
+    transform: scale(1.1);
+  }
+  
+  .footer-bottom {
+    margin-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    padding-top: 10px;
+    font-size: 14px;
+  }
+  
+  @media (max-width: 768px) {
+    .footer-content {
+      text-align: left;
+    }
+  }
+  

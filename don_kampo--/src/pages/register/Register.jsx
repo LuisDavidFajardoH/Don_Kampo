@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Form, Input, Button, message, Select, Row, Col } from "antd";
 import axios from "axios";
 import Navbar from "../../components/navbar/Navbar";
+import CustomFooter from "../../components/footer/Footer";
 import { useNavigate } from "react-router-dom";
 import "./Register.css";
 
@@ -189,6 +190,7 @@ const Register = () => {
           </Row>
         </Form>
       </div>
+      <CustomFooter />
     </>
   );
 };
