@@ -19,6 +19,7 @@
     padding: 10px;
     max-width: 1000px;
     margin: 0 auto;
+    margin-top: -5%;
 }
 
 .product-card {
@@ -38,10 +39,11 @@
 
 .product-card .ant-card-cover img {
     width: 100%;
-    height: 80px;
-    object-fit: cover;
+    height: 100px; /* Ajusta el tamaño de la altura */
+    object-fit: contain; /* Cambia a "contain" si deseas mostrar la imagen completa */
     border-radius: 8px 8px 0 0;
 }
+
 
 .product-info {
     padding: 6px 0;
