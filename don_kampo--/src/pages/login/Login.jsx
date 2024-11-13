@@ -12,27 +12,29 @@ const Login = () => {
 
   const onFinish = async (values) => {
     const { email, user_password } = values;
-
+  
     setLoading(true);
     try {
       const response = await axios.post(
-        '/api/login', // Solo la ruta relativa
+        "/api/login",
         { email, user_password },
         { withCredentials: true }
       );
-
-      // Guardar toda la respuesta de la API en localStorage
-      localStorage.setItem('loginData', JSON.stringify(response.data));
-
-      // Mensaje de éxito y redirección
+  
+      localStorage.setItem("loginData", JSON.stringify(response.data));
       message.success(response.data.message);
-      navigate('/');
+  
+      const redirectTo = localStorage.getItem("redirectTo") || "/";
+      navigate(redirectTo, { replace: true });
+      localStorage.removeItem("redirectTo");
     } catch (error) {
-      message.error('Email o contraseña incorrectos');
+      message.error("Email o contraseña incorrectos");
     } finally {
       setLoading(false);
     }
   };
+  
+  
 
   const handleForgotPassword = () => {
     message.info('Redirigiendo a recuperación de contraseña...');

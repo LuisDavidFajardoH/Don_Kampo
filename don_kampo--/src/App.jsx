@@ -1,4 +1,5 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import Login from './pages/login/Login';
 import Register from './pages/register/Register';
 import Products from './pages/products/Products';
@@ -12,7 +13,12 @@ import { CartProvider } from './pages/products/CartContext.jsx';
 import './App.css';
 
 const App = () => {
-  const userType = JSON.parse(localStorage.getItem("loginData"))?.user?.user_type;
+  const [userType, setUserType] = useState(null);
+
+  useEffect(() => {
+    const loginData = JSON.parse(localStorage.getItem("loginData"));
+    setUserType(loginData?.user?.user_type || null); // Recuperar userType de localStorage
+  }, []);
 
   return (
     <Router>

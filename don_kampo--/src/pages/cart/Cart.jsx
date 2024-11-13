@@ -127,25 +127,35 @@ const Cart = () => {
     if (loginData && loginData.user) {
       navigate("/checkout"); // Navega al componente Checkout si el usuario está autenticado
     } else {
+      // Almacena la ruta actual antes de mostrar el modal
+      localStorage.setItem("redirectTo", "/cart");
       setIsModalVisible(true); // Muestra el modal para iniciar sesión o registrarse
     }
   };
-
-  const handleModalCancel = () => {
-    setIsModalVisible(false);
-  };
-
+  
   const handleLogin = () => {
+    // Guarda la ruta actual antes de redirigir
+    localStorage.setItem("redirectTo", "/cart");
     navigate("/login");
   };
-
+  
   const handleRegister = () => {
+    // Guarda la ruta actual antes de redirigir
+    localStorage.setItem("redirectTo", "/cart");
     navigate("/register");
   };
 
-  const handleContinueShopping = () => {
-    navigate("/products");
+  const handleModalCancel = () => {
+    setIsModalVisible(false); // Cierra el modal al establecer el estado como falso
   };
+  
+  const handleContinueShopping = () => {
+    navigate("/products"); // Redirige al usuario a la página de productos
+  };
+  
+  
+
+ 
 
   return (
     <>

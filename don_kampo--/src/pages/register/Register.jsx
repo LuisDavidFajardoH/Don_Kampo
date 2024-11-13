@@ -10,6 +10,8 @@ const { Option } = Select;
 
 const Register = () => {
   const [loading, setLoading] = useState(false);
+  const redirectTo = localStorage.getItem("redirectTo") || "/";
+  console.log("traigo el estado de redirect",redirectTo);
   const navigate = useNavigate();
 
   const onFinish = async (values) => {
@@ -31,14 +33,22 @@ const Register = () => {
         email,
         phone,
         city,
-        address: " ", 
+        address: " ",
         neighborhood: " ",
         user_password,
         user_type,
       });
   
       message.success(response.data.msg);
-      navigate("/login");
+  
+      const redirectTo = localStorage.getItem("redirectTo") || "/";
+      if (redirectTo === "/cart" ) {
+        const reenviar = "/login";
+        console.log(redirectTo);
+      navigate(reenviar, { replace: true });
+      
+      }
+     
     } catch (error) {
       message.error(
         error.response?.data?.msg || "Error al registrar el usuario. Inténtalo nuevamente."
@@ -47,6 +57,8 @@ const Register = () => {
       setLoading(false);
     }
   };
+  
+  
   
 
   return (
