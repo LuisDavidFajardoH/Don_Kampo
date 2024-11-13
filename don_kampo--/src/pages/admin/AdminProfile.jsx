@@ -276,62 +276,60 @@ const AdminProfile = () => {
   const exportFilteredOrdersToExcel = async () => {
     const failedOrders = []; // Lista para almacenar los detalles de órdenes fallidas
     const detailedOrders = []; // Lista para almacenar los detalles exitosos
-
+  
     setLoading(true); // Activamos la rueda de carga
-
+  
     try {
-      // Iterar sobre las órdenes filtradas
-      for (const order of filteredOrders) {
-        try {
-          const response = await axios.get(`/api/orders/${order.id}`);
-          const { order: orderDetails, items, shippingInfo } = response.data;
-
-          // Combinar los detalles de la orden, ítems y envío en un solo objeto
-          detailedOrders.push({
-            "ID de Orden": orderDetails.id,
-            Cliente: orderDetails.customer_name,
-            "Correo Cliente": orderDetails.customer_email,
-            "Fecha de Pedido": new Date(
-              orderDetails.order_date
-            ).toLocaleDateString(),
-            Total: `$${orderDetails.total}`,
-            Estado:
-              orderDetails.status_id === 1
-                ? "Pendiente"
-                : orderDetails.status_id === 2
-                ? "Enviado"
-                : orderDetails.status_id === 3
-                ? "Entregado"
-                : "Cancelado",
-            "Método de Envío": shippingInfo?.shipping_method || "No disponible",
-            "Número de Rastreo":
-              shippingInfo?.tracking_number || "No disponible",
-            Ítems:
-              items
-                .map(
-                  (item) =>
-                    `${item.product_name} (x${item.quantity}) - $${item.price}`
-                )
-                .join("; ") || "No disponible",
-          });
-        } catch (error) {
-          // Captura el detalle del error para la hoja de errores
-          failedOrders.push({
-            "ID de Orden": order.id,
-            Error: error.response
-              ? error.response.data.message || "Error desconocido"
-              : "No se pudo conectar con la API",
-          });
-          console.error(
-            `Error al obtener detalles de la orden ${order.id}:`,
-            error
-          );
-        }
-      }
-
+      // Realizar todas las solicitudes en paralelo
+      const responses = await Promise.all(
+        filteredOrders.map(async (order) => {
+          try {
+            const response = await axios.get(`/api/orders/${order.id}`);
+            const { order: orderDetails, items, shippingInfo } = response.data;
+  
+            // Combinar los detalles de la orden, ítems y envío en un solo objeto
+            detailedOrders.push({
+              "ID de Orden": orderDetails.id,
+              Cliente: orderDetails.customer_name,
+              "Correo Cliente": orderDetails.customer_email,
+              "Fecha de Pedido": new Date(
+                orderDetails.order_date
+              ).toLocaleDateString(),
+              Total: `$${orderDetails.total}`,
+              Estado:
+                orderDetails.status_id === 1
+                  ? "Pendiente"
+                  : orderDetails.status_id === 2
+                  ? "Enviado"
+                  : orderDetails.status_id === 3
+                  ? "Entregado"
+                  : "Cancelado",
+              "Método de Envío": shippingInfo?.shipping_method || "No disponible",
+              "Número de Rastreo":
+                shippingInfo?.tracking_number || "No disponible",
+              Ítems:
+                items
+                  .map(
+                    (item) =>
+                      `${item.product_name} (x${item.quantity}) - $${item.price}`
+                  )
+                  .join("; ") || "No disponible",
+            });
+          } catch (error) {
+            // Captura el detalle del error para la hoja de errores
+            failedOrders.push({
+              "ID de Orden": order.id,
+              Error: error.response
+                ? error.response.data.message || "Error desconocido"
+                : "No se pudo conectar con la API",
+            });
+          }
+        })
+      );
+  
       // Crear hojas de trabajo
       const workbook = XLSX.utils.book_new();
-
+  
       if (detailedOrders.length > 0) {
         const detailedWorksheet = XLSX.utils.json_to_sheet(detailedOrders);
         XLSX.utils.book_append_sheet(
@@ -340,15 +338,15 @@ const AdminProfile = () => {
           "Pedidos Detallados"
         );
       }
-
+  
       if (failedOrders.length > 0) {
         const failedWorksheet = XLSX.utils.json_to_sheet(failedOrders);
         XLSX.utils.book_append_sheet(workbook, failedWorksheet, "Errores");
       }
-
+  
       // Guardar el archivo Excel
       XLSX.writeFile(workbook, "Pedidos_Detallados_y_Errores.xlsx");
-
+  
       // Mensajes al usuario
       if (detailedOrders.length > 0) {
         message.success("Archivo Excel generado exitosamente.");
@@ -365,6 +363,7 @@ const AdminProfile = () => {
       setLoading(false); // Desactivamos la rueda de carga
     }
   };
+  
 
   return (
     <div>
