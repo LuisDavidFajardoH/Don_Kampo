@@ -23,13 +23,11 @@ import "./App.css";
 const App = () => {
   const [userType, setUserType] = useState(null);
 
-  // Recuperar datos del usuario al cargar la aplicación
   useEffect(() => {
     const loginData = JSON.parse(localStorage.getItem("loginData"));
     setUserType(loginData?.user?.user_type || null);
   }, []);
 
-  // Registrar el Service Worker al cargar la aplicación
   useEffect(() => {
     if (
       window.location.protocol === "http:" &&
@@ -38,7 +36,7 @@ const App = () => {
       console.warn("Service Workers solo funcionan en HTTPS o localhost.");
     } else if ("serviceWorker" in navigator) {
       navigator.serviceWorker
-        .register("/sw.js")
+        .register("/sw.js", { scope: "/" })
         .then((registration) => {
           console.log("Service Worker registrado con éxito:", registration);
         })
@@ -50,11 +48,41 @@ const App = () => {
     }
   }, []);
 
+  // Manejo del evento beforeinstallprompt
+  useEffect(() => {
+    let deferredPrompt;
+
+    window.addEventListener("beforeinstallprompt", (e) => {
+      e.preventDefault(); // Evita que el navegador muestre el prompt automáticamente
+      deferredPrompt = e; // Guarda el evento para usarlo más tarde
+      const installButton = document.getElementById("install-button");
+      if (installButton) {
+        installButton.style.display = "block"; // Muestra el botón de instalación
+        installButton.addEventListener("click", () => {
+          deferredPrompt.prompt(); // Muestra el prompt de instalación
+          deferredPrompt.userChoice.then((choiceResult) => {
+            if (choiceResult.outcome === "accepted") {
+              console.log("El usuario aceptó instalar la app");
+            } else {
+              console.log("El usuario rechazó instalar la app");
+            }
+            deferredPrompt = null;
+          });
+        });
+      }
+    });
+  }, []);
+
   return (
     <Router>
       <div id="root">
         <CartProvider>
           <div className="main-content">
+            {/* Botón de instalación */}
+            <button id="install-button" style={{ display: "none" }}>
+              Instalar App
+            </button>
+
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/login" element={<Login />} />
@@ -65,7 +93,6 @@ const App = () => {
               <Route path="/createproduct" element={<CreateProduct />} />
               <Route path="/createorder" element={<CreateOrder />} />
               <Route path="/manageproducts" element={<ManageProducts />} />
-              {/* Ruta condicional para el perfil */}
               <Route
                 path="/profile"
                 element={
