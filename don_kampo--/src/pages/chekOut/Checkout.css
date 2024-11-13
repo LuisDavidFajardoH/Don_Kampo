@@ -7,6 +7,14 @@
   margin-bottom: 5%;
 }
 
+.order-summary-pdf {
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #333;
+}
+
+
 /* Content Layout */
 .checkout-content {
   display: flex;

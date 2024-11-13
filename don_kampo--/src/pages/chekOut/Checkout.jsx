@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Form, Input, Button, message, Divider, Modal, Row, Col } from "antd";
-import Confetti from "react-confetti";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
+
 import axios from "axios";
 import Navbar from "../../components/navbar/Navbar";
 import CustomFooter from "../../components/footer/Footer";
@@ -27,7 +29,6 @@ const Checkout = () => {
 
   // Verificar si el usuario tiene órdenes previas
   const [isFirstOrder, setIsFirstOrder] = useState(false);
-
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -178,7 +179,7 @@ const Checkout = () => {
         const response = await axios.post("/api/orders/placeOrder", orderData);
         if (response.status === 201) {
           setOrderId(response.data.orderId);
-          clearCart();
+          
           setIsModalVisible(true);
         } else {
           message.error("Error al realizar el pedido. Inténtalo nuevamente.");
@@ -195,6 +196,34 @@ const Checkout = () => {
   };
 
   const total = calculateSubtotal() + shippingCost;
+
+  const generateOrderPDF = () => {
+    const input = document.getElementById("order-summary-pdf"); // Elemento que será convertido a PDF
+    if (!input) {
+      message.error("No se pudo generar el PDF. Intenta nuevamente.");
+      return;
+    }
+  
+    html2canvas(input).then((canvas) => {
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF();
+  
+      // Agregar la imagen al PDF
+      const imgWidth = 190;
+      const pageHeight = 295;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      const position = 10; // Espaciado desde la parte superior
+  
+      pdf.addImage(imgData, "PNG", 10, position, imgWidth, imgHeight);
+      pdf.save(`Resumen_Pedido_${orderId}.pdf`); // Guardar el archivo con un nombre personalizado
+  
+      // Limpiar el carrito después de guardar el PDF
+      clearCart();
+      message.success("El carrito ha sido vaciado después de generar el PDF.");
+      navigate("/products");
+    });
+  };
+  
 
   return (
     <div>
@@ -336,28 +365,45 @@ const Checkout = () => {
               }}
               onCancel={() => setIsModalVisible(false)}
               footer={[
+              
                 <Button
-                  key="confirm"
-                  type="primary"
-                  onClick={() => navigate("/products")}
+                  key="pdf"
+                  type="default"
+                  onClick={generateOrderPDF}
+                  style={{ backgroundColor: "#FF914D", color: "#fff" }}
                 >
-                  Ver más productos
+                  Descargar PDF
                 </Button>,
               ]}
             >
-              <p>
-                ¡{userData?.user_name}, tu pedido ha sido realizado
-                exitosamente!
-              </p>
-              <p>
-                ID de la orden: <strong>{orderId}</strong>
-              </p>
-              <Confetti
-                width={width}
-                height={height}
-                numberOfPieces={300}
-                x={width * 0.25} // Ajuste para mover el confeti hacia la izquierda
-              />
+              <div id="order-summary-pdf">
+                <p>
+                  ¡{userData?.user_name}, tu pedido ha sido realizado
+                  exitosamente!
+                </p>
+                <p>
+                  ID de la orden: <strong>{orderId}</strong>
+                </p>
+                <Divider />
+                <h4>Resumen del Pedido</h4>
+                {cartDetails.map((product) => (
+                  <div key={product.product_id} className="order-summary-item">
+                    <span>
+                      {product.name} x {product.quantity}
+                    </span>
+                    <span>
+                      $
+                      {(
+                        getPriceByUserType(product) * product.quantity
+                      ).toLocaleString()}
+                    </span>
+                  </div>
+                ))}
+                <Divider />
+                <p>Subtotal: ${calculateSubtotal().toLocaleString()}</p>
+                <p>Envío: ${shippingCost.toLocaleString()}</p>
+                <h4>Total: ${total.toLocaleString()}</h4>
+              </div>
             </Modal>
           </div>
         </div>
