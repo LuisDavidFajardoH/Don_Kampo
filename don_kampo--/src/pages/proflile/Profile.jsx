@@ -16,6 +16,7 @@ import {
 } from "antd";
 import Navbar from "../../components/navbar/Navbar";
 import CustomFooter from "../../components/footer/Footer";
+import BotonWhatsapp from "../../components/botonWhatsapp/BotonWhatsapp";
 import axios from "axios";
 import * as XLSX from "xlsx";
 import "./UserProfile.css";
@@ -395,6 +396,7 @@ const Profile = () => {
         {view === "orders" && renderOrders()}
         {renderOrderDetailsModal()}
       </div>
+      <BotonWhatsapp />
       <CustomFooter />
     </>
   );
