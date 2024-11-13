@@ -1,7 +1,21 @@
 import React, { useEffect, useState } from "react";
-import { Card, Button, Table, Modal, message, Divider, Select, Popconfirm, Form, Input, Row, Col } from "antd";
+import {
+  Card,
+  Button,
+  Table,
+  Modal,
+  message,
+  Divider,
+  Select,
+  Popconfirm,
+  Form,
+  Input,
+  Row,
+  Col,
+} from "antd";
 import Navbar from "../../components/navbar/Navbar";
 import axios from "axios";
+import * as XLSX from "xlsx";
 import "./AdminProfile.css";
 
 const { Option } = Select;
@@ -14,7 +28,9 @@ const AdminProfile = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [isUserModalVisible, setIsUserModalVisible] = useState(false);
   const [isOrderModalVisible, setIsOrderModalVisible] = useState(false);
-  const [isCreateUserModalVisible, setIsCreateUserModalVisible] = useState(false);
+
+  const [isCreateUserModalVisible, setIsCreateUserModalVisible] =
+    useState(false);
   const [statusFilter, setStatusFilter] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -49,7 +65,9 @@ const AdminProfile = () => {
   const updateOrderStatus = async (orderId, newStatus) => {
     try {
       // Cambiamos la URL para incluir directamente el id y el nuevo estado
-      await axios.put(`http://localhost:8080/api/updatestatus/${orderId}/${newStatus}`);
+      await axios.put(
+        `http://localhost:8080/api/updatestatus/${orderId}/${newStatus}`
+      );
       message.success("Estado del pedido actualizado correctamente.");
       fetchOrders(); // Refresca la lista de pedidos después de actualizar el estado
     } catch (error) {
@@ -57,7 +75,6 @@ const AdminProfile = () => {
       console.error(error);
     }
   };
-  
 
   const deleteOrder = async (orderId) => {
     try {
@@ -86,6 +103,7 @@ const AdminProfile = () => {
   const openOrderModal = async (orderId) => {
     try {
       const response = await axios.get(`/api/orders/${orderId}`);
+      // Actualiza el estado con toda la respuesta (incluyendo order, items y shippingInfo)
       setSelectedOrder(response.data);
       setIsOrderModalVisible(true);
     } catch (error) {
@@ -99,7 +117,7 @@ const AdminProfile = () => {
     if (value === null) {
       setFilteredOrders(orders);
     } else {
-      setFilteredOrders(orders.filter(order => order.status_id === value));
+      setFilteredOrders(orders.filter((order) => order.status_id === value));
     }
   };
 
@@ -114,7 +132,7 @@ const AdminProfile = () => {
       await axios.post("/api/createusers", {
         ...values,
         address: " ",
-        neighborhood: " "
+        neighborhood: " ",
       });
       message.success("Usuario creado exitosamente.");
       fetchUsers();
@@ -149,7 +167,11 @@ const AdminProfile = () => {
 
     return (
       <Card title="Gestión de Usuarios">
-        <Button type="primary" onClick={openCreateUserModal} className="crearUser" >
+        <Button
+          type="primary"
+          onClick={openCreateUserModal}
+          className="crearUser"
+        >
           Crear Usuario
         </Button>
         <Table
@@ -178,7 +200,13 @@ const AdminProfile = () => {
         dataIndex: "status_id",
         key: "status_id",
         render: (status) =>
-          status === 1 ? "Pendiente" : status === 2 ? "Enviado" : status === 3 ? "Entregado" : "Cancelado",
+          status === 1
+            ? "Pendiente"
+            : status === 2
+            ? "Enviado"
+            : status === 3
+            ? "Entregado"
+            : "Cancelado",
       },
       {
         title: "Acciones",
@@ -211,7 +239,7 @@ const AdminProfile = () => {
 
     return (
       <Card title="Gestión de Pedidos" style={{ marginTop: "20px" }}>
-        <div style={{ marginBottom: "20px"}}>
+        <div style={{ marginBottom: "20px" }}>
           <Select
             placeholder="Filtrar por estado"
             allowClear
@@ -224,6 +252,9 @@ const AdminProfile = () => {
             <Option value={3}>Entregado</Option>
             <Option value={4}>Cancelado</Option>
           </Select>
+          <Button type="primary" onClick={exportFilteredOrdersToExcel}>
+            Descargar Excel
+          </Button>
         </div>
         <Table
           dataSource={filteredOrders}
@@ -233,6 +264,34 @@ const AdminProfile = () => {
         />
       </Card>
     );
+  };
+
+  const exportFilteredOrdersToExcel = () => {
+    // Prepara los datos para el Excel
+    const excelData = filteredOrders.map((order) => ({
+      "ID de Orden": order.id,
+      Cliente: order.customer_id,
+      "Fecha de Pedido": new Date(order.order_date).toLocaleDateString(),
+      Total: `$${order.total}`,
+      Estado:
+        order.status_id === 1
+          ? "Pendiente"
+          : order.status_id === 2
+          ? "Enviado"
+          : order.status_id === 3
+          ? "Entregado"
+          : "Cancelado",
+    }));
+
+    // Crea una hoja de trabajo
+    const worksheet = XLSX.utils.json_to_sheet(excelData);
+
+    // Crea el libro de Excel
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Pedidos Filtrados");
+
+    // Genera el archivo Excel y lo descarga
+    XLSX.writeFile(workbook, "Pedidos_Filtrados.xlsx");
   };
 
   return (
@@ -282,8 +341,95 @@ const AdminProfile = () => {
                 <strong>Tipo:</strong> {selectedUser.user.user_type}
               </p>
               <p>
-                <strong>Estado:</strong> {renderUserStatus(selectedUser.user.is_active)}
+                <strong>Estado:</strong>{" "}
+                {renderUserStatus(selectedUser.user.is_active)}
               </p>
+            </>
+          )}
+        </Modal>
+
+        <Modal
+          title="Detalles del Pedido"
+          visible={isOrderModalVisible}
+          onCancel={() => setIsOrderModalVisible(false)}
+          footer={[
+            <Button key="close" onClick={() => setIsOrderModalVisible(false)}>
+              Cerrar
+            </Button>,
+          ]}
+        >
+          {selectedOrder && selectedOrder.order && (
+            <>
+              <h3>Información del Pedido</h3>
+              <p>
+                <strong>ID:</strong> {selectedOrder.order.id}
+              </p>
+              <p>
+                <strong>Cliente:</strong> {selectedOrder.order.customer_name}
+              </p>
+              <p>
+                <strong>Email:</strong> {selectedOrder.order.customer_email}
+              </p>
+              <p>
+                <strong>Fecha:</strong>{" "}
+                {new Date(selectedOrder.order.order_date).toLocaleDateString()}
+              </p>
+              <p>
+                <strong>Total:</strong> ${selectedOrder.order.total}
+              </p>
+              <p>
+                <strong>Estado:</strong>{" "}
+                {selectedOrder.order.status_id === 1
+                  ? "Pendiente"
+                  : selectedOrder.order.status_id === 2
+                  ? "Enviado"
+                  : selectedOrder.order.status_id === 3
+                  ? "Entregado"
+                  : "Cancelado"}
+              </p>
+              <Divider />
+
+              <h3>Información de Envío</h3>
+              {selectedOrder.shippingInfo ? (
+                <>
+                  <p>
+                    <strong>Método de Envío:</strong>{" "}
+                    {selectedOrder.shippingInfo.shipping_method}
+                  </p>
+                  <p>
+                    <strong>Número de Rastreo:</strong>{" "}
+                    {selectedOrder.shippingInfo.tracking_number}
+                  </p>
+                  <p>
+                    <strong>Fecha Estimada de Entrega:</strong>{" "}
+                    {new Date(
+                      selectedOrder.shippingInfo.estimated_delivery
+                    ).toLocaleDateString()}
+                  </p>
+                  <p>
+                    <strong>Estado de Envío:</strong>{" "}
+                    {selectedOrder.shippingInfo.shipping_status_id === 1
+                      ? "En Proceso"
+                      : "Entregado"}
+                  </p>
+                </>
+              ) : (
+                <p>No hay información de envío disponible.</p>
+              )}
+              <Divider />
+
+              <h3>Ítems del Pedido</h3>
+              {selectedOrder.items.length > 0 ? (
+                <ul>
+                  {selectedOrder.items.map((item, index) => (
+                    <li key={index}>
+                      {item.name} - {item.quantity} x ${item.price}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p>No hay ítems en este pedido.</p>
+              )}
             </>
           )}
         </Modal>
@@ -301,7 +447,9 @@ const AdminProfile = () => {
                 <Form.Item
                   label="Nombre"
                   name="user_name"
-                  rules={[{ required: true, message: "Por favor ingresa el nombre" }]}
+                  rules={[
+                    { required: true, message: "Por favor ingresa el nombre" },
+                  ]}
                 >
                   <Input placeholder="Nombre" />
                 </Form.Item>
@@ -310,7 +458,12 @@ const AdminProfile = () => {
                 <Form.Item
                   label="Apellido"
                   name="lastname"
-                  rules={[{ required: true, message: "Por favor ingresa el apellido" }]}
+                  rules={[
+                    {
+                      required: true,
+                      message: "Por favor ingresa el apellido",
+                    },
+                  ]}
                 >
                   <Input placeholder="Apellido" />
                 </Form.Item>
@@ -322,8 +475,14 @@ const AdminProfile = () => {
                   label="Correo Electrónico"
                   name="email"
                   rules={[
-                    { required: true, message: "Por favor ingresa el correo electrónico" },
-                    { type: "email", message: "Ingresa un correo electrónico válido" },
+                    {
+                      required: true,
+                      message: "Por favor ingresa el correo electrónico",
+                    },
+                    {
+                      type: "email",
+                      message: "Ingresa un correo electrónico válido",
+                    },
                   ]}
                 >
                   <Input placeholder="Correo Electrónico" />
@@ -333,7 +492,12 @@ const AdminProfile = () => {
                 <Form.Item
                   label="Teléfono"
                   name="phone"
-                  rules={[{ required: true, message: "Por favor ingresa el número de teléfono" }]}
+                  rules={[
+                    {
+                      required: true,
+                      message: "Por favor ingresa el número de teléfono",
+                    },
+                  ]}
                 >
                   <Input placeholder="Teléfono" />
                 </Form.Item>
@@ -344,7 +508,12 @@ const AdminProfile = () => {
                 <Form.Item
                   label="Ciudad"
                   name="city"
-                  rules={[{ required: true, message: "Por favor selecciona la ciudad" }]}
+                  rules={[
+                    {
+                      required: true,
+                      message: "Por favor selecciona la ciudad",
+                    },
+                  ]}
                 >
                   <Select placeholder="Selecciona una ciudad">
                     <Option value="Chía">Chía</Option>
@@ -357,8 +526,14 @@ const AdminProfile = () => {
                   label="Contraseña"
                   name="user_password"
                   rules={[
-                    { required: true, message: "Por favor ingresa una contraseña" },
-                    { min: 6, message: "La contraseña debe tener al menos 6 caracteres" },
+                    {
+                      required: true,
+                      message: "Por favor ingresa una contraseña",
+                    },
+                    {
+                      min: 6,
+                      message: "La contraseña debe tener al menos 6 caracteres",
+                    },
                   ]}
                 >
                   <Input.Password placeholder="Contraseña" />
@@ -368,7 +543,12 @@ const AdminProfile = () => {
             <Form.Item
               label="Tipo de Usuario"
               name="user_type"
-              rules={[{ required: true, message: "Por favor selecciona el tipo de usuario" }]}
+              rules={[
+                {
+                  required: true,
+                  message: "Por favor selecciona el tipo de usuario",
+                },
+              ]}
             >
               <Select placeholder="Selecciona un tipo de usuario">
                 <Option value="admin">Administrador</Option>
@@ -379,7 +559,7 @@ const AdminProfile = () => {
               </Select>
             </Form.Item>
             <Form.Item>
-              <Button type="primary" htmlType="submit" loading={loading} block >
+              <Button type="primary" htmlType="submit" loading={loading} block>
                 Crear Usuario
               </Button>
             </Form.Item>

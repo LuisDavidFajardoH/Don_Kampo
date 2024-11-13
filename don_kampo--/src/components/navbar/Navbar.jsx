@@ -78,188 +78,191 @@ const Navbar = () => {
 
   return (
     <Header className="navbar">
-  <div className="navbar-left">
-    {/* Logo */}
-    <div className="logo" onClick={() => handleMenuClick("home", "/")}>
-      <img
-        src="/images/1.png"
-        alt="Don Kampo Logo"
-        style={{ height: "88px" }}
+      <div className="navbar-left">
+        {/* Logo */}
+        <div className="logo" onClick={() => handleMenuClick("home", "/")}>
+          <img
+            src="/images/1.png"
+            alt="Don Kampo Logo"
+            style={{ height: "88px" }}
+          />
+        </div>
+
+        {/* Carrito */}
+        <div
+          className="cart-icon"
+          style={{ display: "flex", alignItems: "center" }}
+          onClick={() => handleMenuClick("cart", "/cart")}
+        >
+          <Badge
+            count={
+              cartValue > 99999
+                ? `${(cartValue / 1000).toFixed(1)}K`
+                : `$${cartValue.toLocaleString()}`
+            }
+            offset={[10, 0]}
+            style={{
+              backgroundColor: "#52c41a",
+              fontSize: "14px",
+              padding: "0 8px",
+            }}
+          >
+            <ShoppingCartOutlined
+              style={{ fontSize: "24px", color: "white", cursor: "pointer" }}
+            />
+          </Badge>
+        </div>
+      </div>
+
+      {/* Menú para pantallas grandes */}
+      <div className="menu-desktop">
+        <Menu
+          theme="light"
+          mode="horizontal"
+          selectedKeys={[selectedKey]}
+          className="menu"
+        >
+          <Menu.Item
+            key="home"
+            icon={<HomeOutlined />}
+            onClick={() => handleMenuClick("home", "/")}
+          >
+            Inicio
+          </Menu.Item>
+          <Menu.Item
+            key="products"
+            icon={<AppstoreOutlined />}
+            onClick={() => handleMenuClick("products", "/products")}
+          >
+            Productos
+          </Menu.Item>
+
+          {isLoggedIn ? (
+            <>
+              {isAdmin && (
+                <Menu.Item
+                  key="createproduct"
+                  icon={<PlusOutlined />}
+                  onClick={() =>
+                    handleMenuClick("createproduct", "/createproduct")
+                  }
+                >
+                  Agregar Productos
+                </Menu.Item>
+              )}
+              <Menu.Item
+                key="profile"
+                icon={<UserOutlined />}
+                onClick={() => handleMenuClick("profile", "/profile")}
+              >
+                {loginData.user.user_name}
+              </Menu.Item>
+              <Menu.Item
+                key="logout"
+                icon={<LogoutOutlined />}
+                onClick={handleLogout}
+              >
+                Cerrar Sesión
+              </Menu.Item>
+            </>
+          ) : (
+            <>
+              <Menu.Item
+                key="login"
+                onClick={() => handleMenuClick("login", "/login")}
+              >
+                Iniciar Sesión
+              </Menu.Item>
+              <Menu.Item
+                key="register"
+                onClick={() => handleMenuClick("register", "/register")}
+              >
+                Registrarse
+              </Menu.Item>
+            </>
+          )}
+        </Menu>
+      </div>
+
+      {/* Ícono de menú para pantallas pequeñas */}
+      <Button
+        className="menu-mobile-button"
+        type="text"
+        icon={<MenuOutlined />}
+        onClick={() => setDrawerVisible(true)}
       />
-    </div>
 
-    {/* Carrito */}
-    <div className="cart-icon" onClick={() => handleMenuClick("cart", "/cart")}>
-      <Badge
-        count={
-          cartValue > 99999
-            ? `${(cartValue / 1000).toFixed(1)}K`
-            : `$${cartValue.toLocaleString()}`
-        }
-        offset={[10, 0]}
-        style={{
-          backgroundColor: "#52c41a",
-          fontSize: "14px",
-          padding: "0 8px",
-        }}
+      {/* Drawer para menú en pantallas pequeñas */}
+      <Drawer
+        title="Menú"
+        placement="right"
+        closable
+        onClose={() => setDrawerVisible(false)}
+        visible={drawerVisible}
       >
-        <ShoppingCartOutlined
-          style={{ fontSize: "24px", color: "white", cursor: "pointer" }}
-        />
-      </Badge>
-    </div>
-  </div>
+        <Menu theme="light" mode="vertical" selectedKeys={[selectedKey]}>
+          <Menu.Item
+            key="home"
+            icon={<HomeOutlined />}
+            onClick={() => handleMenuClick("home", "/")}
+          >
+            Inicio
+          </Menu.Item>
+          <Menu.Item
+            key="products"
+            icon={<AppstoreOutlined />}
+            onClick={() => handleMenuClick("products", "/products")}
+          >
+            Productos
+          </Menu.Item>
 
-  {/* Menú para pantallas grandes */}
-  <div className="menu-desktop">
-    <Menu
-      theme="light"
-      mode="horizontal"
-      selectedKeys={[selectedKey]}
-      className="menu"
-    >
-      <Menu.Item
-        key="home"
-        icon={<HomeOutlined />}
-        onClick={() => handleMenuClick("home", "/")}
-      >
-        Inicio
-      </Menu.Item>
-      <Menu.Item
-        key="products"
-        icon={<AppstoreOutlined />}
-        onClick={() => handleMenuClick("products", "/products")}
-      >
-        Productos
-      </Menu.Item>
-
-      {isLoggedIn ? (
-        <>
-          {isAdmin && (
-            <Menu.Item
-              key="createproduct"
-              icon={<PlusOutlined />}
-              onClick={() =>
-                handleMenuClick("createproduct", "/createproduct")
-              }
-            >
-              Agregar Productos
-            </Menu.Item>
+          {isLoggedIn ? (
+            <>
+              {isAdmin && (
+                <Menu.Item
+                  key="createproduct"
+                  icon={<PlusOutlined />}
+                  onClick={() =>
+                    handleMenuClick("createproduct", "/createproduct")
+                  }
+                >
+                  Agregar Productos
+                </Menu.Item>
+              )}
+              <Menu.Item
+                key="profile"
+                icon={<UserOutlined />}
+                onClick={() => handleMenuClick("profile", "/profile")}
+              >
+                {loginData.user.user_name}
+              </Menu.Item>
+              <Menu.Item
+                key="logout"
+                icon={<LogoutOutlined />}
+                onClick={handleLogout}
+              >
+                Cerrar Sesión
+              </Menu.Item>
+            </>
+          ) : (
+            <>
+              <Menu.Item
+                key="login"
+                onClick={() => handleMenuClick("login", "/login")}
+              >
+                Iniciar Sesión
+              </Menu.Item>
+              <Menu.Item
+                key="register"
+                onClick={() => handleMenuClick("register", "/register")}
+              >
+                Registrarse
+              </Menu.Item>
+            </>
           )}
-          <Menu.Item
-            key="profile"
-            icon={<UserOutlined />}
-            onClick={() => handleMenuClick("profile", "/profile")}
-          >
-            {loginData.user.user_name}
-          </Menu.Item>
-          <Menu.Item
-            key="logout"
-            icon={<LogoutOutlined />}
-            onClick={handleLogout}
-          >
-            Cerrar Sesión
-          </Menu.Item>
-        </>
-      ) : (
-        <>
-          <Menu.Item
-            key="login"
-            onClick={() => handleMenuClick("login", "/login")}
-          >
-            Iniciar Sesión
-          </Menu.Item>
-          <Menu.Item
-            key="register"
-            onClick={() => handleMenuClick("register", "/register")}
-          >
-            Registrarse
-          </Menu.Item>
-        </>
-      )}
-    </Menu>
-  </div>
-
-  {/* Ícono de menú para pantallas pequeñas */}
-  <Button
-    className="menu-mobile-button"
-    type="text"
-    icon={<MenuOutlined />}
-    onClick={() => setDrawerVisible(true)}
-  />
-
-  {/* Drawer para menú en pantallas pequeñas */}
-  <Drawer
-    title="Menú"
-    placement="right"
-    closable
-    onClose={() => setDrawerVisible(false)}
-    visible={drawerVisible}
-  >
-    <Menu theme="light" mode="vertical" selectedKeys={[selectedKey]}>
-      <Menu.Item
-        key="home"
-        icon={<HomeOutlined />}
-        onClick={() => handleMenuClick("home", "/")}
-      >
-        Inicio
-      </Menu.Item>
-      <Menu.Item
-        key="products"
-        icon={<AppstoreOutlined />}
-        onClick={() => handleMenuClick("products", "/products")}
-      >
-        Productos
-      </Menu.Item>
-
-      {isLoggedIn ? (
-        <>
-          {isAdmin && (
-            <Menu.Item
-              key="createproduct"
-              icon={<PlusOutlined />}
-              onClick={() =>
-                handleMenuClick("createproduct", "/createproduct")
-              }
-            >
-              Agregar Productos
-            </Menu.Item>
-          )}
-          <Menu.Item
-            key="profile"
-            icon={<UserOutlined />}
-            onClick={() => handleMenuClick("profile", "/profile")}
-          >
-            {loginData.user.user_name}
-          </Menu.Item>
-          <Menu.Item
-            key="logout"
-            icon={<LogoutOutlined />}
-            onClick={handleLogout}
-          >
-            Cerrar Sesión
-          </Menu.Item>
-        </>
-      ) : (
-        <>
-          <Menu.Item
-            key="login"
-            onClick={() => handleMenuClick("login", "/login")}
-          >
-            Iniciar Sesión
-          </Menu.Item>
-          <Menu.Item
-            key="register"
-            onClick={() => handleMenuClick("register", "/register")}
-          >
-            Registrarse
-          </Menu.Item>
-        </>
-      )}
-    </Menu>
-  </Drawer>
-</Header>
-
+        </Menu>
+      </Drawer>
+    </Header>
   );
 };
 
