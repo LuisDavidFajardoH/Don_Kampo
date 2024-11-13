@@ -32,7 +32,7 @@ const carouselItems = [
 ];
 
 const categories = [
-  { title: "frutas nacionales", img: "/images/frutasProducto.jpg" },
+  { title: "Frutas nacionales", img: "/images/frutasProducto.jpg" },
   { title: "Verduras", img: "/images/verdurasProducto.jpg" },
   { title: "Frutas importadas", img: "/images/lecheProducto.jpg" },
   { title: "Hortalizas", img: "/images/slider.jpg" },
@@ -105,7 +105,7 @@ const Home = () => {
             <Col xs={24} md={12}>
               <Title level={3}>Calidad garantizada</Title>
               <Paragraph>
-                En Don Kampo nos enorgullece ofrecer productos frescos y de excelente calidad. Nuestro compromiso es llevar lo mejor del campo a tu mesa, promoviendo un consumo responsable y sostenible.
+              En Don Kampo, nuestra pasión es brindar productos frescos y de calidad excepcional, cultivados con dedicación y respeto por la tierra. Nos enorgullece llevar lo mejor del campo directamente a tu mesa, promoviendo un consumo responsable y sostenible que apoya a nuestros agricultores y cuida del medio ambiente. Con un compromiso firme hacia la excelencia, entregamos nuestros productos con esmero a hogares, fruver, supermercados y restaurantes, asegurándonos de que la frescura y el sabor auténtico del campo estén siempre al alcance de quienes valoran una alimentación natural y consciente.
               </Paragraph>
               <Button type="primary" size="large">
                 Conoce más sobre nosotros
