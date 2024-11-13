@@ -47,7 +47,8 @@ const Register = () => {
         const reenviar = "/login";
         console.log(redirectTo);
       navigate(reenviar, { replace: true });
-      
+      }else{
+        navigate("/login", { replace: true });
       }
      
     } catch (error) {
@@ -177,6 +178,7 @@ const Register = () => {
                 ]}
               >
                 <Select placeholder="Selecciona un tipo de usuario">
+                  <option value="admin">Admin</option>
                   <option value="hogar">Hogar</option>
                   <option value="restaurante">Restaurante</option>
                   <option value="supermercado">Supermercado</option>

@@ -39,7 +39,7 @@ const AdminProfile = () => {
     if (!globalSearchText) return users;
 
     return users.filter((user) => {
-      const statusText = renderUserStatus(user.is_active); // Convierte el estado a texto legible
+      const statusText = renderUserStatus(user.status_id); // Convierte el estado a texto legible
       return (
         (user.user_name &&
           user.user_name.toLowerCase().includes(globalSearchText)) ||
@@ -188,9 +188,19 @@ const AdminProfile = () => {
   };
 
   const renderUserTable = () => {
+    const updateUserStatus = async (userId, statusId) => {
+      try {
+        await axios.put(`/api/userstatus/${userId}/${statusId}`);
+        message.success("Estado del usuario actualizado correctamente.");
+        fetchUsers(); // Refresca la lista de usuarios después de actualizar
+      } catch (error) {
+        message.error("Error al actualizar el estado del usuario.");
+        console.error(error);
+      }
+    };
+  
     const userColumns = [
       { title: "Nombre", dataIndex: "user_name", key: "user_name" },
-      // lastname
       { title: "Apellido", dataIndex: "lastname", key: "lastname" },
       {
         title: "Email",
@@ -232,9 +242,19 @@ const AdminProfile = () => {
       { title: "Tipo", dataIndex: "user_type", key: "user_type" },
       {
         title: "Estado",
-        dataIndex: "is_active",
-        key: "is_active",
-        render: renderUserStatus,
+        dataIndex: "status_id",
+        key: "status_id",
+        render: (status, record) => (
+          <Select
+            defaultValue={status}
+            onChange={(newStatus) => updateUserStatus(record.id, newStatus)}
+            style={{ width: 120 }}
+          >
+            <Option value={1}>Activo</Option>
+            <Option value={2}>Inactivo</Option>
+            <Option value={3}>Suspendido</Option>
+          </Select>
+        ),
       },
       {
         title: "Acciones",
@@ -244,7 +264,7 @@ const AdminProfile = () => {
         ),
       },
     ];
-
+  
     return (
       <Card title="Gestión de Usuarios">
         <Button
@@ -270,6 +290,7 @@ const AdminProfile = () => {
       </Card>
     );
   };
+  
 
   const renderOrderTable = () => {
     const orderColumns = [
@@ -557,7 +578,7 @@ const AdminProfile = () => {
               </Form.Item>
               <Form.Item
                 label="Estado"
-                name="is_active"
+                name="status_id"
                 rules={[
                   { required: true, message: "Por favor selecciona el estado" },
                 ]}
