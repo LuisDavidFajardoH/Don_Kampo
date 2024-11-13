@@ -159,6 +159,7 @@ const CreateProduct = () => {
                   <Option value="Fruta">Fruta</Option>
                   <Option value="Verdura">Verdura</Option>
                   <Option value="Lácteos">Lácteos</Option>
+                  <Option value="Cosecha">Cosecha</Option>
                 </Select>
               </Form.Item>
             </Col>
