@@ -21,7 +21,7 @@
     "react-router-dom": "^6.28.0",
     "react-use": "^17.5.1",
     "xlsx": "^0.18.5",
-    "proxy": "http://localhost:8080"
+    "proxy": "https://don-kampo-api.onrender.com"
   },
   "devDependencies": {
     "@eslint/js": "^9.13.0",
