@@ -40,7 +40,7 @@ export default defineConfig({
     port: 3000, // Puerto del servidor
     proxy: {
       '/api': {
-        target: 'http://localhost:8080', // Redirige las solicitudes al backend
+        target: 'https://don-kampo-api.onrender.com', // Redirige las solicitudes al backend
         changeOrigin: true, // Cambia el origen del host al backend
         secure: false, // Permite conexiones no seguras al backend
       },
