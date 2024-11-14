@@ -196,3 +196,128 @@
     margin-bottom: 15px;
     display: inline-block;
 }
+
+/* Pantallas pequeñas (teléfonos) */
+@media (max-width: 768px) {
+    .carousel-item {
+      height: 300px; /* Reducimos el tamaño del carrusel */
+    }
+  
+    .carousel-image {
+      height: 300px; /* Ajustamos la altura de la imagen */
+      object-fit: cover; /* Para mantener el contenido visible */
+    }
+  
+    .carousel-overlay {
+        flex-direction: column;
+        align-items: center;
+        padding: 15px 20px;
+        width: 77%;
+        height: 64%;
+        gap: 15px;
+        bottom: 5%;
+        left: 5%;
+        margin-bottom: 5%;
+    }
+  
+    .carousel-left {
+      text-align: center; /* Centramos el texto */
+      flex: none; /* Dejamos que tome el espacio necesario */
+    }
+  
+    .carousel-title {
+      font-size: 1.5rem; /* Reducimos el tamaño del título */
+    }
+  
+    .carousel-description {
+      font-size: 1rem; /* Reducimos el tamaño de la descripción */
+    }
+  
+    .carousel-button {
+      font-size: 0.9rem; /* Botón más pequeño */
+      padding: 8px 15px; /* Menos padding */
+      max-width: 100%; /* Ocupa todo el ancho posible */
+    }
+  
+    .carousel-right {
+      width: 60%; /* Logo más pequeño */
+      padding: 10px; /* Reducimos el padding */
+    }
+  
+    .carousel-logo {
+      width: 80px; /* Tamaño del logo reducido */
+    }
+  }
+  
+  /* Pantallas medianas (tabletas) */
+  @media (min-width: 769px) and (max-width: 1024px) {
+    .carousel-item {
+      height: 400px;
+    }
+  
+    .carousel-image {
+      height: 400px;
+    }
+  
+    .carousel-overlay {
+      width: 85%; /* Ancho un poco más amplio */
+      bottom: 7%;
+      left: 7%;
+      padding: 20px;
+      gap: 20px;
+    }
+  
+    .carousel-title {
+      font-size: 1.7rem;
+    }
+  
+    .carousel-description {
+      font-size: 1.1rem;
+    }
+  
+    .carousel-button {
+      font-size: 1rem;
+      padding: 10px 20px;
+    }
+  
+    .carousel-logo {
+      width: 120px;
+    }
+  }
+  
+  /* Pantallas grandes (escritorio) */
+  @media (min-width: 1025px) {
+    .carousel-item {
+      height: 450px;
+    }
+  
+    .carousel-image {
+      height: 450px;
+    }
+  
+    .carousel-overlay {
+      width: 80%;
+      bottom: 10%;
+      left: 8%;
+      padding: 30px;
+      gap: 30px;
+    }
+  
+    .carousel-title {
+      font-size: 2rem;
+    }
+  
+    .carousel-description {
+      font-size: 1.2rem;
+    }
+  
+    .carousel-button {
+      font-size: 1.1rem;
+      padding: 12px 25px;
+    }
+  
+    .carousel-logo {
+      width: 150px;
+    }
+  }
+  
