@@ -157,10 +157,12 @@ const CreateProduct = () => {
                 rules={[{ required: true, message: "Por favor selecciona la categoría" }]}
               >
                 <Select placeholder="Selecciona una categoría">
-                  <Option value="Fruta">Fruta</Option>
+                  <Option value="Frutas importadas">Frutas importadas</Option>
                   <Option value="Verdura">Verdura</Option>
-                  <Option value="Lácteos">Lácteos</Option>
+                  <Option value="Frutas nacionales">Frutas nacionales</Option>
                   <Option value="Cosecha">Cosecha</Option>
+                  <Option value="Hortalizas">Hortalizas</Option>
+                  <Option value="Otros">Otros</Option>
                 </Select>
               </Form.Item>
             </Col>

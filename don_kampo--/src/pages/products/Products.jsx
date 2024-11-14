@@ -23,36 +23,45 @@ const Products = () => {
   const userType = JSON.parse(localStorage.getItem("loginData"))?.user
     ?.user_type;
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const response = await axios.get("/api/products", {
-          withCredentials: true,
-        });
-        setProducts(response.data);
-        setFilteredProducts(response.data);
-
-        const uniqueCategories = [
-          "Todas",
-          ...new Set(response.data.map((product) => product.category)),
-        ];
-        setCategories(uniqueCategories);
-        const params = new URLSearchParams(location.search);
-        const initialCategory = params.get("category");
-        if (initialCategory) {
-          setSelectedCategory(initialCategory);
-          filterProducts(initialCategory, searchQuery);
+    useEffect(() => {
+      const fetchProducts = async () => {
+        try {
+          const response = await axios.get("/api/products", {
+            withCredentials: true,
+          });
+          setProducts(response.data);
+          setFilteredProducts(response.data);
+    
+          const uniqueCategories = [
+            "Todas",
+            "Frutas importadas",
+            "Verdura",
+            "Frutas nacionales",
+            "Hortalizas",
+            "Cosecha",
+            "Otros",
+          ];
+          setCategories(uniqueCategories);
+    
+          const params = new URLSearchParams(location.search);
+          const initialCategory = params.get("category");
+    
+          // Aplica el filtro inicial solo si la categoría es válida
+          if (initialCategory) {
+            setSelectedCategory(initialCategory);
+            filterProducts(initialCategory, searchQuery, response.data); // Pasa los productos cargados directamente
+          }
+        } catch (error) {
+          message.error("Error al cargar los productos.");
+          console.error("Error:", error);
+        } finally {
+          setLoading(false);
         }
-      } catch (error) {
-        message.error("Error al cargar los productos.");
-        console.error("Error:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProducts();
-  }, []);
+      };
+    
+      fetchProducts();
+    }, []);
+    
 
   const handleCategoryChange = (value) => {
     setSelectedCategory(value);
@@ -72,8 +81,8 @@ const Products = () => {
       .toLowerCase();
   };
 
-  const filterProducts = (category, query) => {
-    const filtered = products.filter((product) => {
+  const filterProducts = (category, query, productsToFilter = products) => {
+    const filtered = productsToFilter.filter((product) => {
       const matchesCategory =
         category === "Todas" || product.category === category;
       const matchesSearch = normalizeString(product.name).includes(
@@ -83,6 +92,13 @@ const Products = () => {
     });
     setFilteredProducts(filtered);
   };
+
+  useEffect(() => {
+    filterProducts(selectedCategory, searchQuery);
+  }, [selectedCategory, searchQuery]);
+  
+
+  
 
   const getBase64Image = (photo) => {
     if (photo && photo.data) {
@@ -118,7 +134,7 @@ const Products = () => {
           placeholder="Filtrar por categoría"
           style={{ width: 200, marginRight: 16 }}
           onChange={handleCategoryChange}
-          value={selectedCategory}
+          value={selectedCategory || "Todas"}
           allowClear
           size="large"
         >

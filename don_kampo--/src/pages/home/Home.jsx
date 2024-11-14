@@ -1,6 +1,8 @@
 import React, { useRef } from "react";
-import { Carousel, Button, Card, Typography, Row, Col } from "antd";
+import { useState, useEffect } from "react";
+import { Carousel, Button, Card, Typography, Row, Col, Modal } from "antd";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
+import { useNavigate } from "react-router-dom";
 import Navbar from "../../components/navbar/Navbar";
 import CustomFooter from "../../components/footer/Footer";
 import BotonWhatsapp from "../../components/botonWhatsapp/BotonWhatsapp";
@@ -21,9 +23,9 @@ const carouselItems = [
     description: "Verduras cultivadas orgánicamente, perfectas para tu dieta",
   },
   {
-    img: "/images/leche.webp",
-    title: "Lácteos de granja",
-    description: "Lácteos frescos y saludables para toda tu familia",
+    img: "/images/frutasImportadas.jpg",
+    title: "Frutas importadas",
+    description: "Frutas importadas de la mejor calidad para tu hogar",
   },
   {
     img: "/images/slider.jpg",
@@ -35,12 +37,26 @@ const carouselItems = [
 const categories = [
   { title: "Frutas nacionales", img: "/images/frutasProducto.jpg" },
   { title: "Verduras", img: "/images/verdurasProducto.jpg" },
-  { title: "Frutas importadas", img: "/images/lecheProducto.jpg" },
+  { title: "Frutas importadas", img: "/images/frutasImportadas.jpg" },
   { title: "Hortalizas", img: "/images/slider.jpg" },
 ];
 
 const Home = () => {
   const carouselRef = useRef(null);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const navigate = useNavigate();
+
+  const handleCategoryClick = (category) => {
+    navigate(`/products?category=${encodeURIComponent(category)}`);
+  };
+
+  useEffect(() => {
+    setIsModalVisible(true); // Muestra el modal al cargar la página
+  }, []);
+
+  const handleOk = () => {
+    setIsModalVisible(false); // Cierra el modal al hacer clic en "Ok"
+  };
 
   const handleNext = () => {
     carouselRef.current.next();
@@ -59,11 +75,23 @@ const Home = () => {
           <Carousel autoplay className="home-carousel" ref={carouselRef}>
             {carouselItems.map((item, index) => (
               <div key={index} className="carousel-item">
-                <img src={item.img} alt={item.title} className="carousel-image" />
+                <img
+                  src={item.img}
+                  alt={item.title}
+                  className="carousel-image"
+                />
                 <div className="carousel-overlay">
-                  <Title level={2} className="carousel-title">{item.title}</Title>
-                  <Paragraph className="carousel-description">{item.description}</Paragraph>
-                  <Button type="primary" size="large" className="carousel-button">
+                  <Title level={2} className="carousel-title">
+                    {item.title}
+                  </Title>
+                  <Paragraph className="carousel-description">
+                    {item.description}
+                  </Paragraph>
+                  <Button
+                    type="primary"
+                    size="large"
+                    className="carousel-button"
+                  >
                     Ver más
                   </Button>
                 </div>
@@ -92,6 +120,7 @@ const Home = () => {
                   hoverable
                   cover={<img alt={category.title} src={category.img} />}
                   className="category-card"
+                  onClick={() => handleCategoryClick(category.title)} // Redirigir al hacer clic
                 >
                   <Card.Meta title={category.title} />
                 </Card>
@@ -106,16 +135,43 @@ const Home = () => {
             <Col xs={24} md={12}>
               <Title level={3}>Calidad garantizada</Title>
               <Paragraph>
-              En Don Kampo, nuestra pasión es brindar productos frescos y de calidad excepcional, cultivados con dedicación y respeto por la tierra. Nos enorgullece llevar lo mejor del campo directamente a tu mesa, promoviendo un consumo responsable y sostenible que apoya a nuestros agricultores y cuida del medio ambiente. Con un compromiso firme hacia la excelencia, entregamos nuestros productos con esmero a hogares, fruver, supermercados y restaurantes, asegurándonos de que la frescura y el sabor auténtico del campo estén siempre al alcance de quienes valoran una alimentación natural y consciente.
+                En Don Kampo, nuestra pasión es brindar productos frescos y de
+                calidad excepcional, cultivados con dedicación y respeto por la
+                tierra. Nos enorgullece llevar lo mejor del campo directamente a
+                tu mesa, promoviendo un consumo responsable y sostenible que
+                apoya a nuestros agricultores y cuida del medio ambiente. Con un
+                compromiso firme hacia la excelencia, entregamos nuestros
+                productos con esmero a hogares, fruver, supermercados y
+                restaurantes, asegurándonos de que la frescura y el sabor
+                auténtico del campo estén siempre al alcance de quienes valoran
+                una alimentación natural y consciente.
               </Paragraph>
               <Button type="primary" size="large">
                 Conoce más sobre nosotros
               </Button>
             </Col>
             <Col xs={24} md={12}>
-              <img src="/images/calidad.webp" alt="Calidad Don Kampo" className="info-image" />
+              <img
+                src="/images/calidad.webp"
+                alt="Calidad Don Kampo"
+                className="info-image"
+              />
             </Col>
           </Row>
+          <Modal
+            title="Información importante"
+            visible={isModalVisible}
+            onOk={handleOk}
+            onCancel={handleOk}
+            okText="Entendido"
+            cancelButtonProps={{ style: { display: "none" } }}
+          >
+            <p>
+              Por el momento, nuestros servicios están disponibles únicamente en
+              Chía y Cajicá. ¡Gracias por tu comprensión!
+            </p>
+          </Modal>
+          ;
         </div>
         <InstallPrompt />
       </div>
