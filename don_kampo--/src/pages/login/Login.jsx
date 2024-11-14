@@ -13,7 +13,7 @@ const Login = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isResetModalVisible, setIsResetModalVisible] = useState(false);
   const [email, setEmail] = useState('');
-  const [resetCode, setResetCode] = useState('');
+  const [code, setCode] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const navigate = useNavigate();
 
@@ -63,15 +63,15 @@ const Login = () => {
   };
 
   const handleResetPassword = async () => {
-    if (!resetCode || !newPassword) {
+    if (!code || !newPassword) {
       message.warning('Por favor ingresa el código y la nueva contraseña.');
       return;
     }
 
     try {
-      const response = await axios.post("/api/reset-password", {
+      const response = await axios.post("/api/verify-code-and-reset-password", {
         email,
-        resetCode,
+        code,
         newPassword
       });
       message.success(response.data.message || 'Contraseña restablecida exitosamente.');
@@ -155,12 +155,12 @@ const Login = () => {
           layout="vertical">
           <Form.Item
             label="Código de Verificación"
-            name="resetCode"
+            name="code"
             rules={[{ required: true, message: 'Por favor ingresa el código enviado a tu correo' }]}>
             <Input
               placeholder="Código de Verificación"
-              value={resetCode}
-              onChange={(e) => setResetCode(e.target.value)}
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
             />
           </Form.Item>
           <Form.Item
