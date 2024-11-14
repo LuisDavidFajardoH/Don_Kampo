@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "npm install && npm run build",
+    "build": "npm install && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
@@ -20,8 +20,7 @@
     "react-floating-whatsapp": "^5.0.8",
     "react-router-dom": "^6.28.0",
     "react-use": "^17.5.1",
-    "xlsx": "^0.18.5",
-    "proxy": "https://don-kampo-api.onrender.com"
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@eslint/js": "^9.13.0",
