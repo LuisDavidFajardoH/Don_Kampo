@@ -88,7 +88,7 @@ const AdminProfile = () => {
     try {
       // Cambiamos la URL para incluir directamente el id y el nuevo estado
       await axios.put(
-        `http://localhost:8080/api/updatestatus/${orderId}/${newStatus}`
+        `/api/updatestatus/${orderId}/${newStatus}`
       );
       message.success("Estado del pedido actualizado correctamente.");
       fetchOrders(); // Refresca la lista de pedidos después de actualizar el estado
