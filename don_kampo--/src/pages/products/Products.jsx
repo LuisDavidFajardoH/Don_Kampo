@@ -26,7 +26,7 @@ const Products = () => {
     useEffect(() => {
       const fetchProducts = async () => {
         try {
-          const response = await axios.get("https://don-kampo-api.onrender.com/api/products", {
+          const response = await axios.get("/api/products", {
             withCredentials: true,
           });
           setProducts(response.data);
