@@ -1,7 +1,6 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
-import mkcert from 'vite-plugin-mkcert';
 
 export default defineConfig({
   plugins: [
@@ -32,10 +31,9 @@ export default defineConfig({
         ],
       },
     }),
-    mkcert(), // Habilita soporte para HTTPS local
   ],
   server: {
-    https: true, // Servidor local con HTTPS
+    https: false, // Servidor sin HTTPS para evitar conflictos
     host: '0.0.0.0', // Permite acceso desde otros dispositivos en la red
     port: 3000, // Puerto del servidor
     proxy: {
@@ -48,5 +46,7 @@ export default defineConfig({
   },
   build: {
     chunkSizeWarningLimit: 1500, // Aumenta el límite de advertencia de tamaño de chunk
+    outDir: 'dist', // Asegura que la salida esté en la carpeta dist
+    sourcemap: true, // Incluye mapas de fuente para depuración en producción
   },
 });
