@@ -16,23 +16,28 @@ const carouselItems = [
     img: "/images/frutas.webp",
     title: "Frutas frescas",
     description: "Compra frutas frescas y de calidad directamente del campo",
+    link: "/products?category=Frutas", // Ruta para este slide
   },
   {
     img: "/images/organicas.webp",
     title: "Verduras orgánicas",
     description: "Verduras cultivadas orgánicamente, perfectas para tu dieta",
+    link: "/products?category=Verduras", // Ruta para este slide
   },
   {
     img: "/images/frutasImportadas.jpg",
     title: "Frutas importadas",
     description: "Frutas importadas de la mejor calidad para tu hogar",
+    link: "/products?category=Frutas", // Ruta para este slide
   },
   {
     img: "/images/slider.jpg",
     title: "Promociones exclusivas",
     description: "Aprovecha las ofertas semanales en nuestros productos",
+    link: "/products", // Ruta para este slide
   },
 ];
+
 
 const categories = [
   { title: "Frutas nacionales", img: "/images/frutasProducto.jpg" },
@@ -66,6 +71,10 @@ const Home = () => {
     carouselRef.current.prev();
   };
 
+  const handleNavigate = (link) => {
+    navigate(link); // Redirige a la ruta especificada
+  };
+
   return (
     <>
       <Navbar />
@@ -81,19 +90,29 @@ const Home = () => {
                   className="carousel-image"
                 />
                 <div className="carousel-overlay">
-                  <Title level={2} className="carousel-title">
-                    {item.title}
-                  </Title>
-                  <Paragraph className="carousel-description">
-                    {item.description}
-                  </Paragraph>
-                  <Button
-                    type="primary"
-                    size="large"
-                    className="carousel-button"
-                  >
-                    Ver más
-                  </Button>
+                  <div className="carousel-left">
+                    <Title level={2} className="carousel-title">
+                      {item.title}
+                    </Title>
+                    <Paragraph className="carousel-description">
+                      {item.description}
+                    </Paragraph>
+                    <Button
+                      type="primary"
+                      size="large"
+                      className="carousel-button"
+                      onClick={() => handleNavigate(item.link)}
+                    >
+                      Ver más
+                    </Button>
+                  </div>
+                  <div className="carousel-right">
+                    <img
+                      src="/images/1.png"
+                      alt="Logo"
+                      className="carousel-logo"
+                    />
+                  </div>
                 </div>
               </div>
             ))}
@@ -159,17 +178,30 @@ const Home = () => {
             </Col>
           </Row>
           <Modal
-            title="Información importante"
+            title={
+              <img src="/images/1.png" alt="Logo" className="modal-logo" />
+            }
             visible={isModalVisible}
             onOk={handleOk}
             onCancel={handleOk}
             okText="Entendido"
             cancelButtonProps={{ style: { display: "none" } }}
+            footer={
+              <Button
+                style={{ marginRight: "35%" }}
+                className="modal-ok-button"
+                onClick={handleOk}
+              >
+                Entendido
+              </Button>
+            }
           >
-            <p>
-              Por el momento, nuestros servicios están disponibles únicamente en
-              Chía y Cajicá. ¡Gracias por tu comprensión!
-            </p>
+            <div className="modal-text">
+              Por el momento, nuestros servicios están disponibles únicamente en{" "}
+              <span className="modal-body-highlight">Chía</span> y{" "}
+              <span className="modal-body-highlight">Cajicá</span>. ¡Gracias por
+              tu comprensión!
+            </div>
           </Modal>
           ;
         </div>

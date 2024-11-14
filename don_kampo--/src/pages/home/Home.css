@@ -21,42 +21,70 @@
 
 .carousel-overlay {
     position: absolute;
-    bottom: 10%; /* Ajustado para mejorar visibilidad en diferentes resoluciones */
-    left: 5%;
+    bottom: 10%;
+    left: 8%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    background-color: rgba(45, 131, 57, 0.5); /* Fondo oscuro con transparencia */
+    padding: 20px 30px;
+    border-radius: 12px;
+    width: 80%; /* Ocupa casi todo el ancho del carrusel */
     color: #fff;
-    text-align: left;
-    background-color: rgba(13, 160, 33, 0.781); /* Fondo oscuro con opacidad */
-    padding: 20px;
-    border-radius: 8px;
-    max-width: 40%;
-    z-index: 2; /* Aseguramos que esté en el frente */
-    
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.carousel-left {
+    flex: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 10px;
 }
 
 .carousel-title {
-    font-size: 2rem;
-    color: #ff914d;
-    margin: 0;
+    font-size: 1.8rem;
     font-weight: bold;
-    z-index: 3;
+    color: #ff914d; /* Color destacado del título */
+    margin: 0;
+    line-height: 1.2;
 }
 
 .carousel-description {
-    font-size: 1.2rem;
-    color: #ffffff;
-    margin-top: 10px;
+    font-size: 1.1rem;
+    color: #fff;
+    margin: 0;
+    line-height: 1.5;
 }
 
+
 .carousel-button {
-    margin-top: 10px;
-    background-color: #00983a;
-    border-color: #00983a;
+    background-color: #ff914d;
+    border-color: #ff914d;
     color: #fff;
+    font-weight: bold;
+    font-size: 1rem;
+    padding: 10px 20px;
+    border-radius: 8px;
+    transition: all 0.3s ease-in-out;
+    max-width: 30%;
 }
 
 .carousel-button:hover {
-    background-color: #ff914d;
-    border-color: #ff914d;
+    background-color: #00983a;
+    border-color: #00983a;
+    transform: scale(1.05); /* Efecto de crecimiento al pasar el mouse */
+}
+.carousel-right {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.9); /* Fondo blanco con opacidad */
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
 .carousel-control {
@@ -115,4 +143,56 @@
 
 .info-section h3 {
     color: #00983a;
+}
+
+.ant-modal-title {
+    font-size: 1.8rem;
+    color: #00983a;
+    font-weight: bold;
+    text-align: center;
+}
+
+.ant-modal-body {
+    text-align: center;
+    padding: 20px 40px;
+}
+
+.modal-logo {
+    display: block;
+    margin: 0 auto 20px auto;
+    width: 100px;
+    height: auto;
+}
+
+.modal-text {
+    font-size: 1.2rem;
+    color: #666;
+    margin-bottom: 20px;
+    line-height: 1.6;
+}
+
+.modal-ok-button {
+    background-color: #00983a;
+    border-color: #00983a;
+    color: #fff;
+    font-size: 1.1rem;
+    padding: 10px 20px;
+    border-radius: 5px;
+    margin-top: 15px;
+}
+
+.modal-ok-button:hover {
+    background-color: #ff914d;
+    border-color: #ff914d;
+}
+
+.modal-body-highlight {
+    font-weight: bold;
+    color: #00983a;
+}
+.carousel-logo {
+    width: 300px;
+    height: auto;
+    margin-bottom: 15px;
+    display: inline-block;
 }
