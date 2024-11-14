@@ -22,7 +22,7 @@ const ManageProducts = () => {
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      const response = await axios.get("http://localhost:8080/api/products");
+      const response = await axios.get("/api/products");
       setProducts(response.data);
       message.success("Productos cargados correctamente.");
     } catch (error) {
@@ -35,7 +35,7 @@ const ManageProducts = () => {
 
   const deleteProduct = async (productId) => {
     try {
-      await axios.delete(`http://localhost:8080/api/deleteproduct/${productId}`);
+      await axios.delete(`/api/deleteproduct/${productId}`);
       message.success("Producto eliminado correctamente.");
       fetchProducts(); // Actualiza la lista después de eliminar
     } catch (error) {
@@ -52,7 +52,7 @@ const ManageProducts = () => {
 
   const handleUpdateProduct = async (values) => {
     try {
-      await axios.put(`http://localhost:8080/api/updateproduct/${selectedProduct.product_id}`, values);
+      await axios.put(`/api/updateproduct/${selectedProduct.product_id}`, values);
       message.success("Producto actualizado correctamente.");
       setIsModalVisible(false);
       fetchProducts(); // Refresca la lista después de la actualización
