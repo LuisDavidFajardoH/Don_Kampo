@@ -1,15 +1,14 @@
+/* Importa Delius-Regular desde Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Delius&display=swap');
+
 /* Importa Montserrat desde Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
-
-/* Importa Quicksand desde Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;600;700&display=swap');
-
-
-
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap');
 
 :root {
-  --font-family-primary: 'Montserrat', sans-serif;
-  --font-family-primary: 'Quicksand', sans-serif;
+  /* Asigna Delius-regular como la fuente principal */
+  --font-family-primary: 'Delius', sans-serif;
+  /* Asigna Montserrat como la fuente secundaria */
+  --font-family-secondary: 'Montserrat', sans-serif;
 }
 
 /* Aplica las variables de fuente */

@@ -1,6 +1,7 @@
 .home-container {
-    padding: 20px;
-    background-color: #f9f9f9;
+  padding: 20px;
+  background: linear-gradient(to bottom right, #20ff02, rgb(255, 255, 255), #20ff02);
+ 
 }
 
 .carousel-wrapper {
@@ -49,6 +50,7 @@
     color: #ff914d; /* Color destacado del título */
     margin: 0;
     line-height: 1.2;
+    color: #ffffff;
 }
 
 .carousel-description {
@@ -62,7 +64,7 @@
 .carousel-button {
     background-color: #ff914d;
     border-color: #ff914d;
-    color: #fff;
+    color: #ffffff;
     font-weight: bold;
     font-size: 1rem;
     padding: 10px 20px;
@@ -195,6 +197,9 @@
     height: auto;
     margin-bottom: 15px;
     display: inline-block;
+}
+.ant-card-meta-title{
+    color: #00983a;
 }
 
 /* Pantallas pequeñas (teléfonos) */
