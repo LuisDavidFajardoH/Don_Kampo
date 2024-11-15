@@ -23,7 +23,7 @@ const Login = () => {
     setLoading(true);
     try {
       const response = await axios.post(
-        "/api/login",
+        "https://don-kampo-api.onrender.com/api/login",
         { email, user_password },
         { withCredentials: true }
       );
@@ -49,7 +49,7 @@ const Login = () => {
 
     setForgotPasswordLoading(true);
     try {
-      const response = await axios.post("/api/request-password-reset", {
+      const response = await axios.post("https://don-kampo-api.onrender.com/api/request-password-reset", {
         email
       });
       message.success(response.data.message || 'Solicitud enviada. Por favor revisa tu correo electrónico.');
@@ -69,7 +69,7 @@ const Login = () => {
     }
 
     try {
-      const response = await axios.post("/api/verify-code-and-reset-password", {
+      const response = await axios.post("https://don-kampo-api.onrender.com/api/verify-code-and-reset-password", {
         email,
         code,
         newPassword
