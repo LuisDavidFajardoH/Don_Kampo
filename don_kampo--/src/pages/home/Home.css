@@ -3,6 +3,9 @@
   background: linear-gradient(to bottom right, #20ff02, rgb(255, 255, 255), #20ff02);
  
 }
+.Boton_mas{
+  background-color: #00983a;
+}
 
 .carousel-wrapper {
     position: relative;
@@ -326,3 +329,11 @@
     }
   }
   
+  :where(.css-dev-only-do-not-override-49qm).ant-card .ant-card-meta-title {
+    color: #00983a ;
+
+    font-size: 16px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }

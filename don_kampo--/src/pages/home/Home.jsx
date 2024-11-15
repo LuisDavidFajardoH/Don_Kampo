@@ -91,10 +91,10 @@ const Home = () => {
                 />
                 <div className="carousel-overlay">
                   <div className="carousel-left">
-                    <Title level={2} className="carousel-title">
+                    <Title level={2} className=" carousel-title" style={{color:"white"}}>
                       {item.title}
                     </Title>
-                    <Paragraph className="carousel-description">
+                    <Paragraph className="carousel-description" >
                       {item.description}
                     </Paragraph>
                     <Button
@@ -131,17 +131,18 @@ const Home = () => {
 
         {/* Categorías destacadas */}
         <div className="categories-section">
-          <Title level={3}>Explora nuestras categorías</Title>
-          <Row gutter={16}>
+          <Title  style={{color: "#00983a" }} level={3}>Explora nuestras categorías</Title>
+          <Row gutter={16} style={{color: "#00983a" }}>
             {categories.map((category, index) => (
-              <Col key={index} xs={24} sm={12} md={6}>
+              <Col key={index} xs={24} sm={12} md={6} style={{color: "#00983a" }}>
                 <Card
                   hoverable
+                  style={{color: "#00983a" }}
                   cover={<img alt={category.title} src={category.img} />}
                   className="category-card"
                   onClick={() => handleCategoryClick(category.title)} // Redirigir al hacer clic
                 >
-                  <Card.Meta title={category.title} />
+                  <Card.Meta   style={{color: "#00983a" }}title={category.title} />
                 </Card>
               </Col>
             ))}
@@ -165,7 +166,7 @@ const Home = () => {
                 auténtico del campo estén siempre al alcance de quienes valoran
                 una alimentación natural y consciente.
               </Paragraph>
-              <Button type="primary" size="large">
+              <Button type="primary" size="large" className="Boton_mas">
                 Conoce más sobre nosotros
               </Button>
             </Col>
