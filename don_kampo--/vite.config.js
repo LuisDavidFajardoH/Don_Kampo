@@ -6,25 +6,25 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
-      registerType: 'autoUpdate', // Actualización automática del SW
+      registerType: 'autoUpdate',
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg}'], // Archivos a precachear
-        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // Límite de tamaño 5 MB
-        globIgnores: ['assets/index-DUDElYX9.js', 'images/33.png'], // Archivos grandes excluidos
+        globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
+        globIgnores: ['assets/index-DUDElYX9.js', 'images/33.png'],
       },
       manifest: {
-        name: 'Don Kampo', // Nombre completo de la app
-        short_name: 'DK', // Nombre corto para pantallas pequeñas
-        description: 'Bienvenido a Don Kampo', // Descripción breve
-        theme_color: '#ffffff', // Color de tema de la aplicación
+        name: 'Don Kampo',
+        short_name: 'DK',
+        description: 'Bienvenido a Don Kampo',
+        theme_color: '#ffffff',
         icons: [
           {
-            src: 'images/icon.png', // Ícono de 192x192
+            src: 'images/icon.png',
             sizes: '192x192',
             type: 'image/png',
           },
           {
-            src: 'images/icon.png', // Ícono de 512x512
+            src: 'images/icon.png',
             sizes: '512x512',
             type: 'image/png',
           },
@@ -33,20 +33,20 @@ export default defineConfig({
     }),
   ],
   server: {
-    https: false, // Servidor sin HTTPS para evitar conflictos
-    host: '0.0.0.0', // Permite acceso desde otros dispositivos en la red
-    port: 3000, // Puerto del servidor
+    https: false, // Si deseas habilitar HTTPS localmente también
+    host: '0.0.0.0',
+    port: 3000,
     proxy: {
       '/api': {
-        target: 'https://don-kampo-api.onrender.com', // Redirige las solicitudes al backend
+        target: 'https://don-kampo-api.onrender.com', // URL de tu backend con HTTPS
         changeOrigin: true, // Cambia el origen del host al backend
-        secure: false, // Permite conexiones no seguras al backend
+        secure: true, // Ahora la conexión con el backend usa HTTPS
       },
     },
   },
   build: {
-    chunkSizeWarningLimit: 1500, // Aumenta el límite de advertencia de tamaño de chunk
-    outDir: 'dist', // Asegura que la salida esté en la carpeta dist
-    sourcemap: true, // Incluye mapas de fuente para depuración en producción
+    chunkSizeWarningLimit: 1500,
+    outDir: 'dist',
+    sourcemap: true,
   },
 });
