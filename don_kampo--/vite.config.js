@@ -9,7 +9,7 @@ export default defineConfig({
       registerType: 'autoUpdate',
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
-        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // Limitar el tamaño de los archivos a cachear a 5 MB
         globIgnores: ['assets/index-DUDElYX9.js', 'images/33.png'],
       },
       manifest: {
@@ -33,20 +33,20 @@ export default defineConfig({
     }),
   ],
   server: {
-    https: false, // Si deseas habilitar HTTPS localmente también
-    host: '0.0.0.0',
-    port: 3000,
+    https: true, // Se habilita HTTPS para el servidor de desarrollo
+    host: '0.0.0.0', // Permite acceso desde otros dispositivos en la red
+    port: 3000, // Puerto del servidor
     proxy: {
       '/api': {
         target: 'https://don-kampo-api.onrender.com', // URL de tu backend con HTTPS
         changeOrigin: true, // Cambia el origen del host al backend
-        secure: true, // Ahora la conexión con el backend usa HTTPS
+        secure: true, // Asegura que la conexión al backend se realice con HTTPS
       },
     },
   },
   build: {
-    chunkSizeWarningLimit: 1500,
-    outDir: 'dist',
-    sourcemap: true,
+    chunkSizeWarningLimit: 1500, // Aumenta el límite del tamaño de chunk a 1500 KB
+    outDir: 'dist', // Asegura que la salida se realice en la carpeta dist
+    sourcemap: true, // Incluye mapas de fuente para depuración en producción
   },
 });
