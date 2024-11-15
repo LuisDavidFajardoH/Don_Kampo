@@ -6,7 +6,7 @@
 
 :root {
   /* Asigna Delius-regular como la fuente principal */
-  --font-family-primary: 'Delius', sans-serif;
+  --font-family-primary: 'Delius';
   /* Asigna Montserrat como la fuente secundaria */
   --font-family-secondary: 'Montserrat', sans-serif;
 }
