@@ -1,20 +1,20 @@
-import React, { useState } from 'react';
-import { Form, Input, Button, Modal, message } from 'antd';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
-import CustomFooter from '../../components/footer/Footer';
-import BotonWhatsapp from '../../components/botonWhatsapp/BotonWhatsapp';
-import './Login.css';
-import Navbar from '../../components/navbar/Navbar';
+import React, { useState } from "react";
+import { Form, Input, Button, Modal, message } from "antd";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import CustomFooter from "../../components/footer/Footer";
+import BotonWhatsapp from "../../components/botonWhatsapp/BotonWhatsapp";
+import "./Login.css";
+import Navbar from "../../components/navbar/Navbar";
 
 const Login = () => {
   const [loading, setLoading] = useState(false);
   const [forgotPasswordLoading, setForgotPasswordLoading] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isResetModalVisible, setIsResetModalVisible] = useState(false);
-  const [email, setEmail] = useState('');
-  const [code, setCode] = useState('');
-  const [newPassword, setNewPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [code, setCode] = useState("");
+  const [newPassword, setNewPassword] = useState("");
   const navigate = useNavigate();
 
   const onFinish = async (values) => {
@@ -25,12 +25,14 @@ const Login = () => {
       const response = await axios.post(
         "https://don-kampo-api.onrender.com/api/login",
         { email, user_password },
-        { withCredentials: true }
+        { withCredentials: true } // Permite enviar cookies si el backend lo requiere
       );
-
+    
+      // Guarda los datos de inicio de sesión en localStorage
       localStorage.setItem("loginData", JSON.stringify(response.data));
       message.success(response.data.message);
-
+    
+      // Redirige al usuario
       const redirectTo = localStorage.getItem("redirectTo") || "/";
       navigate(redirectTo, { replace: true });
       localStorage.removeItem("redirectTo");
@@ -39,24 +41,41 @@ const Login = () => {
     } finally {
       setLoading(false);
     }
+    
   };
 
   const handleForgotPassword = async () => {
     if (!email) {
-      message.warning('Por favor ingresa tu correo electrónico.');
+      message.warning("Por favor ingresa tu correo electrónico.");
       return;
     }
 
     setForgotPasswordLoading(true);
     try {
-      const response = await axios.post("https://don-kampo-api.onrender.com/api/request-password-reset", {
-        email
-      });
-      message.success(response.data.message || 'Solicitud enviada. Por favor revisa tu correo electrónico.');
+      const response = await axios.post(
+        "https://don-kampo-api.onrender.com/api/request-password-reset",
+        {
+          email,
+        },
+        {
+          withCredentials: true, // Incluye cookies si el backend requiere autenticación
+          headers: {
+            "Content-Type": "application/json", // Asegúrate de que coincida con lo esperado en el backend
+          },
+        }
+        
+      );
+      message.success(
+        response.data.message ||
+          "Solicitud enviada. Por favor revisa tu correo electrónico."
+      );
       setIsModalVisible(false);
       setIsResetModalVisible(true);
     } catch (error) {
-      message.error(error.response?.data?.message || 'Ocurrió un error al solicitar el restablecimiento de contraseña.');
+      message.error(
+        error.response?.data?.message ||
+          "Ocurrió un error al solicitar el restablecimiento de contraseña."
+      );
     } finally {
       setForgotPasswordLoading(false);
     }
@@ -64,20 +83,34 @@ const Login = () => {
 
   const handleResetPassword = async () => {
     if (!code || !newPassword) {
-      message.warning('Por favor ingresa el código y la nueva contraseña.');
+      message.warning("Por favor ingresa el código y la nueva contraseña.");
       return;
     }
 
     try {
-      const response = await axios.post("https://don-kampo-api.onrender.com/api/verify-code-and-reset-password", {
-        email,
-        code,
-        newPassword
-      });
-      message.success(response.data.message || 'Contraseña restablecida exitosamente.');
+      const response = await axios.post(
+        "https://don-kampo-api.onrender.com/api/verify-code-and-reset-password",
+        {
+          email,
+          code,
+          newPassword,
+        },
+        {
+          withCredentials: true, // Incluye cookies si el backend requiere autenticación
+          headers: {
+            "Content-Type": "application/json", // Asegúrate de que coincida con lo esperado en el backend
+          },
+        }
+      );
+      message.success(
+        response.data.message || "Contraseña restablecida exitosamente."
+      );
       setIsResetModalVisible(false);
     } catch (error) {
-      message.error(error.response?.data?.message || 'Ocurrió un error al restablecer la contraseña.');
+      message.error(
+        error.response?.data?.message ||
+          "Ocurrió un error al restablecer la contraseña."
+      );
     }
   };
 
@@ -86,22 +119,27 @@ const Login = () => {
       <Navbar />
       <div className="login-container">
         <h2>Inicio de Sesión</h2>
-        <Form
-          name="login_form"
-          onFinish={onFinish}
-          layout="vertical"
-        >
+        <Form name="login_form" onFinish={onFinish} layout="vertical">
           <Form.Item
             label="Correo Electrónico"
             name="email"
-            rules={[{ required: true, message: 'Por favor ingresa tu correo electrónico' }]}>
+            rules={[
+              {
+                required: true,
+                message: "Por favor ingresa tu correo electrónico",
+              },
+            ]}
+          >
             <Input type="email" placeholder="Correo Electrónico" />
           </Form.Item>
 
           <Form.Item
             label="Contraseña"
             name="user_password"
-            rules={[{ required: true, message: 'Por favor ingresa tu contraseña' }]}>
+            rules={[
+              { required: true, message: "Por favor ingresa tu contraseña" },
+            ]}
+          >
             <Input.Password placeholder="Contraseña" />
           </Form.Item>
 
@@ -112,7 +150,8 @@ const Login = () => {
           </Form.Item>
           <div
             className="forgot-password"
-            onClick={() => setIsModalVisible(true)}>
+            onClick={() => setIsModalVisible(true)}
+          >
             Olvidé mi contraseña
           </div>
         </Form>
@@ -122,14 +161,19 @@ const Login = () => {
         title="Recuperar Contraseña"
         visible={isModalVisible}
         onCancel={() => setIsModalVisible(false)}
-        footer={null}>
-        <Form
-          onFinish={handleForgotPassword}
-          layout="vertical">
+        footer={null}
+      >
+        <Form onFinish={handleForgotPassword} layout="vertical">
           <Form.Item
             label="Correo Electrónico"
             name="email"
-            rules={[{ required: true, message: 'Por favor ingresa tu correo electrónico' }]}>
+            rules={[
+              {
+                required: true,
+                message: "Por favor ingresa tu correo electrónico",
+              },
+            ]}
+          >
             <Input
               type="email"
               placeholder="Correo Electrónico"
@@ -138,7 +182,12 @@ const Login = () => {
             />
           </Form.Item>
           <Form.Item>
-            <Button type="primary" htmlType="submit" loading={forgotPasswordLoading} block>
+            <Button
+              type="primary"
+              htmlType="submit"
+              loading={forgotPasswordLoading}
+              block
+            >
               Enviar Solicitud
             </Button>
           </Form.Item>
@@ -149,14 +198,19 @@ const Login = () => {
         title="Restablecer Contraseña"
         visible={isResetModalVisible}
         onCancel={() => setIsResetModalVisible(false)}
-        footer={null}>
-        <Form
-          onFinish={handleResetPassword}
-          layout="vertical">
+        footer={null}
+      >
+        <Form onFinish={handleResetPassword} layout="vertical">
           <Form.Item
             label="Código de Verificación"
             name="code"
-            rules={[{ required: true, message: 'Por favor ingresa el código enviado a tu correo' }]}>
+            rules={[
+              {
+                required: true,
+                message: "Por favor ingresa el código enviado a tu correo",
+              },
+            ]}
+          >
             <Input
               placeholder="Código de Verificación"
               value={code}
@@ -166,7 +220,13 @@ const Login = () => {
           <Form.Item
             label="Nueva Contraseña"
             name="newPassword"
-            rules={[{ required: true, message: 'Por favor ingresa tu nueva contraseña' }]}>
+            rules={[
+              {
+                required: true,
+                message: "Por favor ingresa tu nueva contraseña",
+              },
+            ]}
+          >
             <Input.Password
               placeholder="Nueva Contraseña"
               value={newPassword}
