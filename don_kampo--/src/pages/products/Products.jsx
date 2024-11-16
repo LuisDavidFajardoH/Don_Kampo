@@ -23,45 +23,47 @@ const Products = () => {
   const userType = JSON.parse(localStorage.getItem("loginData"))?.user
     ?.user_type;
 
-    useEffect(() => {
-      const fetchProducts = async () => {
-        try {
-          const response = await axios.get("https://don-kampo-api.onrender.com/api/products", {
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await axios.get(
+          "https://don-kampo-api.onrender.com/api/products",
+          {
             withCredentials: true,
-          });
-          setProducts(response.data);
-          setFilteredProducts(response.data);
-    
-          const uniqueCategories = [
-            "Todas",
-            "Frutas importadas",
-            "Verdura",
-            "Frutas nacionales",
-            "Hortalizas",
-            "Cosecha",
-            "Otros",
-          ];
-          setCategories(uniqueCategories);
-    
-          const params = new URLSearchParams(location.search);
-          const initialCategory = params.get("category");
-    
-          // Aplica el filtro inicial solo si la categoría es válida
-          if (initialCategory) {
-            setSelectedCategory(initialCategory);
-            filterProducts(initialCategory, searchQuery, response.data); // Pasa los productos cargados directamente
           }
-        } catch (error) {
-          message.error("Error al cargar los productos.");
-          console.error("Error:", error);
-        } finally {
-          setLoading(false);
+        );
+        setProducts(response.data);
+        setFilteredProducts(response.data);
+
+        const uniqueCategories = [
+          "Todas",
+          "Frutas importadas",
+          "Verdura",
+          "Frutas nacionales",
+          "Hortalizas",
+          "Cosecha",
+          "Otros",
+        ];
+        setCategories(uniqueCategories);
+
+        const params = new URLSearchParams(location.search);
+        const initialCategory = params.get("category");
+
+        // Aplica el filtro inicial solo si la categoría es válida
+        if (initialCategory) {
+          setSelectedCategory(initialCategory);
+          filterProducts(initialCategory, searchQuery, response.data); // Pasa los productos cargados directamente
         }
-      };
-    
-      fetchProducts();
-    }, []);
-    
+      } catch (error) {
+        message.error("Error al cargar los productos.");
+        console.error("Error:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
 
   const handleCategoryChange = (value) => {
     setSelectedCategory(value);
@@ -96,9 +98,6 @@ const Products = () => {
   useEffect(() => {
     filterProducts(selectedCategory, searchQuery);
   }, [selectedCategory, searchQuery]);
-  
-
-  
 
   const getBase64Image = (photo) => {
     if (photo && photo.data) {
@@ -172,7 +171,11 @@ const Products = () => {
                 <p className="product-category">{product.category}</p>
                 <h3 className="product-name">{product.name}</h3>
                 <p className="product-price">
-                  ${parseFloat(getPriceByUserType(product)).toLocaleString()}
+                  {userType
+                    ? `$${parseFloat(
+                        getPriceByUserType(product)
+                      ).toLocaleString()}`
+                    : "Precio no disponible, por favor inicia sesión."}
                 </p>
                 {cart[product.product_id] ? (
                   <div className="quantity-controls">

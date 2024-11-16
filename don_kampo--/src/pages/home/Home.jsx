@@ -1,6 +1,6 @@
 import React, { useRef } from "react";
 import { useState, useEffect } from "react";
-import { Carousel, Button, Card, Typography, Row, Col, Modal } from "antd";
+import { Carousel, Button, Card, Typography, Modal } from "antd";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../components/navbar/Navbar";
@@ -11,44 +11,79 @@ import "./Home.css";
 
 const { Title, Paragraph } = Typography;
 
-const carouselItems = [
+const defaultCarouselItems = [
   {
-    img: "/images/frutas.webp",
-    title: "Frutas frescas",
-    description: "Compra frutas frescas y de calidad directamente del campo",
-    link: "/products?category=Frutas", // Ruta para este slide
-  },
-  {
-    img: "/images/organicas.webp",
-    title: "Verduras orgánicas",
-    description: "Verduras cultivadas orgánicamente, perfectas para tu dieta",
-    link: "/products?category=Verduras", // Ruta para este slide
-  },
-  {
-    img: "/images/frutasImportadas.jpg",
-    title: "Frutas importadas",
-    description: "Frutas importadas de la mejor calidad para tu hogar",
-    link: "/products?category=Frutas", // Ruta para este slide
-  },
-  {
-    img: "/images/slider.jpg",
-    title: "Promociones exclusivas",
-    description: "Aprovecha las ofertas semanales en nuestros productos",
-    link: "/products", // Ruta para este slide
+    img: "/images/default1.webp",
+    title: "Bienvenidos",
+    description: "Explora nuestros productos de calidad",
+    link: "/products",
   },
 ];
 
-
-const categories = [
-  { title: "Frutas nacionales", img: "/images/frutasProducto.jpg" },
-  { title: "Verduras", img: "/images/verdurasProducto.jpg" },
-  { title: "Frutas importadas", img: "/images/frutasImportadas.jpg" },
-  { title: "Hortalizas", img: "/images/slider.jpg" },
-];
+const userTypeCarouselItems = {
+  Fruver: [
+    {
+      img: "/images/frutasImportadas.jpg",
+      title: "Frutas Frescas",
+      description: "Lo mejor para tu fruver",
+      link: "/products?category=Frutas",
+    },
+    {
+      img: "/images/organicas.webp",
+      title: "Verduras Orgánicas",
+      description: "Cultivadas con amor",
+      link: "/products?category=Verduras",
+    },
+  ],
+  Hogar: [
+    {
+      img: "/images/leche.webp",
+      title: "Calidad para tu hogar",
+      description: "Frutas y verduras seleccionadas",
+      link: "/products?category=Frutas",
+    },
+    {
+      img: "/images/slider.jpg",
+      title: "Todo lo que necesitas",
+      description: "Directamente a tu mesa",
+      link: "/products",
+    },
+  ],
+  Restaurante: [
+    {
+      img: "/images/leche.webp",
+      title: "Provisión para restaurantes",
+      description: "Suministros frescos y en cantidad",
+      link: "/products",
+    },
+    {
+      img: "/images/slider.jpg",
+      title: "Calidad Garantizada",
+      description: "Los mejores productos para tus clientes",
+      link: "/products",
+    },
+  ],
+  Supermercado: [
+    {
+      img: "/images/verdurasProducto.jpg",
+      title: "Abastecimiento total",
+      description: "Productos frescos y de calidad",
+      link: "/products",
+    },
+    {
+      img: "/images/calidad.webp",
+      title: "Ofertas exclusivas",
+      description: "Suministros para supermercados",
+      link: "/products",
+    },
+  ],
+};
 
 const Home = () => {
   const carouselRef = useRef(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [userType, setUserType] = useState(null); // Estado para rastrear el tipo de usuario seleccionado
+  const [carouselItems, setCarouselItems] = useState(defaultCarouselItems); // Items del carrusel dinámico
   const navigate = useNavigate();
 
   const handleCategoryClick = (category) => {
@@ -60,7 +95,15 @@ const Home = () => {
   }, []);
 
   const handleOk = () => {
-    setIsModalVisible(false); // Cierra el modal al hacer clic en "Ok"
+    if (userType) {
+      setIsModalVisible(false); // Cierra el modal si hay una selección
+      setCarouselItems(userTypeCarouselItems[userType]); // Actualiza los items del carrusel según el usuario
+      console.log(`Tipo de usuario seleccionado: ${userType}`);
+    }
+  };
+
+  const handleUserTypeChange = (type) => {
+    setUserType(type); // Actualiza el estado con el tipo seleccionado
   };
 
   const handleNext = () => {
@@ -91,10 +134,14 @@ const Home = () => {
                 />
                 <div className="carousel-overlay">
                   <div className="carousel-left">
-                    <Title level={2} className=" carousel-title" style={{color:"white"}}>
+                    <Title
+                      level={2}
+                      className="carousel-title"
+                      style={{ color: "white" }}
+                    >
                       {item.title}
                     </Title>
-                    <Paragraph className="carousel-description" >
+                    <Paragraph className="carousel-description">
                       {item.description}
                     </Paragraph>
                     <Button
@@ -129,87 +176,54 @@ const Home = () => {
           />
         </div>
 
-        {/* Categorías destacadas */}
-        <div className="categories-section">
-          <Title  style={{color: "#00983a" }} level={3}>Explora nuestras categorías</Title>
-          <Row gutter={16} style={{color: "#00983a" }}>
-            {categories.map((category, index) => (
-              <Col key={index} xs={24} sm={12} md={6} style={{color: "#00983a" }}>
-                <Card
-                  hoverable
-                  style={{color: "#00983a" }}
-                  cover={<img alt={category.title} src={category.img} />}
-                  className="category-card"
-                  onClick={() => handleCategoryClick(category.title)} // Redirigir al hacer clic
+        {/* Modal con selección de tipo de usuario */}
+        <Modal
+          title={
+            <img src="/images/1.png" alt="Logo" className="modal-logo" />
+          }
+          visible={isModalVisible}
+          onOk={handleOk}
+          onCancel={handleOk}
+          okText="Entendido"
+          cancelButtonProps={{ style: { display: "none" } }}
+          footer={
+            <Button
+              style={{ marginRight: "35%" }}
+              className="modal-ok-button"
+              onClick={handleOk}
+              disabled={!userType} // Deshabilita si no se selecciona un tipo
+            >
+              Entendido
+            </Button>
+          }
+        >
+          <div className="modal-text">
+            Por el momento, nuestros servicios están disponibles únicamente en{" "}
+            <span className="modal-body-highlight">Chía</span> y{" "}
+            <span className="modal-body-highlight">Cajicá</span>. ¡Gracias por
+            tu comprensión!
+          </div>
+          <div className="user-type-selection">
+            <Title level={5}>Selecciona tu tipo de usuario:</Title>
+            <div className="user-type-options">
+              {Object.keys(userTypeCarouselItems).map((type) => (
+                <Button
+                  key={type}
+                  type={userType === type ? "primary" : "default"} // Resalta el seleccionado
+                  onClick={() => handleUserTypeChange(type)}
+                  className="user-type-button"
+                  style={{ gap: 40 }}
                 >
-                  <Card.Meta   style={{color: "#00983a" }}title={category.title} />
-                </Card>
-              </Col>
-            ))}
-          </Row>
-        </div>
-
-        {/* Testimonios o sección de información */}
-        <div className="info-section">
-          <Row gutter={32} align="middle">
-            <Col xs={24} md={12}>
-              <Title level={3}>Calidad garantizada</Title>
-              <Paragraph>
-                En Don Kampo, nuestra pasión es brindar productos frescos y de
-                calidad excepcional, cultivados con dedicación y respeto por la
-                tierra. Nos enorgullece llevar lo mejor del campo directamente a
-                tu mesa, promoviendo un consumo responsable y sostenible que
-                apoya a nuestros agricultores y cuida del medio ambiente. Con un
-                compromiso firme hacia la excelencia, entregamos nuestros
-                productos con esmero a hogares, fruver, supermercados y
-                restaurantes, asegurándonos de que la frescura y el sabor
-                auténtico del campo estén siempre al alcance de quienes valoran
-                una alimentación natural y consciente.
-              </Paragraph>
-              <Button type="primary" size="large" className="Boton_mas">
-                Conoce más sobre nosotros
-              </Button>
-            </Col>
-            <Col xs={24} md={12}>
-              <img
-                src="/images/calidad.webp"
-                alt="Calidad Don Kampo"
-                className="info-image"
-              />
-            </Col>
-          </Row>
-          <Modal
-            title={
-              <img src="/images/1.png" alt="Logo" className="modal-logo" />
-            }
-            visible={isModalVisible}
-            onOk={handleOk}
-            onCancel={handleOk}
-            okText="Entendido"
-            cancelButtonProps={{ style: { display: "none" } }}
-            footer={
-              <Button
-                style={{ marginRight: "35%" }}
-                className="modal-ok-button"
-                onClick={handleOk}
-              >
-                Entendido
-              </Button>
-            }
-          >
-            <div className="modal-text">
-              Por el momento, nuestros servicios están disponibles únicamente en{" "}
-              <span className="modal-body-highlight">Chía</span> y{" "}
-              <span className="modal-body-highlight">Cajicá</span>. ¡Gracias por
-              tu comprensión!
+                  {type}
+                </Button>
+              ))}
             </div>
-          </Modal>
-          ;
-        </div>
-        <InstallPrompt />
+          </div>
+        </Modal>
       </div>
       <BotonWhatsapp />
       <CustomFooter />
+      <InstallPrompt />
     </>
   );
 };

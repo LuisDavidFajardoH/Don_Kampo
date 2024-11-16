@@ -10,6 +10,71 @@
 .carousel-wrapper {
     position: relative;
 }
+/* Estilo para el modal */
+.modal-logo {
+  display: block;
+  margin: 0 auto;
+  max-width: 150px;
+  margin-bottom: 15px;
+}
+
+.modal-text {
+  text-align: center;
+  font-size: 16px;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.modal-body-highlight {
+  font-weight: bold;
+  color: #00983a; /* Color verde de la marca */
+}
+
+.user-type-selection {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.user-type-options {
+  display: flex;
+  justify-content: center;
+  gap: 20px; /* Espacio horizontal entre botones */
+  flex-wrap: wrap; /* Ajusta los botones en líneas si es necesario */
+}
+
+.user-type-button {
+  
+  padding: 10px 15px;
+  font-size: 14px;
+  border-radius: 5px;
+  transition: all 0.3s ease;
+  margin: 5px; /* Espacio alrededor de cada botón */
+}
+
+.user-type-button:hover {
+  background-color: #e6f7e6; /* Color suave al pasar el mouse */
+  color: #00983a; /* Texto verde al hacer hover */
+}
+
+.modal-ok-button {
+  background-color: #00983a;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  font-size: 16px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.modal-ok-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.modal-ok-button:hover:enabled {
+  background-color: #00792e; /* Un verde más oscuro cuando está habilitado */
+}
+
 
 .carousel-item {
     position: relative;
