@@ -16,12 +16,12 @@ const Products = () => {
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("Todas");
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedVariation, setSelectedVariation] = useState({}); // Para mantener las variaciones seleccionadas
-  const [quantities, setQuantities] = useState({}); // Para manejar la cantidad de cada producto
+  const [selectedVariation, setSelectedVariation] = useState({});
+  const [quantities, setQuantities] = useState({});
+  const [totalPrices, setTotalPrices] = useState({}); // Manejar precios totales por producto
 
-  const { cart, addToCart, removeFromCart } = useCart();
+  const { cart, addToCart, removeFromCart, cartValue, cartCount } = useCart(); // CartContext
 
-  // Obtener el tipo de usuario desde localStorage
   const userType = JSON.parse(localStorage.getItem("loginData"))?.user?.user_type;
 
   useEffect(() => {
@@ -47,10 +47,9 @@ const Products = () => {
         const params = new URLSearchParams(location.search);
         const initialCategory = params.get("category");
 
-        // Aplica el filtro inicial solo si la categoría es válida
         if (initialCategory) {
           setSelectedCategory(initialCategory);
-          filterProducts(initialCategory, searchQuery, response.data); // Pasa los productos cargados directamente
+          filterProducts(initialCategory, searchQuery, response.data);
         }
       } catch (error) {
         message.error("Error al cargar los productos.");
@@ -104,15 +103,14 @@ const Products = () => {
       );
       return `data:image/jpeg;base64,${base64String}`;
     }
-    return "path_to_placeholder_image"; // Cambia este valor si tienes una imagen de placeholder
+    return "path_to_placeholder_image";
   };
 
-  // Función para obtener el precio según el tipo de usuario y la variación seleccionada
   const getPriceByUserType = (product, selectedVariation) => {
     if (!selectedVariation) return 0;
     const { quality, quantity } = selectedVariation;
 
-    if (!quality || !quantity) return 0; // Si no hay variación seleccionada, retorna 0
+    if (!quality || !quantity) return 0;
 
     const selectedProductVariation = product.variations.find(
       (variation) => variation.quality === quality && variation.quantity === quantity
@@ -129,20 +127,30 @@ const Products = () => {
         case "fruver":
           return selectedProductVariation.price_fruver;
         default:
-          return selectedProductVariation.price_home; // Valor por defecto
+          return selectedProductVariation.price_home;
       }
     }
 
     return 0;
   };
 
-  // Lógica para cambiar las cantidades por producto
   const updateQuantity = (productId, increment) => {
     setQuantities((prevQuantities) => {
       const updatedQuantities = { ...prevQuantities };
       const currentQuantity = updatedQuantities[productId] || 0;
-      updatedQuantities[productId] = currentQuantity + increment;
+      updatedQuantities[productId] = Math.max(currentQuantity + increment, 0);
       return updatedQuantities;
+    });
+
+    setTotalPrices((prevTotalPrices) => {
+      const updatedTotalPrices = { ...prevTotalPrices };
+      const product = products.find((p) => p.product_id === productId);
+      const selectedVariationForProduct = selectedVariation[productId];
+      const unitPrice = getPriceByUserType(product, selectedVariationForProduct);
+      const quantity = (quantities[productId] || 0) + increment;
+
+      updatedTotalPrices[productId] = unitPrice * Math.max(quantity, 0);
+      return updatedTotalPrices;
     });
   };
 
@@ -191,7 +199,6 @@ const Products = () => {
                 <h3 className="product-name">{product.name}</h3>
                 <p className="product-description">{product.description}</p>
 
-                {/* Selección de calidad */}
                 <div className="product-variations">
                   <Select
                     placeholder="Selecciona calidad"
@@ -214,7 +221,6 @@ const Products = () => {
                     ))}
                   </Select>
 
-                  {/* Selección de cantidad */}
                   <Select
                     placeholder="Selecciona cantidad"
                     onChange={(value) =>
@@ -237,14 +243,11 @@ const Products = () => {
                   </Select>
                 </div>
 
-                {/* Precio del producto */}
                 <p className="product-price">
-                  {userType
-                    ? `$${parseFloat(getPriceByUserType(product, selectedVariation[product.product_id])).toLocaleString()}`
-                    : "Precio no disponible, por favor inicia sesión."}
+                  Precio total: $
+                  {(totalPrices[product.product_id] || 0).toLocaleString()}
                 </p>
 
-                {/* Contador de cantidad */}
                 <div className="quantity-controls">
                   <Button
                     onClick={() => updateQuantity(product.product_id, -1)}
@@ -264,11 +267,12 @@ const Products = () => {
                   </Button>
                 </div>
 
-                {/* Botón de añadir al carrito */}
                 {quantities[product.product_id] > 0 && (
                   <Button
                     type="primary"
-                    onClick={() => addToCart(product, selectedVariation[product.product_id])}
+                    onClick={() =>
+                      addToCart(product, selectedVariation[product.product_id])
+                    }
                     className="add-to-cart-button"
                   >
                     Añadir al carrito

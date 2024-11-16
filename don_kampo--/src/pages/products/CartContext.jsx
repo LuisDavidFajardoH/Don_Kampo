@@ -16,67 +16,48 @@ export const CartProvider = ({ children }) => {
   }, [cart]);
 
   const getPriceByUserType = (product, selectedVariation) => {
-    if (!selectedVariation) return 0;
+    if (!selectedVariation || !product.variations) return 0;
+
     const { quality, quantity } = selectedVariation;
-  
-    if (!quality || !quantity) return 0; // Si no hay variación seleccionada, retorna 0
-  
     const selectedProductVariation = product.variations.find(
       (variation) => variation.quality === quality && variation.quantity === quantity
     );
-  
+
     if (selectedProductVariation) {
+      const userType =
+        JSON.parse(localStorage.getItem("loginData"))?.user?.user_type || "hogar";
       switch (userType) {
         case "hogar":
-          return selectedProductVariation.price_home;
+          return parseFloat(selectedProductVariation.price_home) || 0;
         case "supermercado":
-          return selectedProductVariation.price_supermarket;
+          return parseFloat(selectedProductVariation.price_supermarket) || 0;
         case "restaurante":
-          return selectedProductVariation.price_restaurant;
+          return parseFloat(selectedProductVariation.price_restaurant) || 0;
         case "fruver":
-          return selectedProductVariation.price_fruver;
+          return parseFloat(selectedProductVariation.price_fruver) || 0;
         default:
-          return selectedProductVariation.price_home; // Valor por defecto
+          return parseFloat(selectedProductVariation.price_home) || 0;
       }
     }
-  
-    return 0; // Si no se encuentra la variación, retornar 0
+
+    return 0;
   };
-  
 
-  // Calcula el valor total del carrito considerando las variaciones
-  const cartValue = Object.values(cart).reduce(
-    (total, item) =>
-      total +
-      (item.quantity * getPriceByUserType(item.product, item.selectedVariation) || 0),
-    0
-  );
-
-  // Función para añadir productos al carrito
   const addToCart = (product, selectedVariation) => {
     setCart((prevCart) => {
       const newCart = { ...prevCart };
       const productId = product.product_id;
-  
-      // Si el producto ya existe en el carrito, actualizamos la cantidad
+
       if (newCart[productId]) {
         newCart[productId].quantity += 1;
       } else {
-        // Si no está en el carrito, lo agrega con la variación seleccionada
         newCart[productId] = { product, quantity: 1, selectedVariation };
       }
-  
+
       return newCart;
     });
   };
-  
 
-  // Función para limpiar el carrito
-  const clearCart = () => {
-    setCart({});
-  };
-
-  // Función para eliminar productos del carrito
   const removeFromCart = (product) => {
     setCart((prevCart) => {
       const newCart = { ...prevCart };
@@ -92,9 +73,19 @@ export const CartProvider = ({ children }) => {
     });
   };
 
-  // Calcula la cantidad total de artículos en el carrito
+  const clearCart = () => {
+    setCart({});
+  };
+
   const cartCount = Object.values(cart).reduce(
     (total, item) => total + (item.quantity || 0),
+    0
+  );
+
+  const cartValue = Object.values(cart).reduce(
+    (total, item) =>
+      total +
+      (item.quantity * getPriceByUserType(item.product, item.selectedVariation) || 0),
     0
   );
 
@@ -105,8 +96,9 @@ export const CartProvider = ({ children }) => {
         addToCart,
         removeFromCart,
         clearCart,
-        cartValue, // Valor total en pesos colombianos
+        getPriceByUserType,
         cartCount,
+        cartValue,
       }}
     >
       {children}
