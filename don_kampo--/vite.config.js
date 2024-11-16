@@ -33,17 +33,17 @@ export default defineConfig({
     }),
   ],
   server: {
-    https: true, // Se habilita HTTPS para el servidor de desarrollo
-    host: '0.0.0.0', // Permite acceso desde otros dispositivos en la red
-    port: 3000, // Puerto del servidor
+    https: false,  // Desactiva HTTPS en desarrollo
+    host: '0.0.0.0',
+    port: 3000,
     proxy: {
       '/api': {
-        target: 'https://don-kampo-api.onrender.com', // URL de tu backend con HTTPS
-        changeOrigin: true, // Cambia el origen del host al backend
-        secure: true, // Asegura que la conexión al backend se realice con HTTPS
+        target: 'http://localhost:8080',  // Usa HTTP en lugar de HTTPS para el backend local
+        changeOrigin: true,
+        secure: false, // Desactiva la verificación de certificado
       },
     },
-  },
+  },  
   build: {
     chunkSizeWarningLimit: 1500, // Aumenta el límite del tamaño de chunk a 1500 KB
     outDir: 'dist', // Asegura que la salida se realice en la carpeta dist

@@ -15,42 +15,61 @@ export const CartProvider = ({ children }) => {
     localStorage.setItem("cart", JSON.stringify(cart));
   }, [cart]);
 
-  // Función para obtener el precio según el tipo de usuario
-  const getPriceByUserType = (product) => {
-    const userType = JSON.parse(localStorage.getItem("loginData"))?.user?.user_type;
-    switch (userType) {
-      case "hogar":
-        return product.price_home;
-      case "supermercado":
-        return product.price_supermarket;
-      case "restaurante":
-        return product.price_restaurant;
-      case "fruver":
-        return product.price_fruver;
-      default:
-        return product.price_home; // Valor por defecto
+  const getPriceByUserType = (product, selectedVariation) => {
+    if (!selectedVariation) return 0;
+    const { quality, quantity } = selectedVariation;
+  
+    if (!quality || !quantity) return 0; // Si no hay variación seleccionada, retorna 0
+  
+    const selectedProductVariation = product.variations.find(
+      (variation) => variation.quality === quality && variation.quantity === quantity
+    );
+  
+    if (selectedProductVariation) {
+      switch (userType) {
+        case "hogar":
+          return selectedProductVariation.price_home;
+        case "supermercado":
+          return selectedProductVariation.price_supermarket;
+        case "restaurante":
+          return selectedProductVariation.price_restaurant;
+        case "fruver":
+          return selectedProductVariation.price_fruver;
+        default:
+          return selectedProductVariation.price_home; // Valor por defecto
+      }
     }
+  
+    return 0; // Si no se encuentra la variación, retornar 0
   };
+  
 
-  // Calcula el valor total del carrito en pesos colombianos
+  // Calcula el valor total del carrito considerando las variaciones
   const cartValue = Object.values(cart).reduce(
     (total, item) =>
-      total + (item.quantity * parseFloat(getPriceByUserType(item)) || 0),
+      total +
+      (item.quantity * getPriceByUserType(item.product, item.selectedVariation) || 0),
     0
   );
 
   // Función para añadir productos al carrito
-  const addToCart = (product) => {
+  const addToCart = (product, selectedVariation) => {
     setCart((prevCart) => {
       const newCart = { ...prevCart };
-      if (newCart[product.product_id]) {
-        newCart[product.product_id].quantity += 1;
+      const productId = product.product_id;
+  
+      // Si el producto ya existe en el carrito, actualizamos la cantidad
+      if (newCart[productId]) {
+        newCart[productId].quantity += 1;
       } else {
-        newCart[product.product_id] = { ...product, quantity: 1 };
+        // Si no está en el carrito, lo agrega con la variación seleccionada
+        newCart[productId] = { product, quantity: 1, selectedVariation };
       }
+  
       return newCart;
     });
   };
+  
 
   // Función para limpiar el carrito
   const clearCart = () => {
@@ -61,11 +80,14 @@ export const CartProvider = ({ children }) => {
   const removeFromCart = (product) => {
     setCart((prevCart) => {
       const newCart = { ...prevCart };
-      if (newCart[product.product_id] && newCart[product.product_id].quantity > 1) {
-        newCart[product.product_id].quantity -= 1;
+      const productId = product.product_id;
+
+      if (newCart[productId] && newCart[productId].quantity > 1) {
+        newCart[productId].quantity -= 1;
       } else {
-        delete newCart[product.product_id];
+        delete newCart[productId];
       }
+
       return newCart;
     });
   };

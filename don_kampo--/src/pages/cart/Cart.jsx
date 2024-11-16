@@ -14,27 +14,25 @@ const Cart = () => {
   const [loading, setLoading] = useState(true);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isFirstOrder, setIsFirstOrder] = useState(false);
-
-  const navigate = useNavigate();
   const [shippingCost, setShippingCost] = useState(5000);
 
-  // Obtener el tipo de usuario desde localStorage
-  const userType = JSON.parse(localStorage.getItem("loginData"))?.user
-    ?.user_type;
+  const navigate = useNavigate();
+
+  const userType = JSON.parse(localStorage.getItem("loginData"))?.user?.user_type;
 
   useEffect(() => {
     const fetchCartDetails = async () => {
       setLoading(true);
 
       try {
-        // Cargar detalles de productos en el carrito
         const productDetails = await Promise.all(
           Object.keys(cart).map(async (product_id) => {
             try {
-              const response = await axios.get(`https://don-kampo-api.onrender.com/api/getproduct/${product_id}`);
+              const response = await axios.get(`http://localhost:8080/api/getproduct/${product_id}`);
               return {
                 ...response.data,
                 quantity: cart[product_id].quantity,
+                selectedVariation: cart[product_id].selectedVariation // Get selected variation
               };
             } catch (error) {
               if (error.response && error.response.status === 404) {
@@ -48,17 +46,14 @@ const Cart = () => {
         );
         setCartDetails(productDetails.filter((item) => item !== null));
 
-        // Verificar si el usuario está autenticado para aplicar descuento
         const loginData = JSON.parse(localStorage.getItem("loginData"));
         if (loginData && loginData.user) {
           const userResponse = await axios.get(
-            `https://don-kampo-api.onrender.com/api/users/${loginData.user.id}`
+            `http://localhost:8080/api/users/${loginData.user.id}`
           );
-          const hasOrders =
-            userResponse.data.orders && userResponse.data.orders.length > 0;
+          const hasOrders = userResponse.data.orders && userResponse.data.orders.length > 0;
           setIsFirstOrder(!hasOrders);
 
-          // Aplica el descuento de envío si es la primera orden
           if (!hasOrders) {
             if (userType === "hogar") {
               setShippingCost(2500); // 50% de descuento en el envío para "hogar"
@@ -78,45 +73,52 @@ const Cart = () => {
     fetchCartDetails();
   }, [cart]);
 
-  // Función para obtener el precio según el tipo de usuario
-  const getPriceByUserType = (product) => {
-    switch (userType) {
-      case "hogar":
-        return parseFloat(product.price_home) || 0;
-      case "supermercado":
-        return parseFloat(product.price_supermarket) || 0;
-      case "restaurante":
-        return parseFloat(product.price_restaurant) || 0;
-      case "fruver":
-        return parseFloat(product.price_fruver) || 0;
-      default:
-        return parseFloat(product.price_home) || 0; // Valor por defecto
+  const getPriceByUserType = (product, selectedVariation) => {
+    const { quality, quantity } = selectedVariation;
+    if (!quality || !quantity) return 0;
+
+    const selectedProductVariation = product.variations.find(
+      (variation) => variation.quality === quality && variation.quantity === quantity
+    );
+
+    if (selectedProductVariation) {
+      switch (userType) {
+        case "hogar":
+          return parseFloat(selectedProductVariation.price_home);
+        case "supermercado":
+          return parseFloat(selectedProductVariation.price_supermarket);
+        case "restaurante":
+          return parseFloat(selectedProductVariation.price_restaurant);
+        case "fruver":
+          return parseFloat(selectedProductVariation.price_fruver);
+        default:
+          return parseFloat(selectedProductVariation.price_home);
+      }
     }
+
+    return 0;
   };
 
-  // Función para convertir el buffer de imagen en una URL base64
   const getBase64Image = (photo) => {
     if (photo && photo.data) {
-      const base64String = btoa(
-        String.fromCharCode(...new Uint8Array(photo.data))
-      );
+      const base64String = btoa(String.fromCharCode(...new Uint8Array(photo.data)));
       return `data:image/jpeg;base64,${base64String}`;
     }
-    return "path_to_placeholder_image"; // Cambia este valor si tienes una imagen de placeholder
+    return "path_to_placeholder_image"; 
   };
 
   const handleRemoveFromCart = (product) => {
     removeFromCart(product);
   };
 
-  const handleAddToCart = (product) => {
-    addToCart(product);
+  const handleAddToCart = (product, selectedVariation) => {
+    addToCart(product, selectedVariation);
   };
 
   const calculateSubtotal = () => {
     return cartDetails.reduce(
       (total, product) =>
-        total + getPriceByUserType(product) * product.quantity,
+        total + getPriceByUserType(product, product.selectedVariation) * product.quantity,
       0
     );
   };
@@ -126,37 +128,30 @@ const Cart = () => {
   const handleCheckout = () => {
     const loginData = JSON.parse(localStorage.getItem("loginData"));
     if (loginData && loginData.user) {
-      navigate("/checkout"); // Navega al componente Checkout si el usuario está autenticado
+      navigate("/checkout");
     } else {
-      // Almacena la ruta actual antes de mostrar el modal
       localStorage.setItem("redirectTo", "/cart");
-      setIsModalVisible(true); // Muestra el modal para iniciar sesión o registrarse
+      setIsModalVisible(true);
     }
   };
-  
+
   const handleLogin = () => {
-    // Guarda la ruta actual antes de redirigir
     localStorage.setItem("redirectTo", "/cart");
     navigate("/login");
   };
-  
+
   const handleRegister = () => {
-    // Guarda la ruta actual antes de redirigir
     localStorage.setItem("redirectTo", "/cart");
     navigate("/register");
   };
 
   const handleModalCancel = () => {
-    setIsModalVisible(false); // Cierra el modal al establecer el estado como falso
+    setIsModalVisible(false);
   };
-  
-  const handleContinueShopping = () => {
-    navigate("/products"); // Redirige al usuario a la página de productos
-  };
-  
-  
 
- 
+  const handleContinueShopping = () => {
+    navigate("/products");
+  };
 
   return (
     <>
@@ -182,25 +177,21 @@ const Cart = () => {
                       <h4 className="product-name">{product.name}</h4>
                       <p className="product-category">{product.category}</p>
                       <p className="product-price">
-                        Precio: ${getPriceByUserType(product).toLocaleString()}
+                        Precio: ${getPriceByUserType(product, product.selectedVariation).toLocaleString()}
                       </p>
                     </div>
 
                     <div className="cart-item-quantity">
-                      <Button onClick={() => handleRemoveFromCart(product)}>
-                        -
-                      </Button>
+                      <Button onClick={() => handleRemoveFromCart(product)}>-</Button>
                       <span>{product.quantity}</span>
-                      <Button onClick={() => handleAddToCart(product)}>
-                        +
-                      </Button>
+                      <Button onClick={() => handleAddToCart(product, product.selectedVariation)}>+</Button>
                     </div>
 
                     <div className="cart-item-subtotal">
                       <p>
                         Subtotal: $
                         {(
-                          getPriceByUserType(product) * product.quantity
+                          getPriceByUserType(product, product.selectedVariation) * product.quantity
                         ).toLocaleString()}
                       </p>
                     </div>

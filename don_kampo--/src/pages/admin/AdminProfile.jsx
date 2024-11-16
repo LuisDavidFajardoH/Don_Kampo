@@ -65,7 +65,7 @@ const AdminProfile = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get("https://don-kampo-api.onrender.com/api/users");
+      const response = await axios.get("http://localhost:8080/api/users");
       setUsers(response.data);
     } catch (error) {
       message.error("Error al cargar los usuarios.");
@@ -75,7 +75,7 @@ const AdminProfile = () => {
 
   const fetchOrders = async () => {
     try {
-      const response = await axios.get("https://don-kampo-api.onrender.com/api/orders");
+      const response = await axios.get("http://localhost:8080/api/orders");
       setOrders(response.data);
       setFilteredOrders(response.data);
     } catch (error) {
@@ -88,7 +88,7 @@ const AdminProfile = () => {
     try {
       // Cambiamos la URL para incluir directamente el id y el nuevo estado
       await axios.put(
-        `https://don-kampo-api.onrender.com/api/updatestatus/${orderId}/${newStatus}`
+        `http://localhost:8080/api/updatestatus/${orderId}/${newStatus}`
       );
       message.success("Estado del pedido actualizado correctamente.");
       fetchOrders(); // Refresca la lista de pedidos después de actualizar el estado
@@ -100,7 +100,7 @@ const AdminProfile = () => {
 
   const deleteOrder = async (orderId) => {
     try {
-      await axios.delete(`https://don-kampo-api.onrender.com/api/deleteorders/${orderId}`);
+      await axios.delete(`http://localhost:8080/api/deleteorders/${orderId}`);
       message.success("Pedido eliminado correctamente.");
       fetchOrders();
     } catch (error) {
@@ -113,7 +113,7 @@ const AdminProfile = () => {
 
   const openUserModal = async (user) => {
     try {
-      const response = await axios.get(`https://don-kampo-api.onrender.com/api/users/${user.id}`);
+      const response = await axios.get(`http://localhost:8080/api/users/${user.id}`);
       setSelectedUser(response.data);
       setIsUserModalVisible(true);
       form.setFieldsValue(response.data.user); // Actualiza los valores del formulario
@@ -131,7 +131,7 @@ const AdminProfile = () => {
 
   const openOrderModal = async (orderId) => {
     try {
-      const response = await axios.get(`https://don-kampo-api.onrender.com/api/orders/${orderId}`);
+      const response = await axios.get(`http://localhost:8080/api/orders/${orderId}`);
       // Actualiza el estado con toda la respuesta (incluyendo order, items y shippingInfo)
       setSelectedOrder(response.data);
       setIsOrderModalVisible(true);
@@ -152,7 +152,7 @@ const AdminProfile = () => {
 
   const updateUserDetails = async (values) => {
     try {
-      await axios.put(`https://don-kampo-api.onrender.com/api/updateusers/${selectedUser.user.id}`, values);
+      await axios.put(`http://localhost:8080/api/updateusers/${selectedUser.user.id}`, values);
       message.success("Usuario actualizado exitosamente.");
       fetchUsers(); // Refresca la lista de usuarios después de actualizar
       setIsUserModalVisible(false);
@@ -171,7 +171,7 @@ const AdminProfile = () => {
   const handleCreateUser = async (values) => {
     setLoading(true);
     try {
-      await axios.post("https://don-kampo-api.onrender.com/api/createusers", {
+      await axios.post("http://localhost:8080/api/createusers", {
         ...values,
         address: " ",
         neighborhood: " ",
@@ -190,7 +190,7 @@ const AdminProfile = () => {
   const renderUserTable = () => {
     const updateUserStatus = async (userId, statusId) => {
       try {
-        await axios.put(`https://don-kampo-api.onrender.com/api/userstatus/${userId}/${statusId}`);
+        await axios.put(`http://localhost:8080/api/userstatus/${userId}/${statusId}`);
         message.success("Estado del usuario actualizado correctamente.");
         fetchUsers(); // Refresca la lista de usuarios después de actualizar
       } catch (error) {
