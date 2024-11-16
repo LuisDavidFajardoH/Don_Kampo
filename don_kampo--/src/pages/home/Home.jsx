@@ -94,10 +94,16 @@ const Home = () => {
     setIsModalVisible(true); // Muestra el modal al cargar la página
   }, []);
 
+  useEffect(() => {
+    // Actualiza los elementos del carrusel al cambiar el tipo de usuario
+    if (userType) {
+      setCarouselItems(userTypeCarouselItems[userType]);
+    }
+  }, [userType]);
+
   const handleOk = () => {
     if (userType) {
       setIsModalVisible(false); // Cierra el modal si hay una selección
-      setCarouselItems(userTypeCarouselItems[userType]); // Actualiza los items del carrusel según el usuario
       console.log(`Tipo de usuario seleccionado: ${userType}`);
     }
   };
