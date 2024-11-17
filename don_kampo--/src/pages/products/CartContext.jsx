@@ -16,26 +16,27 @@ export const CartProvider = ({ children }) => {
   }, [cart]);
 
   // Función para obtener el precio según el tipo de usuario
-  const getPriceByUserType = (product) => {
-    const userType = JSON.parse(localStorage.getItem("loginData"))?.user?.user_type;
+  const getPriceByUserType = (item) => {
+    const userType = JSON.parse(localStorage.getItem("loginData"))?.user
+      ?.user_type;
+    if (!item) return 0; // Si el elemento es indefinido, retornar 0
     switch (userType) {
       case "hogar":
-        return product.price_home;
+        return parseFloat(item.price_home);
       case "supermercado":
-        return product.price_supermarket;
+        return parseFloat(item.price_supermarket);
       case "restaurante":
-        return product.price_restaurant;
+        return parseFloat(item.price_restaurant);
       case "fruver":
-        return product.price_fruver;
+        return parseFloat(item.price_fruver);
       default:
-        return product.price_home; // Valor por defecto
+        return parseFloat(item.price_home);
     }
   };
 
   // Calcula el valor total del carrito en pesos colombianos
   const cartValue = Object.values(cart).reduce(
-    (total, item) =>
-      total + (item.quantity * parseFloat(getPriceByUserType(item)) || 0),
+    (total, item) => total + item.quantity * (item.price || 0),
     0
   );
 
@@ -43,14 +44,30 @@ export const CartProvider = ({ children }) => {
   const addToCart = (product) => {
     setCart((prevCart) => {
       const newCart = { ...prevCart };
+      const selectedVariation = product.selectedVariation;
+
       if (newCart[product.product_id]) {
         newCart[product.product_id].quantity += 1;
       } else {
-        newCart[product.product_id] = { ...product, quantity: 1 };
+        newCart[product.product_id] = {
+          ...product,
+          price: parseFloat(getPriceByUserType(selectedVariation)),
+          quantity: 1,
+          selectedVariation,
+        };
       }
+      console.log("Carrito actualizado:", newCart);
       return newCart;
     });
   };
+
+  useEffect(() => {
+    const cartValue = Object.values(cart).reduce(
+      (total, item) => total + item.quantity * (item.price || 0),
+      0
+    );
+    console.log("Valor total del carrito:", cartValue);
+  }, [cart]);
 
   // Función para limpiar el carrito
   const clearCart = () => {
@@ -61,7 +78,10 @@ export const CartProvider = ({ children }) => {
   const removeFromCart = (product) => {
     setCart((prevCart) => {
       const newCart = { ...prevCart };
-      if (newCart[product.product_id] && newCart[product.product_id].quantity > 1) {
+      if (
+        newCart[product.product_id] &&
+        newCart[product.product_id].quantity > 1
+      ) {
         newCart[product.product_id].quantity -= 1;
       } else {
         delete newCart[product.product_id];

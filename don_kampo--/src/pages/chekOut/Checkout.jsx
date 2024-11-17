@@ -66,12 +66,13 @@ const Checkout = () => {
         const productDetails = await Promise.all(
           Object.keys(cart).map(async (productId) => {
             const response = await axios.get(`/api/getproduct/${productId}`);
+            const selectedVariation =
+              cart[productId].selectedVariation || response.data.variations[0]; // Variación predeterminada
+
             return {
               ...response.data,
               quantity: cart[productId].quantity,
-              selectedVariation:
-                cart[productId].selectedVariation ||
-                response.data.variations[0], // Asegura que haya una variación seleccionada
+              selectedVariation,
             };
           })
         );
@@ -86,39 +87,30 @@ const Checkout = () => {
   }, [cart]);
 
   const getPriceByUserType = (product, selectedVariation) => {
-    if (!selectedVariation || !product.variations) return 0;
-
-    const selectedProductVariation = product.variations.find(
-      (variation) => variation.variation_id === selectedVariation.variation_id
-    );
-
-    if (selectedProductVariation) {
-      switch (userType) {
-        case "hogar":
-          return parseFloat(selectedProductVariation.price_home) || 0;
-        case "supermercado":
-          return parseFloat(selectedProductVariation.price_supermarket) || 0;
-        case "restaurante":
-          return parseFloat(selectedProductVariation.price_restaurant) || 0;
-        case "fruver":
-          return parseFloat(selectedProductVariation.price_fruver) || 0;
-        default:
-          return parseFloat(selectedProductVariation.price_home) || 0;
-      }
+    if (!selectedVariation) return 0;
+  
+    switch (userType) {
+      case "hogar":
+        return parseFloat(selectedVariation.price_home) || 0;
+      case "supermercado":
+        return parseFloat(selectedVariation.price_supermarket) || 0;
+      case "restaurante":
+        return parseFloat(selectedVariation.price_restaurant) || 0;
+      case "fruver":
+        return parseFloat(selectedVariation.price_fruver) || 0;
+      default:
+        return parseFloat(selectedVariation.price_home) || 0;
     }
-
-    return 0;
   };
+  
 
   const calculateSubtotal = () => {
-    return (cartDetails || []).reduce(
-      (total, product) =>
-        total +
-        getPriceByUserType(product, product.selectedVariation) *
-          product.quantity,
-      0
-    );
+    return cartDetails.reduce((total, product) => {
+      const price = getPriceByUserType(product, product.selectedVariation);
+      return total + price * product.quantity;
+    }, 0);
   };
+  
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -170,7 +162,7 @@ const Checkout = () => {
       )
     );
   };
-
+  
   const handleRemoveFromCart = (product) => {
     removeFromCart(product);
     setCartDetails((prevDetails) =>
@@ -183,13 +175,14 @@ const Checkout = () => {
         .filter((item) => item.quantity > 0)
     );
   };
+  
 
   const handlePlaceOrder = async () => {
     if (validateForm()) {
       const currentDate = new Date();
       currentDate.setDate(currentDate.getDate() + 1);
       const estimatedDelivery = currentDate.toISOString();
-  
+
       const orderData = {
         userId: loginData?.user?.id,
         cartDetails: cartDetails.map((product) => ({
@@ -213,8 +206,7 @@ const Checkout = () => {
           neighborhood: userData.neighborhood,
         },
       };
-      
-  
+
       try {
         const response = await axios.post("/api/orders/placeOrder", orderData);
         if (response.status === 201) {
@@ -223,7 +215,6 @@ const Checkout = () => {
         } else {
           message.error("Error al realizar el pedido. Inténtalo nuevamente.");
           console.log("Datos enviados al backend:", orderData);
-
         }
       } catch (error) {
         message.error("Error al realizar el pedido.");
@@ -234,11 +225,9 @@ const Checkout = () => {
     } else {
       message.error(
         "Por favor, complete todos los campos antes de realizar el pedido."
-        
       );
     }
   };
-  
 
   const total = calculateSubtotal() + shippingCost;
 

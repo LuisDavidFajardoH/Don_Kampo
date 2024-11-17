@@ -20,7 +20,8 @@ const Products = () => {
 
   const { cart, addToCart, removeFromCart } = useCart();
 
-  const userType = JSON.parse(localStorage.getItem("loginData"))?.user?.user_type;
+  const userType = JSON.parse(localStorage.getItem("loginData"))?.user
+    ?.user_type;
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -28,7 +29,7 @@ const Products = () => {
         const response = await axios.get("/api/products", {
           withCredentials: true,
         });
-    
+
         // Generar `variation_id` único si no existe
         const updatedProducts = response.data.map((product) => ({
           ...product,
@@ -37,20 +38,20 @@ const Products = () => {
             variation_id: `${product.product_id}-${index}`, // ID único
           })),
         }));
-    
+
         setProducts(updatedProducts);
         setFilteredProducts(updatedProducts);
-    
+
         const uniqueCategories = [
           "Todas",
           ...new Set(updatedProducts.map((product) => product.category)),
         ];
         setCategories(uniqueCategories);
-    
+
         const params = new URLSearchParams(location.search);
         const initialCategory = params.get("category");
         const initialSearch = params.get("search");
-    
+
         if (initialSearch) {
           setSearchQuery(initialSearch);
           filterProducts("Todas", initialSearch, updatedProducts);
@@ -65,7 +66,6 @@ const Products = () => {
         setLoading(false);
       }
     };
-    
 
     fetchProducts();
   }, []);
@@ -82,10 +82,7 @@ const Products = () => {
   };
 
   const normalizeString = (str) => {
-    return str
-      .normalize("NFD")
-      .replace(/[̀-ͯ]/g, "")
-      .toLowerCase();
+    return str.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
   };
 
   const filterProducts = (category, query, productsToFilter = products) => {
@@ -132,13 +129,12 @@ const Products = () => {
   const getSelectedVariationPrice = (product) => {
     const selectedVariationId = selectedVariations[product.product_id];
     if (!selectedVariationId) return null;
-  
+
     const selectedVariation = product.variations.find(
       (v) => v.variation_id === selectedVariationId
     );
     return selectedVariation ? getPriceByUserType(selectedVariation) : null;
   };
-  
 
   const handleVariationChange = (productId, variationId) => {
     console.log("Cambio de variación:", { productId, variationId });
@@ -147,7 +143,6 @@ const Products = () => {
       [productId]: variationId,
     }));
   };
-  
 
   const handleAddToCart = (product) => {
     const selectedVariation = product.variations.find(
@@ -163,6 +158,10 @@ const Products = () => {
 
     addToCart({ ...product, selectedVariation });
   };
+
+  useEffect(() => {
+    console.log("Estado del carrito:", cart);
+  }, [cart]);
 
   const handleRemoveFromCart = (product) => {
     removeFromCart(product);
@@ -243,7 +242,10 @@ const Products = () => {
                 {cart[product.product_id] ? (
                   <div className="quantity-controls">
                     <Button
-                      onClick={() => handleRemoveFromCart(product)}
+                      onClick={() => {
+                        console.log("Eliminando del carrito:", product);
+                        handleRemoveFromCart(product);
+                      }}
                       className="quantity-button"
                     >
                       -
@@ -252,7 +254,10 @@ const Products = () => {
                       {cart[product.product_id].quantity}
                     </span>
                     <Button
-                      onClick={() => handleAddToCart(product)}
+                      onClick={() => {
+                        console.log("Añadiendo al carrito:", product);
+                        handleAddToCart(product);
+                      }}
                       className="quantity-button"
                     >
                       +

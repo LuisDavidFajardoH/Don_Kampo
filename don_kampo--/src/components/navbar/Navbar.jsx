@@ -116,7 +116,7 @@ const Navbar = () => {
           onPressEnter={(e) => handleSearch(e.target.value)}
           onChange={(e) => setSearchTerm(e.target.value)}
           value={searchTerm}
-        
+          
         />
       </div>
 
@@ -255,6 +255,7 @@ const Navbar = () => {
         closable
         onClose={() => setDrawerVisible(false)}
         visible={drawerVisible}
+        width={200}
       >
         <Menu theme="light" mode="vertical" selectedKeys={[selectedKey]}>
           <Menu.Item

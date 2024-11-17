@@ -1,57 +1,56 @@
 import React from "react";
 import { Layout, Row, Col } from "antd";
-import {
-  FacebookOutlined,
-  InstagramOutlined,
-  TwitterOutlined,
-  PhoneOutlined,
-  MailOutlined,
-  EnvironmentOutlined,
-} from "@ant-design/icons";
 import "./Footer.css";
 
 const { Footer } = Layout;
+
+const categories = [
+  {
+    title: "Frutas nacionales",
+    img: "/images/frutasProducto.jpg",
+    link: "/products?category=Frutas",
+  },
+  { title: "Verduras", img: "/images/verdurasProducto.jpg", link: "/products?category=Verdura" },
+  {
+    title: "Frutas importadas",
+    img: "/images/frutasImportadas.jpg",
+    link: "/frutas-importadas",
+  },
+  { title: "Hortalizas", img: "/images/slider.jpg", link: "/products?category=Hortalizas" },
+  { title: "Cosecha", img: "/images/organicas.webp", link: "/products?category=Cosecha" },
+];
 
 const CustomFooter = () => {
   return (
     <Footer className="footer">
       <div className="footer-content">
-        <Row gutter={[16, 16]}>
-          {/* Columna 1: Información de contacto */}
-          <Col xs={24} sm={12} lg={8}>
-            <h3 className="footer-title">Contacto</h3>
-            <p><PhoneOutlined /> Tel: +57 123 456 7890</p>
-            <p><MailOutlined /> Correo: info@donkampo.com</p>
-            <p><EnvironmentOutlined /> Dirección: Calle Ficticia 123, Bogotá</p>
-          </Col>
-
-          {/* Columna 2: Redes sociales */}
-          <Col xs={24} sm={12} lg={8}>
-            <h3 className="footer-title">Síguenos</h3>
-            <div className="social-icons">
-              <FacebookOutlined className="icon" />
-              <InstagramOutlined className="icon" />
-              <TwitterOutlined className="icon" />
-            </div>
-          </Col>
-
-          {/* Columna 3: Misión/Enlace adicional */}
-          <Col xs={24} sm={24} lg={8}>
-            <h3 className="footer-title">Nuestra misión</h3>
-            <p>
-              Conectar lo mejor del campo con el consumidor moderno, ofreciendo
-              productos frescos y de excelente calidad.
-            </p>
-          </Col>
-        </Row>
+        <h3 className="footer-title">Explora nuestras categorías</h3>
+        <div className="category-container">
+          {categories.map((category, index) => (
+            <a href={category.link} className="category-link" key={index}>
+              <img
+                src={category.img}
+                alt={category.title}
+                className="category-image"
+              />
+              <p className="category-title">{category.title}</p>
+            </a>
+          ))}
+        </div>
       </div>
+
       <div className="footer-bottom">
         <p>© 2024 Don Kampo. Todos los derechos reservados.</p>
         <p>
           Diseñado y Desarrollado por{" "}
-          <a href="https://www.cre8tive.pro/" target="_blank" rel="noopener noreferrer">
+          <a
+            href="https://www.cre8tive.pro/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             Cre8tive Agency
-          </a>.
+          </a>
+          .
         </p>
       </div>
     </Footer>

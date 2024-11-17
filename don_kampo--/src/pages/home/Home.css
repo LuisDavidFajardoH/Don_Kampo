@@ -151,7 +151,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: rgba(255, 255, 255, 0.9); /* Fondo blanco con opacidad */
+    background-color: rgb(205 92 56 / 62%); /* Fondo blanco con opacidad */
     padding: 20px;
     border-radius: 12px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
@@ -193,6 +193,7 @@
 
 .category-card {
     text-align: center;
+    background-color: rgba(65, 94, 78, 0.178);
 }
 
 .category-card img {
@@ -201,9 +202,10 @@
 }
 
 .info-section {
-    background-color: #ffffff;
+    background-color: rgba(65, 94, 78, 0.342);
     padding: 40px 20px;
     margin-top: 40px;
+    border-radius: 8px;
 }
 
 .info-section .info-image {
@@ -390,7 +392,7 @@
     }
   
     .carousel-logo {
-      width: 150px;
+      width: 224px;
     }
   }
   

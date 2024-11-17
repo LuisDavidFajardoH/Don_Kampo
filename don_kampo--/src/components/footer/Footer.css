@@ -1,13 +1,9 @@
-/* Footer */
 .footer {
   background-color: #ee7723; /* Color corporativo */
   color: white;
-  padding: 20px 20px;
+  padding: 40px 20px;
   text-align: center;
-  position: relative;/* Fix the footer at the bottom */
-  left: 0;
-  bottom: 0;
-  width: 100%;
+  max-height: 80%;
 }
 
 .footer-content {
@@ -18,11 +14,58 @@
 .footer-title {
   color: #00983a; /* Color secundario */
   font-weight: bold;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
+  font-size: 1.5rem;
+}
+
+/* Flexbox para centrar las categorías */
+.category-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap; /* Para que sea responsivo */
+  gap: 40px; /* Espaciado uniforme */
+  margin-top: 20px;
+}
+
+.category-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-decoration: none;
+  color: white;
+  transition: transform 0.2s ease;
+}
+
+.category-link:hover {
+  transform: scale(1.05);
+}
+
+.category-image {
+  width: 120px;
+  height: 120px;
+  object-fit: cover; /* Mantiene proporciones */
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  margin-bottom: 8px;
+}
+
+.category-title {
+  font-size: 1rem;
+  font-weight: bold;
+  text-align: center;
+  margin: 0;
+}
+
+.footer-bottom {
+  margin-top: 40px;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  padding-top: 20px;
+  font-size: 0.9rem;
 }
 
 .footer-bottom a {
-  color: #00983a; /* Cambia este color si deseas otro */
+  color: #00983a;
   text-decoration: none;
 }
 
@@ -30,29 +73,18 @@
   text-decoration: underline;
 }
 
-
-.social-icons .icon {
-  font-size: 24px;
-  margin: 0 10px;
-  color: white;
-  cursor: pointer;
-  transition: transform 0.2s ease;
-}
-
-.social-icons .icon:hover {
-  color: #00983a; /* Color secundario en hover */
-  transform: scale(1.1);
-}
-
-.footer-bottom {
-  margin-top: 20px;
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
-  padding-top: 10px;
-  font-size: 14px;
-}
-
+/* Responsividad */
 @media (max-width: 768px) {
-  .footer-content {
-    text-align: left;
+  .category-image {
+    width: 100px;
+    height: 100px;
+  }
+
+  .category-title {
+    font-size: 0.9rem;
+  }
+
+  .category-container {
+    gap: 20px;
   }
 }
