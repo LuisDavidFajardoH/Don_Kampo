@@ -28,7 +28,7 @@ const Register = () => {
   
     setLoading(true);
     try {
-      const response = await axios.post("https://don-kampo-api.onrender.com/api/createusers", {
+      const response = await axios.post("/api/createusers", {
         user_name,
         lastname,
         email,

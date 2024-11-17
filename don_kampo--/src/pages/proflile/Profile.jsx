@@ -40,13 +40,13 @@ const Profile = () => {
       const loginData = JSON.parse(localStorage.getItem("loginData"));
       if (loginData && loginData.user) {
         try {
-          const response = await axios.get(`https://don-kampo-api.onrender.com/api/users/${loginData.user.id}`);
+          const response = await axios.get(`/api/users/${loginData.user.id}`);
           const user = response.data.user;
           setUserData(user);
           form.setFieldsValue(user);
 
           // Load orders and filter by user's customer_id
-          const ordersResponse = await axios.get("https://don-kampo-api.onrender.com/api/orders");
+          const ordersResponse = await axios.get("/api/orders");
           const userOrders = ordersResponse.data.filter(
             (order) => order.customer_id === loginData.user.id
           );
@@ -68,7 +68,7 @@ const Profile = () => {
     try {
       const values = form.getFieldsValue();
       const loginData = JSON.parse(localStorage.getItem("loginData"));
-      await axios.put(`https://don-kampo-api.onrender.com/api/updateusers/${loginData.user.id}`, values);
+      await axios.put(`/api/updateusers/${loginData.user.id}`, values);
       setUserData(values);
       message.success("Datos actualizados exitosamente.");
     } catch (error) {
@@ -79,7 +79,7 @@ const Profile = () => {
 
   const fetchOrderDetails = async (orderId) => {
     try {
-      const response = await axios.get(`https://don-kampo-api.onrender.com/api/orders/${orderId}`);
+      const response = await axios.get(`/api/orders/${orderId}`);
       setSelectedOrder(response.data);
       setIsModalVisible(true);
     } catch (error) {

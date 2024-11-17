@@ -31,7 +31,7 @@ const Cart = () => {
         const productDetails = await Promise.all(
           Object.keys(cart).map(async (product_id) => {
             try {
-              const response = await axios.get(`https://don-kampo-api.onrender.com/api/getproduct/${product_id}`);
+              const response = await axios.get(`/api/getproduct/${product_id}`);
               return {
                 ...response.data,
                 quantity: cart[product_id].quantity,
@@ -52,7 +52,7 @@ const Cart = () => {
         const loginData = JSON.parse(localStorage.getItem("loginData"));
         if (loginData && loginData.user) {
           const userResponse = await axios.get(
-            `https://don-kampo-api.onrender.com/api/users/${loginData.user.id}`
+            `/api/users/${loginData.user.id}`
           );
           const hasOrders =
             userResponse.data.orders && userResponse.data.orders.length > 0;

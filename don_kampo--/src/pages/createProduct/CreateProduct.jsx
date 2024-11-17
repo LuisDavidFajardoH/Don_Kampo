@@ -29,7 +29,7 @@ const CreateProduct = () => {
     formData.append("price_fruver", values.price_fruver !== undefined ? parseFloat(values.price_fruver) : 0);
 
     try {
-      const response = await axios.post("https://don-kampo-api.onrender.com/api/createproduct", formData, {
+      const response = await axios.post("/api/createproduct", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       message.success(`Producto creado exitosamente con ID: ${response.data.product_id}`);
@@ -83,7 +83,7 @@ const CreateProduct = () => {
       }
 
       try {
-        await axios.post("https://don-kampo-api.onrender.com/api/createproduct", formData, {
+        await axios.post("/api/createproduct", formData, {
           headers: { "Content-Type": "multipart/form-data" },
         });
         message.success(`Producto ${product.name} creado exitosamente`);

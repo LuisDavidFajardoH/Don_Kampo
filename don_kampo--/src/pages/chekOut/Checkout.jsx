@@ -35,7 +35,7 @@ const Checkout = () => {
     const fetchUserData = async () => {
       if (loginData && loginData.user) {
         try {
-          const response = await axios.get(`https://don-kampo-api.onrender.com/api/users/${loginData.user.id}`);
+          const response = await axios.get(`/api/users/${loginData.user.id}`);
           const user = response.data.user;
           setUserData(user);
 
@@ -68,7 +68,7 @@ const Checkout = () => {
       try {
         const productDetails = await Promise.all(
           Object.keys(cart).map(async (productId) => {
-            const response = await axios.get(`https://don-kampo-api.onrender.com/api/getproduct/${productId}`);
+            const response = await axios.get(`/api/getproduct/${productId}`);
             return { ...response.data, quantity: cart[productId].quantity };
           })
         );
@@ -124,7 +124,7 @@ const Checkout = () => {
           neighborhood: userData.neighborhood,
         };
 
-        await axios.put(`https://don-kampo-api.onrender.com/api/updateusers/${loginData.user.id}`, updatedData);
+        await axios.put(`/api/updateusers/${loginData.user.id}`, updatedData);
         message.success("Datos actualizados exitosamente.");
       } catch (error) {
         message.error("Error al actualizar los datos del usuario.");
@@ -177,7 +177,7 @@ const Checkout = () => {
       };
 
       try {
-        const response = await axios.post("https://don-kampo-api.onrender.com/api/orders/placeOrder", orderData);
+        const response = await axios.post("/api/orders/placeOrder", orderData);
         if (response.status === 201) {
           setOrderId(response.data.orderId);
           
