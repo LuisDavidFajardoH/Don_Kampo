@@ -1,35 +1,23 @@
 import React, { useEffect, useState } from "react";
-import { Form, Input, Button, message, Divider, Modal, Row, Col } from "antd";
-import BotonWhatsapp from "../../components/botonWhatsapp/BotonWhatsapp";
-import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
-
+import { Form, Input, Button, message, Divider, Row, Col } from "antd";
+import { useCart } from "../products/CartContext";
 import axios from "axios";
 import Navbar from "../../components/navbar/Navbar";
 import CustomFooter from "../../components/footer/Footer";
 import { useNavigate } from "react-router-dom";
-import { useCart } from "../products/CartContext";
-import useWindowSize from "react-use/lib/useWindowSize";
 import "./Checkout.css";
 
 const Checkout = () => {
   const [userData, setUserData] = useState(null);
   const [cartDetails, setCartDetails] = useState([]);
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [orderId, setOrderId] = useState(null);
+  const [shippingCost, setShippingCost] = useState(5000);
+  const [isFirstOrder, setIsFirstOrder] = useState(false);
 
-  const { cart, clearCart } = useCart();
+  const { cart, clearCart, getPriceByUserType } = useCart();
   const navigate = useNavigate();
-  const { width, height } = useWindowSize();
 
-  // Obtener el tipo de usuario y órdenes desde localStorage
   const loginData = JSON.parse(localStorage.getItem("loginData"));
   const userType = loginData?.user?.user_type;
-
-  const [shippingCost, setShippingCost] = useState(5000);
-
-  // Verificar si el usuario tiene órdenes previas
-  const [isFirstOrder, setIsFirstOrder] = useState(false);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -57,6 +45,22 @@ const Checkout = () => {
       } else {
         message.error("Debe iniciar sesión para realizar la compra.");
         navigate("/login");
+        return;
+      }
+
+      try {
+        const response = await axios.get(
+          `https://don-kampo-api.onrender.com/api/users/${loginData.user.id}`
+        );
+        setUserData(response.data.user);
+
+        const hasOrders = response.data.orders?.length > 0;
+        if (!hasOrders) {
+          setIsFirstOrder(true);
+          setShippingCost(userType === "hogar" ? 2500 : 0);
+        }
+      } catch (error) {
+        message.error("Error al cargar los datos del usuario.");
       }
     };
 
@@ -82,26 +86,12 @@ const Checkout = () => {
     fetchCartDetails();
   }, [cart]);
 
-  // Función para obtener el precio según el tipo de usuario
-  const getPriceByUserType = (product) => {
-    switch (userType) {
-      case "hogar":
-        return parseFloat(product.price_home) || 0;
-      case "supermercado":
-        return parseFloat(product.price_supermarket) || 0;
-      case "restaurante":
-        return parseFloat(product.price_restaurant) || 0;
-      case "fruver":
-        return parseFloat(product.price_fruver) || 0;
-      default:
-        return parseFloat(product.price_home) || 0;
-    }
-  };
-
   const calculateSubtotal = () => {
-    return (cartDetails || []).reduce(
+    return cartDetails.reduce(
       (total, product) =>
-        total + getPriceByUserType(product) * product.quantity,
+        total +
+        getPriceByUserType(product, product.selectedVariation) *
+          product.quantity,
       0
     );
   };
@@ -198,34 +188,6 @@ const Checkout = () => {
 
   const total = calculateSubtotal() + shippingCost;
 
-  const generateOrderPDF = () => {
-    const input = document.getElementById("order-summary-pdf"); // Elemento que será convertido a PDF
-    if (!input) {
-      message.error("No se pudo generar el PDF. Intenta nuevamente.");
-      return;
-    }
-  
-    html2canvas(input).then((canvas) => {
-      const imgData = canvas.toDataURL("image/png");
-      const pdf = new jsPDF();
-  
-      // Agregar la imagen al PDF
-      const imgWidth = 190;
-      const pageHeight = 295;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      const position = 10; // Espaciado desde la parte superior
-  
-      pdf.addImage(imgData, "PNG", 10, position, imgWidth, imgHeight);
-      pdf.save(`Resumen_Pedido_${orderId}.pdf`); // Guardar el archivo con un nombre personalizado
-  
-      // Limpiar el carrito después de guardar el PDF
-      clearCart();
-      message.success("El carrito ha sido vaciado después de generar el PDF.");
-      navigate("/products");
-    });
-  };
-  
-
   return (
     <div>
       <Navbar />
@@ -233,183 +195,76 @@ const Checkout = () => {
         <h2>Finalizar Compra</h2>
         <div className="checkout-content">
           {userData ? (
-            <Form layout="vertical" className="checkout-form">
-              <Row gutter={16}>
-                <Col xs={24} sm={12}>
+            <Row gutter={16}>
+              <Col xs={24} sm={12}>
+                <Form layout="vertical">
                   <Form.Item label="Nombre">
-                    <Input
-                      name="user_name"
-                      value={userData.user_name}
-                      onChange={handleInputChange}
-                    />
+                    <Input value={userData.user_name} disabled />
                   </Form.Item>
-                </Col>
-                <Col xs={24} sm={12}>
                   <Form.Item label="Apellido">
-                    <Input
-                      name="lastname"
-                      value={userData.lastname}
-                      onChange={handleInputChange}
-                    />
+                    <Input value={userData.lastname} disabled />
                   </Form.Item>
-                </Col>
-                <Col xs={24} sm={12}>
                   <Form.Item label="Email">
-                    <Input
-                      name="email"
-                      value={userData.email}
-                      onChange={handleInputChange}
-                    />
+                    <Input value={userData.email} disabled />
                   </Form.Item>
-                </Col>
-                <Col xs={24} sm={12}>
                   <Form.Item label="Teléfono">
-                    <Input
-                      name="phone"
-                      value={userData.phone}
-                      onChange={handleInputChange}
-                    />
+                    <Input value={userData.phone} disabled />
                   </Form.Item>
-                </Col>
-                <Col xs={24} sm={12}>
-                  <Form.Item label="Ciudad">
-                    <Input
-                      name="city"
-                      value={userData.city}
-                      onChange={handleInputChange}
-                    />
-                  </Form.Item>
-                </Col>
-                <Col xs={24} sm={12}>
-                  <Form.Item label="Dirección">
-                    <Input
-                      name="address"
-                      value={userData.address}
-                      onChange={handleInputChange}
-                    />
-                  </Form.Item>
-                </Col>
-                <Col xs={24} sm={12}>
-                  <Form.Item label="Barrio">
-                    <Input
-                      name="neighborhood"
-                      value={userData.neighborhood}
-                      onChange={handleInputChange}
-                    />
-                  </Form.Item>
-                </Col>
-                <Col xs={24} sm={12}>
+                </Form>
+              </Col>
+              <Col xs={24} sm={12}>
+                <div className="order-summary">
+                  <h3>Resumen del Pedido</h3>
+                  <Divider />
+                  {cartDetails.map((product) => (
+                    <div
+                      key={product.product_id}
+                      className="order-summary-item"
+                    >
+                      <span>
+                        {product.name} x {product.quantity}
+                      </span>
+                      <span>
+                        $
+                        {(
+                          getPriceByUserType(product, product.selectedVariation) *
+                          product.quantity
+                        ).toLocaleString()}
+                      </span>
+                    </div>
+                  ))}
+                  <Divider />
+                  <p>
+                    Subtotal: <span>${calculateSubtotal().toLocaleString()}</span>
+                  </p>
+                  <p>
+                    Envío: <span>${shippingCost.toLocaleString()}</span>
+                  </p>
+                  {isFirstOrder && (
+                    <p style={{ color: "#FF914D" }}>
+                      ¡Descuento aplicado al costo de envío por ser tu primer
+                      pedido!
+                    </p>
+                  )}
+                  <Divider />
+                  <h4>
+                    Total: <span>${total.toLocaleString()}</span>
+                  </h4>
                   <Button
                     type="primary"
-                    className="confirm-data-button"
-                    onClick={handleUpdateUser}
+                    onClick={handlePlaceOrder}
+                    className="place-order-button"
                   >
-                    Confirmar Datos
+                    REALIZAR EL PEDIDO
                   </Button>
-                </Col>
-              </Row>
-            </Form>
+                </div>
+              </Col>
+            </Row>
           ) : (
             <p>Cargando datos del usuario...</p>
           )}
-          <div className="order-summary">
-            <h3>Resumen del Pedido</h3>
-            <Divider />
-            {cartDetails.map((product) => (
-              <div key={product.product_id} className="order-summary-item">
-                <span>
-                  {product.name} x {product.quantity}
-                </span>
-                <span>
-                  $
-                  {(
-                    getPriceByUserType(product) * product.quantity
-                  ).toLocaleString()}
-                </span>
-              </div>
-            ))}
-            <Divider />
-            <p>
-              Subtotal: <span>${calculateSubtotal().toLocaleString()}</span>
-            </p>
-            <p>
-              Envío: <span>${shippingCost.toLocaleString()}</span>
-            </p>
-            {isFirstOrder && (
-              <p
-                style={{ fontSize: "12px", color: "#FF914D", marginTop: "5px" }}
-              >
-                ¡Descuento aplicado al costo de envío por ser tu primer pedido!
-              </p>
-            )}
-
-            <Divider />
-            <h4>
-              Total: <span>${total.toLocaleString()}</span>
-            </h4>
-
-            <Button
-              type="primary"
-              className="place-order-button"
-              onClick={handlePlaceOrder}
-              disabled={!validateForm()}
-            >
-              REALIZAR EL PEDIDO
-            </Button>
-
-            <Modal
-              title="Pedido Confirmado"
-              visible={isModalVisible}
-              onOk={() => {
-                setIsModalVisible(false);
-                navigate("/products");
-              }}
-              onCancel={() => setIsModalVisible(false)}
-              footer={[
-              
-                <Button
-                  key="pdf"
-                  type="default"
-                  onClick={generateOrderPDF}
-                  style={{ backgroundColor: "#FF914D", color: "#fff" }}
-                >
-                  Descargar PDF
-                </Button>,
-              ]}
-            >
-              <div id="order-summary-pdf">
-                <p>
-                  ¡{userData?.user_name}, tu pedido ha sido realizado
-                  exitosamente!
-                </p>
-                <p>
-                  ID de la orden: <strong>{orderId}</strong>
-                </p>
-                <Divider />
-                <h4>Resumen del Pedido</h4>
-                {cartDetails.map((product) => (
-                  <div key={product.product_id} className="order-summary-item">
-                    <span>
-                      {product.name} x {product.quantity}
-                    </span>
-                    <span>
-                      $
-                      {(
-                        getPriceByUserType(product) * product.quantity
-                      ).toLocaleString()}
-                    </span>
-                  </div>
-                ))}
-                <Divider />
-                <p>Subtotal: ${calculateSubtotal().toLocaleString()}</p>
-                <p>Envío: ${shippingCost.toLocaleString()}</p>
-                <h4>Total: ${total.toLocaleString()}</h4>
-              </div>
-            </Modal>
-          </div>
         </div>
       </div>
-      <BotonWhatsapp />
       <CustomFooter />
     </div>
   );

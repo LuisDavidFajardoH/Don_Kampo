@@ -22,11 +22,13 @@ import "./App.css";
 
 const App = () => {
   const [userType, setUserType] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Recuperar datos del usuario al cargar la aplicación
   useEffect(() => {
     const loginData = JSON.parse(localStorage.getItem("loginData"));
     setUserType(loginData?.user?.user_type || null);
+    setIsLoading(false); // Establecer que ya no se está cargando
   }, []);
 
   // Registrar el Service Worker
@@ -43,21 +45,60 @@ const App = () => {
     }
   }, []);
 
+  if (isLoading) {
+    // Mostrar una pantalla de carga mientras se recupera el tipo de usuario
+    return <div>Cargando...</div>;
+  }
+
   return (
     <Router>
       <div id="root">
         <CartProvider>
           <div className="main-content">
             <Routes>
+              {/* Rutas públicas */}
               <Route path="/" element={<Home />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/products" element={<Products />} />
               <Route path="/cart" element={<Cart />} />
               <Route path="/checkout" element={<Checkout />} />
-              <Route path="/createproduct" element={<CreateProduct />} />
-              <Route path="/createorder" element={<CreateOrder />} />
-              <Route path="/manageproducts" element={<ManageProducts />} />
+
+              {/* Rutas protegidas para usuarios admin */}
+              <Route
+                path="/createproduct"
+                element={
+                  userType === "admin" ? (
+                    <CreateProduct />
+                  ) : (
+                    <Navigate to="/" replace />
+                  )
+                }
+              />
+              <Route
+                path="/manageproducts"
+                element={
+                  userType === "admin" ? (
+                    <ManageProducts />
+                  ) : (
+                    <Navigate to="/" replace />
+                  )
+                }
+              />
+
+              {/* Ruta protegida para crear órdenes */}
+              <Route
+                path="/createorder"
+                element={
+                  userType ? (
+                    <CreateOrder />
+                  ) : (
+                    <Navigate to="/login" replace />
+                  )
+                }
+              />
+
+              {/* Ruta para el perfil del usuario */}
               <Route
                 path="/profile"
                 element={

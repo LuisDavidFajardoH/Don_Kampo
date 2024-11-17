@@ -16,12 +16,13 @@ const Products = () => {
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("Todas");
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedVariation, setSelectedVariation] = useState({});
+  const [quantities, setQuantities] = useState({});
+  const [totalPrices, setTotalPrices] = useState({}); // Manejar precios totales por producto
 
-  const { cart, addToCart, removeFromCart } = useCart();
+  const { cart, addToCart, removeFromCart, cartValue, cartCount } = useCart(); // CartContext
 
-  // Obtener el tipo de usuario desde localStorage
-  const userType = JSON.parse(localStorage.getItem("loginData"))?.user
-    ?.user_type;
+  const userType = JSON.parse(localStorage.getItem("loginData"))?.user?.user_type;
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -49,10 +50,9 @@ const Products = () => {
         const params = new URLSearchParams(location.search);
         const initialCategory = params.get("category");
 
-        // Aplica el filtro inicial solo si la categoría es válida
         if (initialCategory) {
           setSelectedCategory(initialCategory);
-          filterProducts(initialCategory, searchQuery, response.data); // Pasa los productos cargados directamente
+          filterProducts(initialCategory, searchQuery, response.data);
         }
       } catch (error) {
         message.error("Error al cargar los productos.");
@@ -106,23 +106,55 @@ const Products = () => {
       );
       return `data:image/jpeg;base64,${base64String}`;
     }
-    return "path_to_placeholder_image"; // Cambia este valor si tienes una imagen de placeholder
+    return "path_to_placeholder_image";
   };
 
-  // Función para obtener el precio según el tipo de usuario
-  const getPriceByUserType = (product) => {
-    switch (userType) {
-      case "hogar":
-        return product.price_home;
-      case "supermercado":
-        return product.price_supermarket;
-      case "restaurante":
-        return product.price_restaurant;
-      case "fruver":
-        return product.price_fruver;
-      default:
-        return product.price_home; // Valor por defecto
+  const getPriceByUserType = (product, selectedVariation) => {
+    if (!selectedVariation) return 0;
+    const { quality, quantity } = selectedVariation;
+
+    if (!quality || !quantity) return 0;
+
+    const selectedProductVariation = product.variations.find(
+      (variation) => variation.quality === quality && variation.quantity === quantity
+    );
+
+    if (selectedProductVariation) {
+      switch (userType) {
+        case "hogar":
+          return selectedProductVariation.price_home;
+        case "supermercado":
+          return selectedProductVariation.price_supermarket;
+        case "restaurante":
+          return selectedProductVariation.price_restaurant;
+        case "fruver":
+          return selectedProductVariation.price_fruver;
+        default:
+          return selectedProductVariation.price_home;
+      }
     }
+
+    return 0;
+  };
+
+  const updateQuantity = (productId, increment) => {
+    setQuantities((prevQuantities) => {
+      const updatedQuantities = { ...prevQuantities };
+      const currentQuantity = updatedQuantities[productId] || 0;
+      updatedQuantities[productId] = Math.max(currentQuantity + increment, 0);
+      return updatedQuantities;
+    });
+
+    setTotalPrices((prevTotalPrices) => {
+      const updatedTotalPrices = { ...prevTotalPrices };
+      const product = products.find((p) => p.product_id === productId);
+      const selectedVariationForProduct = selectedVariation[productId];
+      const unitPrice = getPriceByUserType(product, selectedVariationForProduct);
+      const quantity = (quantities[productId] || 0) + increment;
+
+      updatedTotalPrices[productId] = unitPrice * Math.max(quantity, 0);
+      return updatedTotalPrices;
+    });
   };
 
   return (
@@ -163,42 +195,87 @@ const Products = () => {
               key={product.product_id}
               className="product-card"
               hoverable
-              cover={
-                <img alt={product.name} src={getBase64Image(product.photo)} />
-              }
+              cover={<img alt={product.name} src={getBase64Image(product.photo)} />}
             >
               <div className="product-info">
                 <p className="product-category">{product.category}</p>
                 <h3 className="product-name">{product.name}</h3>
+                <p className="product-description">{product.description}</p>
+
+                <div className="product-variations">
+                  <Select
+                    placeholder="Selecciona calidad"
+                    onChange={(value) =>
+                      setSelectedVariation({
+                        ...selectedVariation,
+                        [product.product_id]: {
+                          ...selectedVariation[product.product_id],
+                          quality: value,
+                        },
+                      })
+                    }
+                    size="large"
+                    style={{ width: "100%", marginBottom: 10 }}
+                  >
+                    {product.variations.map((variation) => (
+                      <Option key={variation.variation_id} value={variation.quality}>
+                        {variation.quality}
+                      </Option>
+                    ))}
+                  </Select>
+
+                  <Select
+                    placeholder="Selecciona cantidad"
+                    onChange={(value) =>
+                      setSelectedVariation({
+                        ...selectedVariation,
+                        [product.product_id]: {
+                          ...selectedVariation[product.product_id],
+                          quantity: value,
+                        },
+                      })
+                    }
+                    size="large"
+                    style={{ width: "100%", marginBottom: 10 }}
+                  >
+                    {product.variations.map((variation) => (
+                      <Option key={variation.variation_id} value={variation.quantity}>
+                        {variation.quantity}
+                      </Option>
+                    ))}
+                  </Select>
+                </div>
+
                 <p className="product-price">
-                  {userType
-                    ? `$${parseFloat(
-                        getPriceByUserType(product)
-                      ).toLocaleString()}`
-                    : "Precio no disponible, por favor inicia sesión."}
+                  Precio total: $
+                  {(totalPrices[product.product_id] || 0).toLocaleString()}
                 </p>
-                {cart[product.product_id] ? (
-                  <div className="quantity-controls">
-                    <Button
-                      onClick={() => removeFromCart(product)}
-                      className="quantity-button"
-                    >
-                      -
-                    </Button>
-                    <span className="quantity-text">
-                      {cart[product.product_id].quantity}
-                    </span>
-                    <Button
-                      onClick={() => addToCart(product)}
-                      className="quantity-button"
-                    >
-                      +
-                    </Button>
-                  </div>
-                ) : (
+
+                <div className="quantity-controls">
+                  <Button
+                    onClick={() => updateQuantity(product.product_id, -1)}
+                    className="quantity-button"
+                    disabled={quantities[product.product_id] <= 0}
+                  >
+                    -
+                  </Button>
+                  <span className="quantity-text">
+                    {quantities[product.product_id] || 0}
+                  </span>
+                  <Button
+                    onClick={() => updateQuantity(product.product_id, 1)}
+                    className="quantity-button"
+                  >
+                    +
+                  </Button>
+                </div>
+
+                {quantities[product.product_id] > 0 && (
                   <Button
                     type="primary"
-                    onClick={() => addToCart(product)}
+                    onClick={() =>
+                      addToCart(product, selectedVariation[product.product_id])
+                    }
                     className="add-to-cart-button"
                   >
                     Añadir al carrito
