@@ -81,9 +81,7 @@ const CreateProduct = () => {
     }
   };
 
-  const handleImageUpload = ({ file }) => {
-    setImageFile(file);
-  };
+ 
 
   const handleExcelUpload = ({ file }) => {
     const reader = new FileReader();

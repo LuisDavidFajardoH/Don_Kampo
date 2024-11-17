@@ -97,6 +97,17 @@
     border-bottom-color: #00983a;
   }
 
+
+  .navbar-search{
+    width: 185px;
+    border-radius: 8px;
+    height: 30px;
+    margin-left: 1%;
+    margin-right: 5%;
+    border: 1px solid #ddd;
+    padding: 0 15px;
+    background-color: #fff;
+  }
   /* Responsive*/
 
   .logo {
@@ -131,6 +142,10 @@
   @media (max-width: 768px) {
     .menu-desktop {
       display: none;
+    }
+
+    .navbar-search{
+      width: 95%;
     }
     .menu-mobile-button {
       display: inline-flex;

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Layout, Menu, Drawer, Button, Badge } from "antd";
+import { Layout, Menu, Drawer, Button, Badge, Input } from "antd";
 import {
   HomeOutlined,
   AppstoreOutlined,
@@ -8,6 +8,7 @@ import {
   MenuOutlined,
   ShoppingCartOutlined,
   PlusOutlined,
+  SearchOutlined,
 } from "@ant-design/icons";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useCart } from "../../pages/products/CartContext"; // Importa el hook de contexto de carrito
@@ -30,6 +31,7 @@ const Navbar = () => {
   // Estado para la ruta seleccionada y para el drawer en pantallas pequeñas
   const [selectedKey, setSelectedKey] = useState("");
   const [drawerVisible, setDrawerVisible] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
   // Efecto para actualizar la ruta seleccionada en el menú
   useEffect(() => {
@@ -68,7 +70,6 @@ const Navbar = () => {
       case "/adminprofile":
         setSelectedKey("adminprofile");
         break;
-      
 
       default:
         setSelectedKey("home");
@@ -90,6 +91,11 @@ const Navbar = () => {
     handleMenuClick("login", "/login");
   };
 
+  // Función para manejar la búsqueda
+  const handleSearch = (value) => {
+    navigate(`/products?search=${encodeURIComponent(value)}`);
+  };
+
   return (
     <Header className="navbar">
       <div className="navbar-left">
@@ -102,30 +108,41 @@ const Navbar = () => {
           />
         </div>
 
-        {/* Carrito */}
-        <div
-          className="cart-icon"
-          style={{ display: "flex", alignItems: "center" }}
-          onClick={() => handleMenuClick("cart", "/cart")}
+        {/* Barra de búsqueda */}
+        <Input
+          className="navbar-search"
+          placeholder="Buscar productos..."
+          prefix={<SearchOutlined />}
+          onPressEnter={(e) => handleSearch(e.target.value)}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          value={searchTerm}
+        
+        />
+      </div>
+
+      {/* Carrito */}
+      <div
+        className="cart-icon"
+        style={{ display: "flex", alignItems: "center" }}
+        onClick={() => handleMenuClick("cart", "/cart")}
+      >
+        <Badge
+          count={
+            cartValue > 99999
+              ? `${(cartValue / 1000).toFixed(1)}K`
+              : `$${cartValue.toLocaleString()}`
+          }
+          offset={[10, 0]}
+          style={{
+            backgroundColor: "#52c41a",
+            fontSize: "14px",
+            padding: "0 8px",
+          }}
         >
-          <Badge
-            count={
-              cartValue > 99999
-                ? `${(cartValue / 1000).toFixed(1)}K`
-                : `$${cartValue.toLocaleString()}`
-            }
-            offset={[10, 0]}
-            style={{
-              backgroundColor: "#52c41a",
-              fontSize: "14px",
-              padding: "0 8px",
-            }}
-          >
-            <ShoppingCartOutlined
-              style={{ fontSize: "24px", color: "white", cursor: "pointer" }}
-            />
-          </Badge>
-        </div>
+          <ShoppingCartOutlined
+            style={{ fontSize: "24px", color: "white", cursor: "pointer" }}
+          />
+        </Badge>
       </div>
 
       {/* Menú para pantallas grandes */}
@@ -185,18 +202,8 @@ const Navbar = () => {
                   onClick={() =>
                     handleMenuClick("manageproducts", "/manageproducts")
                   }
-                  >
-                  Gestionar Productos
-                  </Menu.Item>
-                )}
-              {isAdmin && (
-                // createorder
-                <Menu.Item
-                  key="createorder"
-                  icon={<PlusOutlined />}
-                  onClick={() => handleMenuClick("createorder", "/createorder")}
                 >
-                  Crear Orden
+                  Gestionar Productos
                 </Menu.Item>
               )}
               <Menu.Item

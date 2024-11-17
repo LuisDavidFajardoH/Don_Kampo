@@ -15,77 +15,64 @@ export const CartProvider = ({ children }) => {
     localStorage.setItem("cart", JSON.stringify(cart));
   }, [cart]);
 
-  const getPriceByUserType = (product, selectedVariation) => {
-    if (!selectedVariation || !product.variations) return 0;
-
-    const { quality, quantity } = selectedVariation;
-    const selectedProductVariation = product.variations.find(
-      (variation) => variation.quality === quality && variation.quantity === quantity
-    );
-
-    if (selectedProductVariation) {
-      const userType =
-        JSON.parse(localStorage.getItem("loginData"))?.user?.user_type || "hogar";
-      switch (userType) {
-        case "hogar":
-          return parseFloat(selectedProductVariation.price_home) || 0;
-        case "supermercado":
-          return parseFloat(selectedProductVariation.price_supermarket) || 0;
-        case "restaurante":
-          return parseFloat(selectedProductVariation.price_restaurant) || 0;
-        case "fruver":
-          return parseFloat(selectedProductVariation.price_fruver) || 0;
-        default:
-          return parseFloat(selectedProductVariation.price_home) || 0;
-      }
+  // Función para obtener el precio según el tipo de usuario
+  const getPriceByUserType = (product) => {
+    const userType = JSON.parse(localStorage.getItem("loginData"))?.user?.user_type;
+    switch (userType) {
+      case "hogar":
+        return product.price_home;
+      case "supermercado":
+        return product.price_supermarket;
+      case "restaurante":
+        return product.price_restaurant;
+      case "fruver":
+        return product.price_fruver;
+      default:
+        return product.price_home; // Valor por defecto
     }
-
-    return 0;
   };
 
-  const addToCart = (product, selectedVariation) => {
+  // Calcula el valor total del carrito en pesos colombianos
+  const cartValue = Object.values(cart).reduce(
+    (total, item) =>
+      total + (item.quantity * parseFloat(getPriceByUserType(item)) || 0),
+    0
+  );
+
+  // Función para añadir productos al carrito
+  const addToCart = (product) => {
     setCart((prevCart) => {
       const newCart = { ...prevCart };
-      const productId = product.product_id;
-
-      if (newCart[productId]) {
-        newCart[productId].quantity += 1;
+      if (newCart[product.product_id]) {
+        newCart[product.product_id].quantity += 1;
       } else {
-        newCart[productId] = { product, quantity: 1, selectedVariation };
+        newCart[product.product_id] = { ...product, quantity: 1 };
       }
-
       return newCart;
     });
   };
 
-  const removeFromCart = (product) => {
-    setCart((prevCart) => {
-      const newCart = { ...prevCart };
-      const productId = product.product_id;
-
-      if (newCart[productId] && newCart[productId].quantity > 1) {
-        newCart[productId].quantity -= 1;
-      } else {
-        delete newCart[productId];
-      }
-
-      return newCart;
-    });
-  };
-
+  // Función para limpiar el carrito
   const clearCart = () => {
     setCart({});
   };
 
+  // Función para eliminar productos del carrito
+  const removeFromCart = (product) => {
+    setCart((prevCart) => {
+      const newCart = { ...prevCart };
+      if (newCart[product.product_id] && newCart[product.product_id].quantity > 1) {
+        newCart[product.product_id].quantity -= 1;
+      } else {
+        delete newCart[product.product_id];
+      }
+      return newCart;
+    });
+  };
+
+  // Calcula la cantidad total de artículos en el carrito
   const cartCount = Object.values(cart).reduce(
     (total, item) => total + (item.quantity || 0),
-    0
-  );
-
-  const cartValue = Object.values(cart).reduce(
-    (total, item) =>
-      total +
-      (item.quantity * getPriceByUserType(item.product, item.selectedVariation) || 0),
     0
   );
 
@@ -96,9 +83,8 @@ export const CartProvider = ({ children }) => {
         addToCart,
         removeFromCart,
         clearCart,
-        getPriceByUserType,
+        cartValue, // Valor total en pesos colombianos
         cartCount,
-        cartValue,
       }}
     >
       {children}

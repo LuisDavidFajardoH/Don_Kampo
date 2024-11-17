@@ -1,23 +1,33 @@
 import React, { useEffect, useState } from "react";
-import { Form, Input, Button, message, Divider, Row, Col } from "antd";
-import { useCart } from "../products/CartContext";
+import { Form, Input, Button, message, Divider, Modal, Row, Col } from "antd";
+import BotonWhatsapp from "../../components/botonWhatsapp/BotonWhatsapp";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
+
 import axios from "axios";
 import Navbar from "../../components/navbar/Navbar";
 import CustomFooter from "../../components/footer/Footer";
 import { useNavigate } from "react-router-dom";
+import { useCart } from "../products/CartContext";
+import useWindowSize from "react-use/lib/useWindowSize";
 import "./Checkout.css";
 
 const Checkout = () => {
   const [userData, setUserData] = useState(null);
   const [cartDetails, setCartDetails] = useState([]);
-  const [shippingCost, setShippingCost] = useState(5000);
-  const [isFirstOrder, setIsFirstOrder] = useState(false);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [orderId, setOrderId] = useState(null);
 
-  const { cart, clearCart, getPriceByUserType } = useCart();
+  const { cart, clearCart, addToCart, removeFromCart } = useCart();
   const navigate = useNavigate();
+  const { width, height } = useWindowSize();
 
   const loginData = JSON.parse(localStorage.getItem("loginData"));
   const userType = loginData?.user?.user_type;
+
+  const [shippingCost, setShippingCost] = useState(5000);
+
+  const [isFirstOrder, setIsFirstOrder] = useState(false);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -27,15 +37,14 @@ const Checkout = () => {
           const user = response.data.user;
           setUserData(user);
 
-          // Aplicar descuento de envío si es la primera orden
           const hasOrders =
             response.data.orders && response.data.orders.length > 0;
           if (!hasOrders) {
             setIsFirstOrder(true);
             if (userType === "hogar") {
-              setShippingCost(2500); // 50% de descuento en el envío para "hogar"
+              setShippingCost(2500);
             } else {
-              setShippingCost(1); // Envío gratis para otros tipos de usuario en la primera orden
+              setShippingCost(1);
             }
           }
         } catch (error) {
@@ -45,22 +54,6 @@ const Checkout = () => {
       } else {
         message.error("Debe iniciar sesión para realizar la compra.");
         navigate("/login");
-        return;
-      }
-
-      try {
-        const response = await axios.get(
-          `https://don-kampo-api.onrender.com/api/users/${loginData.user.id}`
-        );
-        setUserData(response.data.user);
-
-        const hasOrders = response.data.orders?.length > 0;
-        if (!hasOrders) {
-          setIsFirstOrder(true);
-          setShippingCost(userType === "hogar" ? 2500 : 0);
-        }
-      } catch (error) {
-        message.error("Error al cargar los datos del usuario.");
       }
     };
 
@@ -73,7 +66,13 @@ const Checkout = () => {
         const productDetails = await Promise.all(
           Object.keys(cart).map(async (productId) => {
             const response = await axios.get(`/api/getproduct/${productId}`);
-            return { ...response.data, quantity: cart[productId].quantity };
+            return {
+              ...response.data,
+              quantity: cart[productId].quantity,
+              selectedVariation:
+                cart[productId].selectedVariation ||
+                response.data.variations[0], // Asegura que haya una variación seleccionada
+            };
           })
         );
         setCartDetails(productDetails);
@@ -86,8 +85,33 @@ const Checkout = () => {
     fetchCartDetails();
   }, [cart]);
 
+  const getPriceByUserType = (product, selectedVariation) => {
+    if (!selectedVariation || !product.variations) return 0;
+
+    const selectedProductVariation = product.variations.find(
+      (variation) => variation.variation_id === selectedVariation.variation_id
+    );
+
+    if (selectedProductVariation) {
+      switch (userType) {
+        case "hogar":
+          return parseFloat(selectedProductVariation.price_home) || 0;
+        case "supermercado":
+          return parseFloat(selectedProductVariation.price_supermarket) || 0;
+        case "restaurante":
+          return parseFloat(selectedProductVariation.price_restaurant) || 0;
+        case "fruver":
+          return parseFloat(selectedProductVariation.price_fruver) || 0;
+        default:
+          return parseFloat(selectedProductVariation.price_home) || 0;
+      }
+    }
+
+    return 0;
+  };
+
   const calculateSubtotal = () => {
-    return cartDetails.reduce(
+    return (cartDetails || []).reduce(
       (total, product) =>
         total +
         getPriceByUserType(product, product.selectedVariation) *
@@ -136,19 +160,43 @@ const Checkout = () => {
     return requiredFields.every((field) => userData?.[field]?.trim());
   };
 
+  const handleAddToCart = (product, selectedVariation) => {
+    addToCart(product, selectedVariation);
+    setCartDetails((prevDetails) =>
+      prevDetails.map((item) =>
+        item.product_id === product.product_id
+          ? { ...item, quantity: item.quantity + 1 }
+          : item
+      )
+    );
+  };
+
+  const handleRemoveFromCart = (product) => {
+    removeFromCart(product);
+    setCartDetails((prevDetails) =>
+      prevDetails
+        .map((item) =>
+          item.product_id === product.product_id
+            ? { ...item, quantity: Math.max(item.quantity - 1, 0) }
+            : item
+        )
+        .filter((item) => item.quantity > 0)
+    );
+  };
+
   const handlePlaceOrder = async () => {
     if (validateForm()) {
-      // Calcular la fecha de entrega estimada sumando 4 días a la fecha actual
       const currentDate = new Date();
       currentDate.setDate(currentDate.getDate() + 1);
       const estimatedDelivery = currentDate.toISOString();
-
+  
       const orderData = {
         userId: loginData?.user?.id,
         cartDetails: cartDetails.map((product) => ({
           productId: product.product_id,
           quantity: product.quantity,
-          price: getPriceByUserType(product),
+          variationId: product.selectedVariation.variation_id, // ID de la variación
+          price: getPriceByUserType(product, product.selectedVariation),
         })),
         total: calculateSubtotal() + shippingCost,
         shippingCost: shippingCost,
@@ -165,28 +213,59 @@ const Checkout = () => {
           neighborhood: userData.neighborhood,
         },
       };
-
+      
+  
       try {
         const response = await axios.post("/api/orders/placeOrder", orderData);
         if (response.status === 201) {
           setOrderId(response.data.orderId);
-          
           setIsModalVisible(true);
         } else {
           message.error("Error al realizar el pedido. Inténtalo nuevamente.");
+          console.log("Datos enviados al backend:", orderData);
+
         }
       } catch (error) {
         message.error("Error al realizar el pedido.");
+        console.log("Datos enviados al backend:", orderData);
+
         console.error(error);
       }
     } else {
       message.error(
         "Por favor, complete todos los campos antes de realizar el pedido."
+        
       );
     }
   };
+  
 
   const total = calculateSubtotal() + shippingCost;
+
+  const generateOrderPDF = () => {
+    const input = document.getElementById("order-summary-pdf");
+    if (!input) {
+      message.error("No se pudo generar el PDF. Intenta nuevamente.");
+      return;
+    }
+
+    html2canvas(input).then((canvas) => {
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF();
+
+      const imgWidth = 190;
+      const pageHeight = 295;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      const position = 10;
+
+      pdf.addImage(imgData, "PNG", 10, position, imgWidth, imgHeight);
+      pdf.save(`Resumen_Pedido_${orderId}.pdf`);
+
+      clearCart();
+      message.success("El carrito ha sido vaciado después de generar el PDF.");
+      navigate("/products");
+    });
+  };
 
   return (
     <div>
@@ -195,76 +274,200 @@ const Checkout = () => {
         <h2>Finalizar Compra</h2>
         <div className="checkout-content">
           {userData ? (
-            <Row gutter={16}>
-              <Col xs={24} sm={12}>
-                <Form layout="vertical">
+            <Form layout="vertical" className="checkout-form">
+              <Row gutter={16}>
+                <Col xs={24} sm={12}>
                   <Form.Item label="Nombre">
-                    <Input value={userData.user_name} disabled />
+                    <Input
+                      name="user_name"
+                      value={userData.user_name}
+                      onChange={handleInputChange}
+                    />
                   </Form.Item>
+                </Col>
+                <Col xs={24} sm={12}>
                   <Form.Item label="Apellido">
-                    <Input value={userData.lastname} disabled />
+                    <Input
+                      name="lastname"
+                      value={userData.lastname}
+                      onChange={handleInputChange}
+                    />
                   </Form.Item>
+                </Col>
+                <Col xs={24} sm={12}>
                   <Form.Item label="Email">
-                    <Input value={userData.email} disabled />
+                    <Input
+                      name="email"
+                      value={userData.email}
+                      onChange={handleInputChange}
+                    />
                   </Form.Item>
+                </Col>
+                <Col xs={24} sm={12}>
                   <Form.Item label="Teléfono">
-                    <Input value={userData.phone} disabled />
+                    <Input
+                      name="phone"
+                      value={userData.phone}
+                      onChange={handleInputChange}
+                    />
                   </Form.Item>
-                </Form>
-              </Col>
-              <Col xs={24} sm={12}>
-                <div className="order-summary">
-                  <h3>Resumen del Pedido</h3>
-                  <Divider />
-                  {cartDetails.map((product) => (
-                    <div
-                      key={product.product_id}
-                      className="order-summary-item"
-                    >
-                      <span>
-                        {product.name} x {product.quantity}
-                      </span>
-                      <span>
-                        $
-                        {(
-                          getPriceByUserType(product, product.selectedVariation) *
-                          product.quantity
-                        ).toLocaleString()}
-                      </span>
-                    </div>
-                  ))}
-                  <Divider />
-                  <p>
-                    Subtotal: <span>${calculateSubtotal().toLocaleString()}</span>
-                  </p>
-                  <p>
-                    Envío: <span>${shippingCost.toLocaleString()}</span>
-                  </p>
-                  {isFirstOrder && (
-                    <p style={{ color: "#FF914D" }}>
-                      ¡Descuento aplicado al costo de envío por ser tu primer
-                      pedido!
-                    </p>
-                  )}
-                  <Divider />
-                  <h4>
-                    Total: <span>${total.toLocaleString()}</span>
-                  </h4>
+                </Col>
+                <Col xs={24} sm={12}>
+                  <Form.Item label="Ciudad">
+                    <Input
+                      name="city"
+                      value={userData.city}
+                      onChange={handleInputChange}
+                    />
+                  </Form.Item>
+                </Col>
+                <Col xs={24} sm={12}>
+                  <Form.Item label="Dirección">
+                    <Input
+                      name="address"
+                      value={userData.address}
+                      onChange={handleInputChange}
+                    />
+                  </Form.Item>
+                </Col>
+                <Col xs={24} sm={12}>
+                  <Form.Item label="Barrio">
+                    <Input
+                      name="neighborhood"
+                      value={userData.neighborhood}
+                      onChange={handleInputChange}
+                    />
+                  </Form.Item>
+                </Col>
+                <Col xs={24} sm={12}>
                   <Button
                     type="primary"
-                    onClick={handlePlaceOrder}
-                    className="place-order-button"
+                    className="confirm-data-button"
+                    onClick={handleUpdateUser}
                   >
-                    REALIZAR EL PEDIDO
+                    Confirmar Datos
                   </Button>
-                </div>
-              </Col>
-            </Row>
+                </Col>
+              </Row>
+            </Form>
           ) : (
             <p>Cargando datos del usuario...</p>
           )}
+          <div className="order-summary">
+            <h3>Resumen del Pedido</h3>
+            <Divider />
+            {cartDetails.map((product) => (
+              <div key={product.product_id} className="order-summary-item">
+                <span>
+                  {product.name} ({product.selectedVariation.quality} -{" "}
+                  {product.selectedVariation.quantity}) x {product.quantity}
+                </span>
+                <div className="quantity-controls">
+                  <Button onClick={() => handleRemoveFromCart(product)}>
+                    -
+                  </Button>
+                  <span className="quantity-text">{product.quantity}</span>
+                  <Button
+                    onClick={() =>
+                      handleAddToCart(product, product.selectedVariation)
+                    }
+                  >
+                    +
+                  </Button>
+                </div>
+                <span>
+                  $
+                  {(
+                    getPriceByUserType(product, product.selectedVariation) *
+                    product.quantity
+                  ).toLocaleString()}
+                </span>
+              </div>
+            ))}
+
+            <Divider />
+            <p>
+              Subtotal: <span>${calculateSubtotal().toLocaleString()}</span>
+            </p>
+            <p>
+              Envío: <span>${shippingCost.toLocaleString()}</span>
+            </p>
+            {isFirstOrder && (
+              <p
+                style={{ fontSize: "12px", color: "#FF914D", marginTop: "5px" }}
+              >
+                ¡Descuento aplicado al costo de envío por ser tu primer pedido!
+              </p>
+            )}
+
+            <Divider />
+            <h4>
+              Total: <span>${total.toLocaleString()}</span>
+            </h4>
+
+            <Button
+              type="primary"
+              className="place-order-button"
+              onClick={handlePlaceOrder}
+              disabled={!validateForm()}
+            >
+              REALIZAR EL PEDIDO
+            </Button>
+
+            <Modal
+              title="Pedido Confirmado"
+              visible={isModalVisible}
+              onOk={() => {
+                setIsModalVisible(false);
+                navigate("/products");
+              }}
+              onCancel={() => setIsModalVisible(false)}
+              footer={[
+                <Button
+                  key="pdf"
+                  type="default"
+                  onClick={generateOrderPDF}
+                  style={{ backgroundColor: "#FF914D", color: "#fff" }}
+                >
+                  Descargar PDF
+                </Button>,
+              ]}
+            >
+              <div id="order-summary-pdf">
+                <p>
+                  ¡{userData?.user_name}, tu pedido ha sido realizado
+                  exitosamente!
+                </p>
+                <p>
+                  ID de la orden: <strong>{orderId}</strong>
+                </p>
+                <Divider />
+                <h4>Resumen del Pedido</h4>
+                {cartDetails.map((product) => (
+                  <div key={product.product_id} className="order-summary-item">
+                    <span>
+                      {product.name} ({product.selectedVariation.quality} -{" "}
+                      {product.selectedVariation.quantity}) x {product.quantity}
+                    </span>
+                    <span>
+                      $
+                      {(
+                        getPriceByUserType(product, product.selectedVariation) *
+                        product.quantity
+                      ).toLocaleString()}
+                    </span>
+                  </div>
+                ))}
+                <Divider />
+                <p>Subtotal: ${calculateSubtotal().toLocaleString()}</p>
+                <p>Envío: ${shippingCost.toLocaleString()}</p>
+                <h4>Total: ${total.toLocaleString()}</h4>
+              </div>
+            </Modal>
+          </div>
         </div>
       </div>
+      <BotonWhatsapp />
       <CustomFooter />
     </div>
   );

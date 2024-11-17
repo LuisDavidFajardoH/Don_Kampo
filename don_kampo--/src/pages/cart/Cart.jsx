@@ -45,7 +45,6 @@ const Cart = () => {
 
         setCartDetails(productDetails.filter((item) => item !== null));
 
-        // Verificar si el usuario está autenticado para aplicar descuento
         const loginData = JSON.parse(localStorage.getItem("loginData"));
         if (loginData && loginData.user) {
           const userResponse = await axios.get(
@@ -53,14 +52,12 @@ const Cart = () => {
           );
           const hasOrders =
             userResponse.data.orders && userResponse.data.orders.length > 0;
-          setIsFirstOrder(!hasOrders);
 
-          // Aplica el descuento de envío si es la primera orden
           if (!hasOrders) {
-            if (userType === "hogar") {
-              setShippingCost(2500); // 50% de descuento en el envío para "hogar"
+            if (loginData.user.user_type === "hogar") {
+              setShippingCost(2500);
             } else {
-              setShippingCost(0); // Envío gratis para otros tipos de usuario en la primera orden
+              setShippingCost(0);
             }
           }
         }
@@ -111,7 +108,7 @@ const Cart = () => {
 
   const handleCheckout = () => {
     if (cartDetails.length > 0) {
-      navigate("/checkout"); // Navegar a la página de checkout
+      navigate("/checkout");
     } else {
       message.warning("No tienes productos en el carrito.");
     }
@@ -161,6 +158,9 @@ const Cart = () => {
                     <div className="cart-item-details">
                       <h4 className="product-name">{product.name}</h4>
                       <p className="product-category">{product.category}</p>
+                      <p className="product-variation">
+                        Variación: {product.selectedVariation.quality} - {product.selectedVariation.quantity}
+                      </p>
                       <p className="product-price">
                         Precio: $
                         {getPriceByUserType(product, product.selectedVariation).toLocaleString()}

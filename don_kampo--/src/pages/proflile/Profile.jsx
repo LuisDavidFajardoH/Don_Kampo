@@ -34,6 +34,7 @@ const Profile = () => {
   const [form] = Form.useForm();
   const [searchTerm, setSearchTerm] = useState("");
   const [dateRange, setDateRange] = useState([]);
+  const [products, setProducts] = useState([]);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -45,15 +46,19 @@ const Profile = () => {
           setUserData(user);
           form.setFieldsValue(user);
 
-          // Load orders and filter by user's customer_id
+          // Cargar pedidos
           const ordersResponse = await axios.get("/api/orders");
           const userOrders = ordersResponse.data.filter(
             (order) => order.customer_id === loginData.user.id
           );
           setOrders(userOrders);
           setFilteredOrders(userOrders);
+
+          // Cargar productos con variaciones
+          const productsResponse = await axios.get("/api/products");
+          setProducts(productsResponse.data);
         } catch (error) {
-          message.error("Error al cargar los datos del usuario.");
+          message.error("Error al cargar los datos.");
           console.error(error);
         }
       } else {
@@ -137,9 +142,9 @@ const Profile = () => {
 
       const matchDate =
         !range ||
-        (range.length === 0 ||
-          (new Date(order.order_date) >= range[0].startOf("day").toDate() &&
-            new Date(order.order_date) <= range[1].endOf("day").toDate()));
+        range.length === 0 ||
+        (new Date(order.order_date) >= range[0].startOf("day").toDate() &&
+          new Date(order.order_date) <= range[1].endOf("day").toDate());
 
       return matchTerm && matchDate;
     });
@@ -267,9 +272,7 @@ const Profile = () => {
         title: "Acciones",
         key: "actions",
         render: (_, record) => (
-          <Button onClick={() => fetchOrderDetails(record.id)}>
-            Detalles
-          </Button>
+          <Button onClick={() => fetchOrderDetails(record.id)}>Detalles</Button>
         ),
       },
     ];
@@ -319,8 +322,8 @@ const Profile = () => {
       ]}
     >
       {selectedOrder && (
-        <>
-          <div className="order-detail">
+        <div className="modal-content-horizontal">
+          <div className="modal-section-horizontal">
             <p>
               <strong>Cliente:</strong> {selectedOrder.order.customer_name}
             </p>
@@ -332,37 +335,41 @@ const Profile = () => {
               {new Date(selectedOrder.order.order_date).toLocaleDateString()}
             </p>
             <p>
-              <strong>Estado:</strong> {renderStatus(selectedOrder.order.status_id)}
+              <strong>Estado:</strong>{" "}
+              {renderStatus(selectedOrder.order.status_id)}
             </p>
-            <p>
+            <p className="modal-total-horizontal">
               <strong>Total:</strong> $
               {parseFloat(selectedOrder.order.total).toLocaleString()}
             </p>
           </div>
-          <Divider />
-          <h4>Productos:</h4>
-          <div className="order-items">
-            {selectedOrder.items.map((item) => (
-              <div key={item.product_id} className="order-item-detail">
-                <p>
-                  <strong>Producto:</strong> {item.product_name}
-                </p>
-                <p>
-                  <strong>Descripción:</strong> {item.product_description}
-                </p>
-                <p>
-                  <strong>Cantidad:</strong> {item.quantity}
-                </p>
-                <p>
-                  <strong>Precio:</strong> $
-                  {parseFloat(item.price).toLocaleString()}
-                </p>
-                <Divider />
-              </div>
-            ))}
+          <div className="modal-section-horizontal">
+            <h4>Productos:</h4>
+            <div className="modal-product-list-horizontal">
+              {selectedOrder.items.map((item) => (
+                <div
+                  key={item.product_id}
+                  className="modal-product-item-horizontal"
+                >
+                  <p>
+                    <strong>Producto:</strong> {item.product_name}
+                  </p>
+                  <p>
+                    <strong>Descripción:</strong> {item.product_description}
+                  </p>
+                  <p>
+                    <strong>Cantidad:</strong> {item.quantity}
+                  </p>
+                  <p>
+                    <strong>Precio:</strong> $
+                    {parseFloat(item.price).toLocaleString()}
+                  </p>
+                </div>
+              ))}
+            </div>
           </div>
-          <h4>Información de Envío:</h4>
-          <div className="shipping-info">
+          <div className="modal-shipping-info-horizontal">
+            <h4>Información de Envío:</h4>
             <p>
               <strong>Método de Envío:</strong>{" "}
               {selectedOrder.shippingInfo.shipping_method}
@@ -379,10 +386,12 @@ const Profile = () => {
             </p>
             <p>
               <strong>Fecha de Entrega:</strong>{" "}
-              {new Date(selectedOrder.shippingInfo.actual_delivery).toLocaleDateString()}
+              {new Date(
+                selectedOrder.shippingInfo.actual_delivery
+              ).toLocaleDateString()}
             </p>
           </div>
-        </>
+        </div>
       )}
     </Modal>
   );
