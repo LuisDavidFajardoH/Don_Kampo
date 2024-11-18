@@ -33,11 +33,12 @@ const Products = () => {
         const processedProducts = response.data.map((product) => ({
           ...product,
           photo: product.photo
-            ? URL.createObjectURL(
-                new Blob([new Uint8Array(product.photo.data)], {
-                  type: "image/jpeg",
-                })
-              )
+            ? `data:image/jpeg;base64,${btoa(
+                new Uint8Array(product.photo.data).reduce(
+                  (data, byte) => data + String.fromCharCode(byte),
+                  ""
+                )
+              )}`
             : null,
         }));
 
@@ -226,6 +227,50 @@ const Products = () => {
                 <p className="product-category">{product.category}</p>
                 <h3 className="product-name">{product.name}</h3>
                 <p className="product-description">{product.description}</p>
+
+                <div className="product-variations">
+                  <Select
+                    placeholder="Selecciona calidad"
+                    onChange={(value) =>
+                      setSelectedVariation({
+                        ...selectedVariation,
+                        [product.product_id]: {
+                          ...selectedVariation[product.product_id],
+                          quality: value,
+                        },
+                      })
+                    }
+                    size="large"
+                    style={{ width: "100%", marginBottom: 10 }}
+                  >
+                    {product.variations.map((variation) => (
+                      <Option key={variation.variation_id} value={variation.quality}>
+                        {variation.quality}
+                      </Option>
+                    ))}
+                  </Select>
+
+                  <Select
+                    placeholder="Selecciona cantidad"
+                    onChange={(value) =>
+                      setSelectedVariation({
+                        ...selectedVariation,
+                        [product.product_id]: {
+                          ...selectedVariation[product.product_id],
+                          quantity: value,
+                        },
+                      })
+                    }
+                    size="large"
+                    style={{ width: "100%", marginBottom: 10 }}
+                  >
+                    {product.variations.map((variation) => (
+                      <Option key={variation.variation_id} value={variation.quantity}>
+                        {variation.quantity}
+                      </Option>
+                    ))}
+                  </Select>
+                </div>
 
                 <p className="product-price">
                   {getSelectedVariationPrice(product) !== null
