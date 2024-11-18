@@ -16,12 +16,12 @@ const Products = () => {
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("Todas");
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedVariations, setSelectedVariations] = useState({});
+  const [selectedVariation, setSelectedVariation] = useState({});
+  const [quantities, setQuantities] = useState({});
+  const [totalPrices, setTotalPrices] = useState({});
 
-  const { cart, addToCart, removeFromCart } = useCart();
-
-  const userType = JSON.parse(localStorage.getItem("loginData"))?.user
-    ?.user_type;
+  const { cart, addToCart } = useCart();
+  const userType = JSON.parse(localStorage.getItem("loginData"))?.user?.user_type;
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -30,17 +30,19 @@ const Products = () => {
           withCredentials: true,
         });
 
-        // Generar `variation_id` único si no existe
-        const updatedProducts = response.data.map((product) => ({
+        const processedProducts = response.data.map((product) => ({
           ...product,
-          variations: product.variations.map((variation, index) => ({
-            ...variation,
-            variation_id: `${product.product_id}-${index}`, // ID único
-          })),
+          photo: product.photo
+            ? URL.createObjectURL(
+                new Blob([new Uint8Array(product.photo.data)], {
+                  type: "image/jpeg",
+                })
+              )
+            : null,
         }));
 
-        setProducts(updatedProducts);
-        setFilteredProducts(updatedProducts);
+        setProducts(processedProducts);
+        setFilteredProducts(processedProducts);
 
         const uniqueCategories = [
           "Todas",
@@ -57,7 +59,7 @@ const Products = () => {
           filterProducts("Todas", initialSearch, updatedProducts);
         } else if (initialCategory) {
           setSelectedCategory(initialCategory);
-          filterProducts(initialCategory, "", updatedProducts);
+          filterProducts(initialCategory, searchQuery, processedProducts);
         }
       } catch (error) {
         message.error("Error al cargar los productos.");
@@ -101,38 +103,32 @@ const Products = () => {
     filterProducts(selectedCategory, searchQuery);
   }, [selectedCategory, searchQuery]);
 
-  const getBase64Image = (photo) => {
-    // Si la foto es nula, devuelve una imagen por defecto
-    if (!photo) {
-      return "https://via.placeholder.com/150"; // Imagen de respaldo
+  const getPriceByUserType = (product, selectedVariation) => {
+    if (!selectedVariation) return 0;
+    const { quality, quantity } = selectedVariation;
+
+    if (!quality || !quantity) return 0;
+
+    const selectedProductVariation = product.variations.find(
+      (variation) => variation.quality === quality && variation.quantity === quantity
+    );
+
+    if (selectedProductVariation) {
+      switch (userType) {
+        case "hogar":
+          return selectedProductVariation.price_home;
+        case "supermercado":
+          return selectedProductVariation.price_supermarket;
+        case "restaurante":
+          return selectedProductVariation.price_restaurant;
+        case "fruver":
+          return selectedProductVariation.price_fruver;
+        default:
+          return selectedProductVariation.price_home;
+      }
     }
 
-    // Si la foto tiene un prefijo incorrecto, corrígelo
-    if (photo.startsWith("data:image/jpeg;base64,dataimage/jpegbase64/")) {
-      return photo.replace(
-        "data:image/jpeg;base64,dataimage/jpegbase64/",
-        "data:image/jpeg;base64,"
-      );
-    }
-    console.log("Fotossssssssssssssssssssssssssssssss:", photo);
-
-    // Si el formato es válido, retorna la foto
-    return photo;
-  };
-
-  const getPriceByUserType = (product) => {
-    switch (userType) {
-      case "hogar":
-        return product.price_home;
-      case "supermercado":
-        return product.price_supermarket;
-      case "restaurante":
-        return product.price_restaurant;
-      case "fruver":
-        return product.price_fruver;
-      default:
-        return product.price_home;
-    }
+    return 0;
   };
 
   const getSelectedVariationPrice = (product) => {
@@ -215,34 +211,21 @@ const Products = () => {
               className="product-card"
               hoverable
               cover={
-                <img
-                  alt={product.name}
-                  src={getBase64Image(product.photo)}
-                  style={{ objectFit: "cover", width: "100%", height: "200px" }}
-                />
+                product.photo ? (
+                  <img
+                    alt={product.name}
+                    src={product.photo}
+                    style={{ height: "200px", objectFit: "contain" }}
+                  />
+                ) : (
+                  <div className="placeholder-image">Imagen no disponible</div>
+                )
               }
             >
               <div className="product-info">
                 <p className="product-category">{product.category}</p>
                 <h3 className="product-name">{product.name}</h3>
-
-                <Select
-                  placeholder="Selecciona una variación"
-                  style={{ width: "100%", marginBottom: 8 }}
-                  onChange={(value) =>
-                    handleVariationChange(product.product_id, value)
-                  }
-                  value={selectedVariations[product.product_id] || undefined}
-                >
-                  {product.variations.map((variation) => (
-                    <Option
-                      key={variation.variation_id}
-                      value={variation.variation_id}
-                    >
-                      {`${variation.quality} - ${variation.quantity}`}
-                    </Option>
-                  ))}
-                </Select>
+                <p className="product-description">{product.description}</p>
 
                 <p className="product-price">
                   {getSelectedVariationPrice(product) !== null
@@ -251,40 +234,7 @@ const Products = () => {
                       ).toLocaleString()}`
                     : "Selecciona una variación para ver el precio."}
                 </p>
-
-                {cart[product.product_id] ? (
-                  <div className="quantity-controls">
-                    <Button
-                      onClick={() => {
-                        console.log("Eliminando del carrito:", product);
-                        handleRemoveFromCart(product);
-                      }}
-                      className="quantity-button"
-                    >
-                      -
-                    </Button>
-                    <span className="quantity-text">
-                      {cart[product.product_id].quantity}
-                    </span>
-                    <Button
-                      onClick={() => {
-                        console.log("Añadiendo al carrito:", product);
-                        handleAddToCart(product);
-                      }}
-                      className="quantity-button"
-                    >
-                      +
-                    </Button>
-                  </div>
-                ) : (
-                  <Button
-                    type="primary"
-                    onClick={() => handleAddToCart(product)}
-                    className="add-to-cart-button"
-                  >
-                    Añadir al carrito
-                  </Button>
-                )}
+                {/* Más lógica para variaciones */}
               </div>
             </Card>
           ))
