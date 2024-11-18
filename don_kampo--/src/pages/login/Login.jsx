@@ -53,7 +53,7 @@ const Login = () => {
     setForgotPasswordLoading(true);
     try {
       const response = await axios.post(
-        "https://don-kampo-api.onrender.com/api/request-password-reset",
+        "http://localhost:8080/api/request-password-reset",
         {
           email,
         },
