@@ -26,7 +26,7 @@ const Products = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get("/api/products", {
+        const response = await axios.get("http://localhost:8080/api/products", {
           withCredentials: true,
         });
 
@@ -47,18 +47,19 @@ const Products = () => {
 
         const uniqueCategories = [
           "Todas",
-          ...new Set(updatedProducts.map((product) => product.category)),
+          "Frutas importadas",
+          "Verdura",
+          "Frutas nacionales",
+          "Hortalizas",
+          "Cosecha",
+          "Otros",
         ];
         setCategories(uniqueCategories);
 
         const params = new URLSearchParams(location.search);
         const initialCategory = params.get("category");
-        const initialSearch = params.get("search");
 
-        if (initialSearch) {
-          setSearchQuery(initialSearch);
-          filterProducts("Todas", initialSearch, updatedProducts);
-        } else if (initialCategory) {
+        if (initialCategory) {
           setSelectedCategory(initialCategory);
           filterProducts(initialCategory, searchQuery, processedProducts);
         }
@@ -85,7 +86,10 @@ const Products = () => {
   };
 
   const normalizeString = (str) => {
-    return str.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+    return str
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase();
   };
 
   const filterProducts = (category, query, productsToFilter = products) => {
@@ -132,45 +136,24 @@ const Products = () => {
     return 0;
   };
 
-  const getSelectedVariationPrice = (product) => {
-    const selectedVariationId = selectedVariations[product.product_id];
-    if (!selectedVariationId) return null;
+  const updateQuantity = (productId, increment) => {
+    setQuantities((prevQuantities) => {
+      const updatedQuantities = { ...prevQuantities };
+      const currentQuantity = updatedQuantities[productId] || 0;
+      updatedQuantities[productId] = Math.max(currentQuantity + increment, 0);
+      return updatedQuantities;
+    });
 
-    const selectedVariation = product.variations.find(
-      (v) => v.variation_id === selectedVariationId
-    );
-    return selectedVariation ? getPriceByUserType(selectedVariation) : null;
-  };
+    setTotalPrices((prevTotalPrices) => {
+      const updatedTotalPrices = { ...prevTotalPrices };
+      const product = products.find((p) => p.product_id === productId);
+      const selectedVariationForProduct = selectedVariation[productId];
+      const unitPrice = getPriceByUserType(product, selectedVariationForProduct);
+      const quantity = (quantities[productId] || 0) + increment;
 
-  const handleVariationChange = (productId, variationId) => {
-    console.log("Cambio de variación:", { productId, variationId });
-    setSelectedVariations((prev) => ({
-      ...prev,
-      [productId]: variationId,
-    }));
-  };
-
-  const handleAddToCart = (product) => {
-    const selectedVariation = product.variations.find(
-      (v) => v.variation_id === selectedVariations[product.product_id]
-    );
-
-    if (!selectedVariation) {
-      message.error(
-        "Por favor selecciona una variación antes de añadir al carrito."
-      );
-      return;
-    }
-
-    addToCart({ ...product, selectedVariation });
-  };
-
-  useEffect(() => {
-    console.log("Estado del carrito:", cart);
-  }, [cart]);
-
-  const handleRemoveFromCart = (product) => {
-    removeFromCart(product);
+      updatedTotalPrices[productId] = unitPrice * Math.max(quantity, 0);
+      return updatedTotalPrices;
+    });
   };
 
   return (
@@ -273,13 +256,39 @@ const Products = () => {
                 </div>
 
                 <p className="product-price">
-                  {getSelectedVariationPrice(product) !== null
-                    ? `$${parseFloat(
-                        getSelectedVariationPrice(product)
-                      ).toLocaleString()}`
-                    : "Selecciona una variación para ver el precio."}
+                  Precio total: ${(totalPrices[product.product_id] || 0).toLocaleString()}
                 </p>
-                {/* Más lógica para variaciones */}
+
+                <div className="quantity-controls">
+                  <Button
+                    onClick={() => updateQuantity(product.product_id, -1)}
+                    className="quantity-button"
+                    disabled={quantities[product.product_id] <= 0}
+                  >
+                    -
+                  </Button>
+                  <span className="quantity-text">
+                    {quantities[product.product_id] || 0}
+                  </span>
+                  <Button
+                    onClick={() => updateQuantity(product.product_id, 1)}
+                    className="quantity-button"
+                  >
+                    +
+                  </Button>
+                </div>
+
+                {quantities[product.product_id] > 0 && (
+                  <Button
+                    type="primary"
+                    onClick={() =>
+                      addToCart(product, selectedVariation[product.product_id])
+                    }
+                    className="add-to-cart-button"
+                  >
+                    Añadir al carrito
+                  </Button>
+                )}
               </div>
             </Card>
           ))
