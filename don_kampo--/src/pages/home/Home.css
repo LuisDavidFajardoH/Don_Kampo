@@ -404,3 +404,107 @@
     white-space: nowrap;
     text-overflow: ellipsis;
   }
+
+/* Estilos generales para la barra de búsqueda */
+.search-bar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  padding: 10px;
+  background-color: rgba(65, 94, 78, 0.178); /* Fondo suave */
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Estilo para el input */
+.search-input {
+  width: 50%;
+  padding: 10px;
+  font-size: 16px;
+  border: 2px solid #00983a;
+  border-radius: 4px;
+  outline: none;
+}
+
+.search-input:focus {
+  border-color: #ff914d;
+  box-shadow: 0 0 4px #ff914d;
+}
+
+/* Estilo para el botón */
+.search-button {
+  background-color: #00983a;
+  border-color: #00983a;
+  color: white;
+  font-weight: bold;
+  padding: 10px 20px;
+  font-size: 16px;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.search-button:hover {
+  background-color: #ff914d;
+  border-color: #ff914d;
+}
+
+/* Responsividad para pantallas pequeñas (teléfonos) */
+@media (max-width: 768px) {
+  .search-bar {
+    flex-direction: column; /* Cambia la dirección a columna */
+    gap: 5px; /* Menor espacio entre elementos */
+    padding: 10px 5px; /* Ajusta el padding */
+  }
+
+  .search-input {
+    width: 90%; /* Input más ancho */
+    font-size: 14px; /* Fuente más pequeña */
+    margin-bottom: 0%;
+  }
+
+  .search-button {
+    width: 90%; /* Botón ocupa todo el ancho del input */
+    font-size: 14px; /* Fuente más pequeña */
+    padding: 8px; /* Menor padding */
+  }
+}
+
+/* Responsividad para pantallas medianas (tabletas) */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .search-bar {
+    gap: 8px; /* Ajusta el espacio entre elementos */
+    
+  }
+
+  .search-input {
+    width: 70%; /* Input más ancho */
+    font-size: 15px; /* Ajusta el tamaño de fuente */
+    margin-bottom: 0%;
+    
+  }
+
+  .search-button {
+    font-size: 15px; /* Ajusta el tamaño de fuente */
+    padding: 9px 18px; /* Ajusta el padding */
+  }
+}
+
+/* Responsividad para pantallas grandes (escritorio) */
+@media (min-width: 1025px) {
+  .search-bar {
+    gap: 12px; /* Espacio mayor entre elementos */
+  }
+
+  .search-input {
+    width: 50%; /* Input de tamaño normal */
+    font-size: 16px; /* Tamaño de fuente estándar */
+    margin-bottom: 0%;
+  }
+
+  .search-button {
+    font-size: 16px; /* Tamaño de fuente estándar */
+    padding: 10px 20px; /* Padding estándar */
+  }
+}

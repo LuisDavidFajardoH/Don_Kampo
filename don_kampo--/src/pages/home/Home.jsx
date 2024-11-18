@@ -1,5 +1,14 @@
 import React, { useRef, useEffect, useState } from "react";
-import { Carousel, Button, Card, Typography, Row, Col, Modal } from "antd";
+import {
+  Carousel,
+  Button,
+  Card,
+  Typography,
+  Row,
+  Col,
+  Modal,
+  Input,
+} from "antd";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../components/navbar/Navbar";
@@ -55,10 +64,16 @@ const Home = () => {
   const carouselRef = useRef(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [userType, setUserType] = useState(null);
+  const [searchValue, setSearchValue] = useState("");
   const navigate = useNavigate();
 
   const handleCategoryClick = (category) => {
     navigate(`/products?category=${encodeURIComponent(category)}`);
+  };
+
+  // Función para manejar la búsqueda
+  const handleSearch = (value) => {
+    navigate(`/products?search=${encodeURIComponent(value)}`);
   };
 
   useEffect(() => {
@@ -97,6 +112,30 @@ const Home = () => {
       <Navbar />
       <div className="home-container">
         {/* Carrusel principal */}
+        {/* Barra de búsqueda */}
+        {/* Barra de búsqueda */}
+        {/* Barra de búsqueda */}
+        <div className="search-bar">
+          <input
+            type="text"
+            placeholder="Buscar productos, categorías, etc."
+            className="search-input"
+            onChange={(e) => setSearchValue(e.target.value)}
+            onKeyPress={(e) => {
+              if (e.key === "Enter") {
+                handleSearch(e.target.value);
+              }
+            }}
+          />
+          <Button
+            type="primary"
+            className="search-button"
+            onClick={() => handleSearch(searchValue)}
+          >
+            Buscar
+          </Button>
+        </div>
+
         <div className="carousel-wrapper">
           <Carousel autoplay className="home-carousel" ref={carouselRef}>
             {carouselItems.map((item, index) => (
@@ -108,7 +147,11 @@ const Home = () => {
                 />
                 <div className="carousel-overlay">
                   <div className="carousel-left">
-                    <Title level={2} className=" carousel-title" style={{ color: "white" }}>
+                    <Title
+                      level={2}
+                      className=" carousel-title"
+                      style={{ color: "white" }}
+                    >
                       {item.title}
                     </Title>
                     <Paragraph className="carousel-description">
@@ -148,7 +191,9 @@ const Home = () => {
 
         {/* Categorías destacadas */}
         <div className="categories-section">
-          <Title style={{ color: "#00983a" }} level={3}>Explora nuestras categorías</Title>
+          <Title style={{ color: "#00983a" }} level={3}>
+            Explora nuestras categorías
+          </Title>
           <Row gutter={16}>
             {categories.map((category, index) => (
               <Col key={index} xs={24} sm={12} md={6}>
@@ -171,9 +216,10 @@ const Home = () => {
             <Col xs={24} md={12}>
               <Title level={3}>Calidad garantizada</Title>
               <Paragraph>
-                En Don Kampo, nuestra pasión es brindar productos frescos y de calidad excepcional,
-                cultivados con dedicación y respeto por la tierra. Nos enorgullece llevar lo mejor del
-                campo directamente a tu mesa, promoviendo un consumo responsable y sostenible que
+                En Don Kampo, nuestra pasión es brindar productos frescos y de
+                calidad excepcional, cultivados con dedicación y respeto por la
+                tierra. Nos enorgullece llevar lo mejor del campo directamente a
+                tu mesa, promoviendo un consumo responsable y sostenible que
                 apoya a nuestros agricultores y cuida del medio ambiente.
               </Paragraph>
               <Button type="primary" size="large" className="Boton_mas">
@@ -200,7 +246,8 @@ const Home = () => {
           <div className="modal-text">
             Por el momento, nuestros servicios están disponibles únicamente en
             <span className="modal-body-highlight"> Chía</span> y
-            <span className="modal-body-highlight"> Cajicá</span>. ¡Gracias por tu comprensión!
+            <span className="modal-body-highlight"> Cajicá</span>. ¡Gracias por
+            tu comprensión!
           </div>
           <div className="user-type-selection">
             <Title level={5}>Selecciona tu tipo de usuario:</Title>

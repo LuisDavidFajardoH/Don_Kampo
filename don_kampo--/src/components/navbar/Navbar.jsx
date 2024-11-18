@@ -91,10 +91,7 @@ const Navbar = () => {
     handleMenuClick("login", "/login");
   };
 
-  // Función para manejar la búsqueda
-  const handleSearch = (value) => {
-    navigate(`/products?search=${encodeURIComponent(value)}`);
-  };
+ 
 
   return (
     <Header className="navbar">
@@ -108,16 +105,7 @@ const Navbar = () => {
           />
         </div>
 
-        {/* Barra de búsqueda */}
-        <Input
-          className="navbar-search"
-          placeholder="Buscar productos..."
-          prefix={<SearchOutlined />}
-          onPressEnter={(e) => handleSearch(e.target.value)}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          value={searchTerm}
-          
-        />
+        
       </div>
 
       {/* Carrito */}
