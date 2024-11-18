@@ -102,13 +102,22 @@ const Products = () => {
   }, [selectedCategory, searchQuery]);
 
   const getBase64Image = (photo) => {
-    if (photo && photo.data) {
-      const base64String = btoa(
-        String.fromCharCode(...new Uint8Array(photo.data))
-      );
-      return `data:image/jpeg;base64,${base64String}`;
+    // Si la foto es nula, devuelve una imagen por defecto
+    if (!photo) {
+      return "https://via.placeholder.com/150"; // Imagen de respaldo
     }
-    return "path_to_placeholder_image";
+
+    // Si la foto tiene un prefijo incorrecto, corrígelo
+    if (photo.startsWith("data:image/jpeg;base64,dataimage/jpegbase64/")) {
+      return photo.replace(
+        "data:image/jpeg;base64,dataimage/jpegbase64/",
+        "data:image/jpeg;base64,"
+      );
+    }
+    console.log("Fotossssssssssssssssssssssssssssssss:", photo);
+
+    // Si el formato es válido, retorna la foto
+    return photo;
   };
 
   const getPriceByUserType = (product) => {
@@ -206,7 +215,11 @@ const Products = () => {
               className="product-card"
               hoverable
               cover={
-                <img alt={product.name} src={getBase64Image(product.photo)} />
+                <img
+                  alt={product.name}
+                  src={getBase64Image(product.photo)}
+                  style={{ objectFit: "cover", width: "100%", height: "200px" }}
+                />
               }
             >
               <div className="product-info">

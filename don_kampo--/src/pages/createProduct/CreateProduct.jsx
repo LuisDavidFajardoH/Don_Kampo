@@ -51,7 +51,7 @@ const CreateProduct = () => {
   const removeVariation = (index) => {
     const updatedVariations = [...variations];
     updatedVariations.splice(index, 1);
-    setVariations(uphttps://don-kampo-api.onrender.comdatedVariations);
+    setVariations(updatedVariations);
   };
 
   const handleSubmit = async (values) => {
@@ -61,29 +61,11 @@ const CreateProduct = () => {
     formData.append("category", values.category || "");
     formData.append("stock", values.stock !== undefined ? parseInt(values.stock, 10) : 0);
     formData.append("photo", imageFile);
+    formData.append("price_home", values.price_home !== undefined ? parseFloat(values.price_home) : 0);
+    formData.append("price_supermarket", values.price_supermarket !== undefined ? parseFloat(values.price_supermarket) : 0);
+    formData.append("price_restaurant", values.price_restaurant !== undefined ? parseFloat(values.price_restaurant) : 0);
+    formData.append("price_fruver", values.price_fruver !== undefined ? parseFloat(values.price_fruver) : 0);
 
-    console.log("Datos enviados:", {
-      name: values.name,
-      description: values.description,
-      category: values.category,
-      stock: values.stock,
-      photo: imageFile,
-      variations: variations
-    });
-  
-    // Incluir las variaciones con el productId
-    const productData = {
-      name: values.name,
-      description: values.description,
-      category: values.category,
-      stock: values.stock,
-      photo: imageFile,
-      variations: variations.map(variation => ({
-        ...variation,
-        product_id: values.productId || null  // Asignar el productId a cada variación
-      }))
-    };
-  
     try {
       const response = await axios.post("/api/createproduct", formData, {
         headers: { "Content-Type": "multipart/form-data" },
@@ -98,18 +80,15 @@ const CreateProduct = () => {
       console.error(error);
     }
   };
-<<<<<<< HEAD
 
-  const handleImageUpload = ({ file }) => {
-    setImageFile(file);
-  };
+ 
 
   const handleExcelUpload = ({ file }) => {
     const reader = new FileReader();
     reader.onload = (e) => {
       const data = new Uint8Array(e.target.result);
       const workbook = XLSX.read(data, { type: "array" });
-      const sheetNahttps://don-kampo-api.onrender.comme = workbook.SheetNames[0];
+      const sheetName = workbook.SheetNames[0];
       const worksheet = workbook.Sheets[sheetName];
       const jsonData = XLSX.utils.sheet_to_json(worksheet);
       setProducts(jsonData);
@@ -191,9 +170,6 @@ const CreateProduct = () => {
       ),
     },
   ];
-=======
-  
->>>>>>> 7ce0cc88a61b0c7408cc591f10f7926b41d8e604
 
   return (
 
