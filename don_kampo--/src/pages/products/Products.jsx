@@ -16,52 +16,48 @@ const Products = () => {
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("Todas");
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedVariation, setSelectedVariation] = useState({});
-  const [quantities, setQuantities] = useState({});
-  const [totalPrices, setTotalPrices] = useState({});
+  const [selectedVariations, setSelectedVariations] = useState({});
 
-  const { cart, addToCart } = useCart();
-  const userType = JSON.parse(localStorage.getItem("loginData"))?.user?.user_type;
+  const { cart, addToCart, removeFromCart } = useCart();
+
+  const userType = JSON.parse(localStorage.getItem("loginData"))?.user
+    ?.user_type;
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get("http://localhost:8080/api/products", {
+        const response = await axios.get("/api/products", {
           withCredentials: true,
         });
 
-        const processedProducts = response.data.map((product) => ({
+        // Generar `variation_id` único si no existe
+        const updatedProducts = response.data.map((product) => ({
           ...product,
-          photo: product.photo
-            ? `data:image/jpeg;base64,${btoa(
-                new Uint8Array(product.photo.data).reduce(
-                  (data, byte) => data + String.fromCharCode(byte),
-                  ""
-                )
-              )}`
-            : null,
+          variations: product.variations.map((variation, index) => ({
+            ...variation,
+            variation_id: `${product.product_id}-${index}`, // ID único
+          })),
         }));
 
-        setProducts(processedProducts);
-        setFilteredProducts(processedProducts);
+        setProducts(updatedProducts);
+        setFilteredProducts(updatedProducts);
 
         const uniqueCategories = [
           "Todas",
-          "Frutas importadas",
-          "Verdura",
-          "Frutas nacionales",
-          "Hortalizas",
-          "Cosecha",
-          "Otros",
+          ...new Set(updatedProducts.map((product) => product.category)),
         ];
         setCategories(uniqueCategories);
 
         const params = new URLSearchParams(location.search);
         const initialCategory = params.get("category");
+        const initialSearch = params.get("search");
 
-        if (initialCategory) {
+        if (initialSearch) {
+          setSearchQuery(initialSearch);
+          filterProducts("Todas", initialSearch, updatedProducts);
+        } else if (initialCategory) {
           setSelectedCategory(initialCategory);
-          filterProducts(initialCategory, searchQuery, processedProducts);
+          filterProducts(initialCategory, "", updatedProducts);
         }
       } catch (error) {
         message.error("Error al cargar los productos.");
@@ -86,10 +82,7 @@ const Products = () => {
   };
 
   const normalizeString = (str) => {
-    return str
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .toLowerCase();
+    return str.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
   };
 
   const filterProducts = (category, query, productsToFilter = products) => {
@@ -108,52 +101,79 @@ const Products = () => {
     filterProducts(selectedCategory, searchQuery);
   }, [selectedCategory, searchQuery]);
 
-  const getPriceByUserType = (product, selectedVariation) => {
-    if (!selectedVariation) return 0;
-    const { quality, quantity } = selectedVariation;
-
-    if (!quality || !quantity) return 0;
-
-    const selectedProductVariation = product.variations.find(
-      (variation) => variation.quality === quality && variation.quantity === quantity
-    );
-
-    if (selectedProductVariation) {
-      switch (userType) {
-        case "hogar":
-          return selectedProductVariation.price_home;
-        case "supermercado":
-          return selectedProductVariation.price_supermarket;
-        case "restaurante":
-          return selectedProductVariation.price_restaurant;
-        case "fruver":
-          return selectedProductVariation.price_fruver;
-        default:
-          return selectedProductVariation.price_home;
-      }
+  const getBase64Image = (photo) => {
+    // Si la foto es nula, devuelve una imagen por defecto
+    if (!photo) {
+      return "https://via.placeholder.com/150"; // Imagen de respaldo
     }
 
-    return 0;
+    // Si la foto tiene un prefijo incorrecto, corrígelo
+    if (photo.startsWith("data:image/jpeg;base64,dataimage/jpegbase64/")) {
+      return photo.replace(
+        "data:image/jpeg;base64,dataimage/jpegbase64/",
+        "data:image/jpeg;base64,"
+      );
+    }
+    console.log("Fotossssssssssssssssssssssssssssssss:", photo);
+
+    // Si el formato es válido, retorna la foto
+    return photo;
   };
 
-  const updateQuantity = (productId, increment) => {
-    setQuantities((prevQuantities) => {
-      const updatedQuantities = { ...prevQuantities };
-      const currentQuantity = updatedQuantities[productId] || 0;
-      updatedQuantities[productId] = Math.max(currentQuantity + increment, 0);
-      return updatedQuantities;
-    });
+  const getPriceByUserType = (product) => {
+    switch (userType) {
+      case "hogar":
+        return product.price_home;
+      case "supermercado":
+        return product.price_supermarket;
+      case "restaurante":
+        return product.price_restaurant;
+      case "fruver":
+        return product.price_fruver;
+      default:
+        return product.price_home;
+    }
+  };
 
-    setTotalPrices((prevTotalPrices) => {
-      const updatedTotalPrices = { ...prevTotalPrices };
-      const product = products.find((p) => p.product_id === productId);
-      const selectedVariationForProduct = selectedVariation[productId];
-      const unitPrice = getPriceByUserType(product, selectedVariationForProduct);
-      const quantity = (quantities[productId] || 0) + increment;
+  const getSelectedVariationPrice = (product) => {
+    const selectedVariationId = selectedVariations[product.product_id];
+    if (!selectedVariationId) return null;
 
-      updatedTotalPrices[productId] = unitPrice * Math.max(quantity, 0);
-      return updatedTotalPrices;
-    });
+    const selectedVariation = product.variations.find(
+      (v) => v.variation_id === selectedVariationId
+    );
+    return selectedVariation ? getPriceByUserType(selectedVariation) : null;
+  };
+
+  const handleVariationChange = (productId, variationId) => {
+    console.log("Cambio de variación:", { productId, variationId });
+    setSelectedVariations((prev) => ({
+      ...prev,
+      [productId]: variationId,
+    }));
+  };
+
+  const handleAddToCart = (product) => {
+    const selectedVariation = product.variations.find(
+      (v) => v.variation_id === selectedVariations[product.product_id]
+    );
+
+    if (!selectedVariation) {
+      message.error(
+        "Por favor selecciona una variación antes de añadir al carrito."
+      );
+      return;
+    }
+
+    addToCart({ ...product, selectedVariation });
+  };
+
+  useEffect(() => {
+    console.log("Estado del carrito:", cart);
+  }, [cart]);
+
+  const handleRemoveFromCart = (product) => {
+    removeFromCart(product);
   };
 
   return (
@@ -195,95 +215,71 @@ const Products = () => {
               className="product-card"
               hoverable
               cover={
-                product.photo ? (
-                  <img
-                    alt={product.name}
-                    src={product.photo}
-                    style={{ height: "200px", objectFit: "contain" }}
-                  />
-                ) : (
-                  <div className="placeholder-image">Imagen no disponible</div>
-                )
+                <img
+                  alt={product.name}
+                  src={getBase64Image(product.photo)}
+                  style={{ objectFit: "cover", width: "100%", height: "200px" }}
+                />
               }
             >
               <div className="product-info">
                 <p className="product-category">{product.category}</p>
                 <h3 className="product-name">{product.name}</h3>
-                <p className="product-description">{product.description}</p>
 
-                <div className="product-variations">
-                  <Select
-                    placeholder="Selecciona calidad"
-                    onChange={(value) =>
-                      setSelectedVariation({
-                        ...selectedVariation,
-                        [product.product_id]: {
-                          ...selectedVariation[product.product_id],
-                          quality: value,
-                        },
-                      })
-                    }
-                    size="large"
-                    style={{ width: "100%", marginBottom: 10 }}
-                  >
-                    {product.variations.map((variation) => (
-                      <Option key={variation.variation_id} value={variation.quality}>
-                        {variation.quality}
-                      </Option>
-                    ))}
-                  </Select>
-
-                  <Select
-                    placeholder="Selecciona cantidad"
-                    onChange={(value) =>
-                      setSelectedVariation({
-                        ...selectedVariation,
-                        [product.product_id]: {
-                          ...selectedVariation[product.product_id],
-                          quantity: value,
-                        },
-                      })
-                    }
-                    size="large"
-                    style={{ width: "100%", marginBottom: 10 }}
-                  >
-                    {product.variations.map((variation) => (
-                      <Option key={variation.variation_id} value={variation.quantity}>
-                        {variation.quantity}
-                      </Option>
-                    ))}
-                  </Select>
-                </div>
+                <Select
+                  placeholder="Selecciona una variación"
+                  style={{ width: "100%", marginBottom: 8 }}
+                  onChange={(value) =>
+                    handleVariationChange(product.product_id, value)
+                  }
+                  value={selectedVariations[product.product_id] || undefined}
+                >
+                  {product.variations.map((variation) => (
+                    <Option
+                      key={variation.variation_id}
+                      value={variation.variation_id}
+                    >
+                      {`${variation.quality} - ${variation.quantity}`}
+                    </Option>
+                  ))}
+                </Select>
 
                 <p className="product-price">
-                  Precio total: ${(totalPrices[product.product_id] || 0).toLocaleString()}
+                  {getSelectedVariationPrice(product) !== null
+                    ? `$${parseFloat(
+                        getSelectedVariationPrice(product)
+                      ).toLocaleString()}`
+                    : "Selecciona una variación para ver el precio."}
                 </p>
 
-                <div className="quantity-controls">
-                  <Button
-                    onClick={() => updateQuantity(product.product_id, -1)}
-                    className="quantity-button"
-                    disabled={quantities[product.product_id] <= 0}
-                  >
-                    -
-                  </Button>
-                  <span className="quantity-text">
-                    {quantities[product.product_id] || 0}
-                  </span>
-                  <Button
-                    onClick={() => updateQuantity(product.product_id, 1)}
-                    className="quantity-button"
-                  >
-                    +
-                  </Button>
-                </div>
-
-                {quantities[product.product_id] > 0 && (
+                {cart[product.product_id] ? (
+                  <div className="quantity-controls">
+                    <Button
+                      onClick={() => {
+                        console.log("Eliminando del carrito:", product);
+                        handleRemoveFromCart(product);
+                      }}
+                      className="quantity-button"
+                    >
+                      -
+                    </Button>
+                    <span className="quantity-text">
+                      {cart[product.product_id].quantity}
+                    </span>
+                    <Button
+                      onClick={() => {
+                        console.log("Añadiendo al carrito:", product);
+                        handleAddToCart(product);
+                      }}
+                      className="quantity-button"
+                    >
+                      +
+                    </Button>
+                  </div>
+                ) : (
                   <Button
                     type="primary"
-                    onClick={() =>
-                      addToCart(product, selectedVariation[product.product_id])
-                    }
+                    onClick={() => handleAddToCart(product)}
                     className="add-to-cart-button"
                   >
                     Añadir al carrito
