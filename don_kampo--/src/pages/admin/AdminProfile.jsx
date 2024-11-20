@@ -359,6 +359,7 @@ const AdminProfile = () => {
             <Option value={2}>Enviado</Option>
             <Option value={3}>Entregado</Option>
             <Option value={4}>Cancelado</Option>
+            <Option value={5}>Pagado</Option>
           </Select>
           <Button type="primary" onClick={exportFilteredOrdersToExcel}>
             Descargar Excel

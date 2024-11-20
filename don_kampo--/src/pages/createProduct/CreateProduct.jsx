@@ -34,7 +34,9 @@ const CreateProduct = () => {
   ]);
 
   const handleImageUpload = ({ file }) => {
-    setImageFile(file);
+    if (file) {
+      setImageFile(file); // Guardar el archivo seleccionado
+    }
   };
 
   const handleVariationChange = (index, field, value) => {
@@ -69,18 +71,24 @@ const CreateProduct = () => {
     formData.append("name", values.name);
     formData.append("description", values.description);
     formData.append("category", values.category);
-    formData.append("stock", values.stock);
+    formData.append("stock", 100);
     if (imageFile) {
-      formData.append("photo", imageFile); // Adjuntar la imagen
+      formData.append("photo_url", imageFile);
     }
     formData.append("variations", JSON.stringify(variations)); // Adjuntar variaciones como JSON
 
     try {
-      const response = await axios.post("http://localhost:8080/api/createproduct", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      const response = await axios.post(
+        "http://localhost:8080/api/createproduct",
+        formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+        }
+      );
 
-      message.success(`Producto creado exitosamente con ID: ${response.data.product_id}`);
+      message.success(
+        `Producto creado exitosamente con ID: ${response.data.product_id}`
+      );
       form.resetFields();
       setImageFile(null);
       setVariations([]);
@@ -101,7 +109,9 @@ const CreateProduct = () => {
               <Form.Item
                 name="name"
                 label="Nombre del Producto"
-                rules={[{ required: true, message: "Por favor ingresa el nombre" }]}
+                rules={[
+                  { required: true, message: "Por favor ingresa el nombre" },
+                ]}
               >
                 <Input placeholder="Nombre del producto" />
               </Form.Item>
@@ -110,7 +120,12 @@ const CreateProduct = () => {
               <Form.Item
                 name="category"
                 label="Categoría"
-                rules={[{ required: true, message: "Por favor selecciona una categoría" }]}
+                rules={[
+                  {
+                    required: true,
+                    message: "Por favor selecciona una categoría",
+                  },
+                ]}
               >
                 <Select placeholder="Selecciona una categoría">
                   <Option value="Frutas importadas">Frutas importadas</Option>
@@ -129,36 +144,53 @@ const CreateProduct = () => {
               <Form.Item
                 name="description"
                 label="Descripción"
-                rules={[{ required: true, message: "Por favor ingresa una descripción" }]}
+                rules={[
+                  {
+                    required: true,
+                    message: "Por favor ingresa una descripción",
+                  },
+                ]}
               >
                 <Input.TextArea placeholder="Descripción del producto" />
               </Form.Item>
             </Col>
-            <Col span={12}>
+            {/* <Col span={12}>
               <Form.Item
                 name="stock"
                 label="Cantidad en stock"
-                rules={[{ required: true, message: "Por favor ingresa el stock" }]}
+                rules={[
+                  { required: true, message: "Por favor ingresa el stock" },
+                ]}
               >
-                <InputNumber min={1} placeholder="Cantidad en stock" style={{ width: "100%" }} />
+                <InputNumber
+                  min={1}
+                  placeholder="Cantidad en stock"
+                  style={{ width: "100%" }}
+                />
               </Form.Item>
-            </Col>
+            </Col> */}
           </Row>
 
           <Form.Item label="Foto del Producto">
             <Upload
-              beforeUpload={() => false}
-              onChange={handleImageUpload}
-              accept="image/*"
+              beforeUpload={() => false} // Evitar la subida automática
+              onChange={handleImageUpload} // Manejar el archivo seleccionado
+              accept="image/*" // Solo permitir imágenes
+              maxCount={1} // Solo permitir una imagen
             >
               <Button icon={<UploadOutlined />}>Subir Imagen</Button>
             </Upload>
             {imageFile && (
               <div style={{ marginTop: 10 }}>
                 <img
-                  src={URL.createObjectURL(imageFile)}
+                  src={URL.createObjectURL(imageFile)} // Mostrar una vista previa del archivo seleccionado
                   alt="Vista previa"
-                  style={{ width: "100%", maxHeight: "200px", objectFit: "contain", borderRadius: "8px" }}
+                  style={{
+                    width: "100%",
+                    maxHeight: "200px",
+                    objectFit: "contain",
+                    borderRadius: "8px",
+                  }}
                 />
               </div>
             )}
@@ -172,14 +204,18 @@ const CreateProduct = () => {
                   <Input
                     placeholder="Calidad (Ej: Primera, Segunda)"
                     value={variation.quality}
-                    onChange={(e) => handleVariationChange(index, "quality", e.target.value)}
+                    onChange={(e) =>
+                      handleVariationChange(index, "quality", e.target.value)
+                    }
                   />
                 </Col>
                 <Col span={12}>
                   <Input
                     placeholder="Cantidad (Ej: 1kg, 2kg)"
                     value={variation.quantity}
-                    onChange={(e) => handleVariationChange(index, "quantity", e.target.value)}
+                    onChange={(e) =>
+                      handleVariationChange(index, "quantity", e.target.value)
+                    }
                   />
                 </Col>
               </Row>
@@ -189,7 +225,9 @@ const CreateProduct = () => {
                     min={0}
                     placeholder="Precio Hogar"
                     value={variation.price_home}
-                    onChange={(value) => handleVariationChange(index, "price_home", value)}
+                    onChange={(value) =>
+                      handleVariationChange(index, "price_home", value)
+                    }
                     style={{ width: "100%" }}
                   />
                 </Col>
@@ -198,7 +236,9 @@ const CreateProduct = () => {
                     min={0}
                     placeholder="Precio Supermercado"
                     value={variation.price_supermarket}
-                    onChange={(value) => handleVariationChange(index, "price_supermarket", value)}
+                    onChange={(value) =>
+                      handleVariationChange(index, "price_supermarket", value)
+                    }
                     style={{ width: "100%" }}
                   />
                 </Col>
@@ -209,7 +249,9 @@ const CreateProduct = () => {
                     min={0}
                     placeholder="Precio Restaurante"
                     value={variation.price_restaurant}
-                    onChange={(value) => handleVariationChange(index, "price_restaurant", value)}
+                    onChange={(value) =>
+                      handleVariationChange(index, "price_restaurant", value)
+                    }
                     style={{ width: "100%" }}
                   />
                 </Col>
@@ -218,18 +260,28 @@ const CreateProduct = () => {
                     min={0}
                     placeholder="Precio Fruver"
                     value={variation.price_fruver}
-                    onChange={(value) => handleVariationChange(index, "price_fruver", value)}
+                    onChange={(value) =>
+                      handleVariationChange(index, "price_fruver", value)
+                    }
                     style={{ width: "100%" }}
                   />
                 </Col>
               </Row>
-              <Button onClick={() => removeVariation(index)} type="danger" style={{ marginTop: 10 }}>
+              <Button
+                onClick={() => removeVariation(index)}
+                type="danger"
+                style={{ marginTop: 10 }}
+              >
                 Eliminar Variación
               </Button>
             </div>
           ))}
 
-          <Button onClick={addVariation} type="dashed" style={{ marginTop: 20, width: "100%" }}>
+          <Button
+            onClick={addVariation}
+            type="dashed"
+            style={{ marginTop: 20, width: "100%" }}
+          >
             Añadir Variación
           </Button>
 
