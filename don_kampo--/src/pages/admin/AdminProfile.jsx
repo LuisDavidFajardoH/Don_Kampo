@@ -34,6 +34,43 @@ const AdminProfile = () => {
   const [isUserModalVisible, setIsUserModalVisible] = useState(false);
   const [isOrderModalVisible, setIsOrderModalVisible] = useState(false);
   const [globalSearchText, setGlobalSearchText] = useState("");
+  const [shippingCosts, setShippingCosts] = useState({});
+  const [loadingShipping, setLoadingShipping] = useState(false);
+
+  const fetchShippingCosts = async () => {
+    try {
+      const response = await axios.get("/api/customer-types");
+      const costs = response.data.reduce((acc, type) => {
+        acc[type.type_name.toLowerCase()] = parseFloat(type.shipping_cost);
+        return acc;
+      }, {});
+      console.log("Shipping Costs Cargados:", costs); // Verifica que los datos se están cargando correctamente
+      setShippingCosts(costs); // Actualiza el estado con los datos cargados
+    } catch (error) {
+      message.error("Error al cargar los costos de envío.");
+      console.error(error);
+    }
+  };
+  
+
+  const updateShippingCosts = async (values) => {
+    setLoadingShipping(true);
+    try {
+      await axios.put("/api/customer-types/shipping-costs", values);
+      message.success("Costos de envío actualizados exitosamente.");
+      fetchShippingCosts(); // Refresca los datos
+    } catch (error) {
+      message.error("Error al actualizar los costos de envío.");
+      console.error(error);
+    } finally {
+      setLoadingShipping(false);
+    }
+  };
+
+  useEffect(() => {
+    form.setFieldsValue(shippingCosts); // Sincronizar los datos cargados con el formulario
+  }, [shippingCosts]); // Ejecutar solo cuando shippingCosts cambie
+  
 
   const getFilteredUsers = () => {
     if (!globalSearchText) return users;
@@ -87,9 +124,7 @@ const AdminProfile = () => {
   const updateOrderStatus = async (orderId, newStatus) => {
     try {
       // Cambiamos la URL para incluir directamente el id y el nuevo estado
-      await axios.put(
-        `/api/updatestatus/${orderId}/${newStatus}`
-      );
+      await axios.put(`/api/updatestatus/${orderId}/${newStatus}`);
       message.success("Estado del pedido actualizado correctamente.");
       fetchOrders(); // Refresca la lista de pedidos después de actualizar el estado
     } catch (error) {
@@ -161,7 +196,6 @@ const AdminProfile = () => {
       console.error(error);
     }
   };
-  
 
   const openCreateUserModal = () => {
     form.resetFields();
@@ -198,7 +232,7 @@ const AdminProfile = () => {
         console.error(error);
       }
     };
-  
+
     const userColumns = [
       { title: "Nombre", dataIndex: "user_name", key: "user_name" },
       { title: "Apellido", dataIndex: "lastname", key: "lastname" },
@@ -264,7 +298,7 @@ const AdminProfile = () => {
         ),
       },
     ];
-  
+
     return (
       <Card title="Gestión de Usuarios">
         <Button
@@ -290,7 +324,6 @@ const AdminProfile = () => {
       </Card>
     );
   };
-  
 
   const renderOrderTable = () => {
     const orderColumns = [
@@ -597,6 +630,36 @@ const AdminProfile = () => {
             </Form>
           )}
         </Modal>
+        <Form
+  form={form}
+  layout="vertical"
+  onFinish={updateShippingCosts} // Maneja la actualización de costos
+>
+  <Row gutter={[16, 16]}>
+    {Object.keys(shippingCosts).map((type) => (
+      <Col span={6} key={type}>
+        <Form.Item
+          label={`Costo para ${type.charAt(0).toUpperCase() + type.slice(1)}`}
+          name={type} // El nombre del campo debe coincidir con la clave del estado
+          rules={[
+            {
+              required: true,
+              message: `Por favor ingresa el costo para ${type}`,
+            },
+          ]}
+        >
+          <Input type="number" step="0.01" />
+        </Form.Item>
+      </Col>
+    ))}
+  </Row>
+  <Form.Item>
+    <Button type="primary" htmlType="submit" loading={loadingShipping}>
+      Actualizar Costos
+    </Button>
+  </Form.Item>
+</Form>
+
 
         <Modal
           title="Detalles del Pedido"
