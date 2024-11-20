@@ -20,17 +20,87 @@ const Checkout = () => {
   const [needsElectronicInvoice, setNeedsElectronicInvoice] = useState(false);
   const [companyName, setCompanyName] = useState("");
   const [companyNit, setCompanyNit] = useState("");
+  const [shippingCosts, setShippingCosts] = useState({});
+  const [discountedShippingCost, setDiscountedShippingCost] = useState(null);
+  const loginData = JSON.parse(localStorage.getItem("loginData")) || null;
+
+
+
+  useEffect(() => {
+    const fetchShippingCostsAndUser = async () => {
+      try {
+        // Fetch shipping costs
+        const response = await axios.get("/api/customer-types");
+        const costs = response.data.reduce((acc, type) => {
+          acc[type.type_name.toLowerCase()] = parseFloat(type.shipping_cost);
+          return acc;
+        }, {});
+        setShippingCosts(costs);
+  
+        // Fetch user data solo si no se ha cargado antes
+        if (!userData && loginData?.user) {
+          const userResponse = await axios.get(`/api/users/${loginData.user.id}`);
+          const user = userResponse.data.user;
+          setUserData(user);
+  
+          const hasOrders =
+            userResponse.data.orders && userResponse.data.orders.length > 0;
+  
+          const userType = loginData.user.user_type.toLowerCase();
+          const baseShippingCost = costs[userType] || 0;
+  
+          if (!hasOrders) {
+            setIsFirstOrder(true);
+            setDiscountedShippingCost(baseShippingCost / 2);
+          } else {
+            setDiscountedShippingCost(baseShippingCost);
+          }
+  
+          setShippingCost(baseShippingCost);
+        }
+      } catch (error) {
+        message.error(
+          "Error al cargar los datos de usuario o costos de envío."
+        );
+        console.error(error);
+      }
+    };
+  
+    fetchShippingCostsAndUser();
+  }, []); // Se ejecuta solo una vez
+  
 
   const { cart, clearCart, addToCart, removeFromCart } = useCart();
   const navigate = useNavigate();
   const { width, height } = useWindowSize();
 
-  const loginData = JSON.parse(localStorage.getItem("loginData"));
+
   const userType = loginData?.user?.user_type;
 
   const [shippingCost, setShippingCost] = useState(5000);
 
   const [isFirstOrder, setIsFirstOrder] = useState(false);
+
+  useEffect(() => {
+    if (!Object.keys(shippingCosts).length) {
+      const fetchShippingCosts = async () => {
+        try {
+          const response = await axios.get("/api/customer-types");
+          const costs = response.data.reduce((acc, type) => {
+            acc[type.type_name.toLowerCase()] = parseFloat(type.shipping_cost);
+            return acc;
+          }, {});
+          setShippingCosts(costs);
+        } catch (error) {
+          message.error("Error al cargar los costos de envío.");
+          console.error(error);
+        }
+      };
+  
+      fetchShippingCosts();
+    }
+  }, []); // Solo una vez
+  
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -43,12 +113,17 @@ const Checkout = () => {
           const hasOrders =
             response.data.orders && response.data.orders.length > 0;
           if (!hasOrders) {
-            setIsFirstOrder(true);
-            if (userType === "hogar") {
-              setShippingCost(2500);
+            setIsFirstOrder(true); // Marcamos que es el primer pedido
+            const userType = loginData.user.user_type.toLowerCase();
+            if (shippingCosts[userType] !== undefined) {
+              setShippingCost(shippingCosts[userType] / 2); // Aplica el descuento del 50%
             } else {
-              setShippingCost(1);
+              setShippingCost(shippingCosts[userType]); // En caso de no encontrar el tipo de usuario, el costo es 0
             }
+          } else {
+            // Si no es el primer pedido, aplicamos el costo regular
+            const userType = loginData.user.user_type.toLowerCase();
+            setShippingCost(shippingCosts[userType] || 0);
           }
         } catch (error) {
           message.error("Error al cargar los datos del usuario.");
@@ -60,8 +135,10 @@ const Checkout = () => {
       }
     };
 
-    fetchUserData();
-  }, [navigate]);
+    if (Object.keys(shippingCosts).length) {
+      fetchUserData();
+    }
+  }, [shippingCosts, navigate]);
 
   useEffect(() => {
     const fetchCartDetails = async () => {
@@ -150,11 +227,11 @@ const Checkout = () => {
       "address",
       "neighborhood",
     ];
-  
+
     if (needsElectronicInvoice) {
       requiredFields.push("companyName", "companyNit");
     }
-  
+
     const isValid = requiredFields.every((field) =>
       field === "companyName" || field === "companyNit"
         ? needsElectronicInvoice
@@ -162,13 +239,15 @@ const Checkout = () => {
           : true
         : userData?.[field]?.trim()
     );
-  
-    console.log("Validación de formulario:", { requiredFields, userData, isValid });
-  
+
+    console.log("Validación de formulario:", {
+      requiredFields,
+      userData,
+      isValid,
+    });
+
     return isValid;
   };
-  
-  
 
   const handleAddToCart = (product, selectedVariation) => {
     addToCart(product, selectedVariation);
@@ -249,7 +328,8 @@ const Checkout = () => {
     }
   };
 
-  const total = calculateSubtotal() + shippingCost;
+  const total = calculateSubtotal() + (discountedShippingCost ?? shippingCost);
+
 
   const generateOrderPDF = () => {
     const input = document.getElementById("order-summary-pdf");
@@ -399,11 +479,22 @@ const Checkout = () => {
               Subtotal: <span>${calculateSubtotal().toLocaleString()}</span>
             </p>
             <p>
-              Envío: <span>${shippingCost.toLocaleString()}</span>
+              Envío:{" "}
+              <span>
+                $
+                {(discountedShippingCost !== null
+                  ? discountedShippingCost
+                  : shippingCost
+                ).toLocaleString()}
+              </span>
             </p>
             {isFirstOrder && (
               <p
-                style={{ fontSize: "12px", color: "#FF914D", marginTop: "5px" }}
+                style={{
+                  fontSize: "12px",
+                  color: "#FF914D",
+                  marginTop: "5px",
+                }}
               >
                 ¡Descuento aplicado al costo de envío por ser tu primer pedido!
               </p>

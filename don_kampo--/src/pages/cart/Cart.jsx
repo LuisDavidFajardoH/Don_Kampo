@@ -14,13 +14,40 @@ const Cart = () => {
   const [loading, setLoading] = useState(true);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [shippingCost, setShippingCost] = useState(5000);
+  const [shippingCosts, setShippingCosts] = useState({});
+
 
   const navigate = useNavigate();
 
   useEffect(() => {
+    const fetchShippingCosts = async () => {
+      try {
+        const response = await axios.get("/api/customer-types");
+        const costs = response.data.reduce((acc, type) => {
+          acc[type.type_name.toLowerCase()] = parseFloat(type.shipping_cost);
+          return acc;
+        }, {});
+        setShippingCosts(costs);
+      } catch (error) {
+        message.error("Error al cargar los costos de envío.");
+        console.error(error);
+      }
+    };
+  
+    const setUserShippingCost = () => {
+      const loginData = JSON.parse(localStorage.getItem("loginData"));
+      if (loginData?.user && Object.keys(shippingCosts).length > 0) {
+        const userType = loginData.user.user_type.toLowerCase();
+        setShippingCost(shippingCosts[userType] || 0);
+      }
+    };
+  
+    fetchShippingCosts().then(setUserShippingCost);
+  }, [shippingCosts]);
+
+  useEffect(() => {
     const fetchCartDetails = async () => {
       setLoading(true);
-
       try {
         const productDetails = await Promise.all(
           Object.keys(cart).map(async (product_id) => {
@@ -33,7 +60,6 @@ const Cart = () => {
               };
             } catch (error) {
               if (error.response && error.response.status === 404) {
-                console.warn(`Producto con ID ${product_id} no encontrado. Eliminándolo del carrito.`);
                 removeFromCart({ product_id });
                 return null;
               } else {
@@ -42,34 +68,18 @@ const Cart = () => {
             }
           })
         );
-
+  
         setCartDetails(productDetails.filter((item) => item !== null));
-
-        const loginData = JSON.parse(localStorage.getItem("loginData"));
-        if (loginData && loginData.user) {
-          const userResponse = await axios.get(
-            `/api/users/${loginData.user.id}`
-          );
-          const hasOrders =
-            userResponse.data.orders && userResponse.data.orders.length > 0;
-
-          if (!hasOrders) {
-            if (loginData.user.user_type === "hogar") {
-              setShippingCost(2500);
-            } else {
-              setShippingCost(0);
-            }
-          }
-        }
       } catch (error) {
         message.error("Error al cargar los detalles del carrito.");
       } finally {
         setLoading(false);
       }
     };
-
+  
     fetchCartDetails();
   }, [cart]);
+  
 
   const getPriceByUserType = (product, selectedVariation) => {
     if (!selectedVariation || !product.variations) return 0;

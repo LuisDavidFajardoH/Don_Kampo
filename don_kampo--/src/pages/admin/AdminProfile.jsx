@@ -34,7 +34,13 @@ const AdminProfile = () => {
   const [isUserModalVisible, setIsUserModalVisible] = useState(false);
   const [isOrderModalVisible, setIsOrderModalVisible] = useState(false);
   const [globalSearchText, setGlobalSearchText] = useState("");
-  const [shippingCosts, setShippingCosts] = useState({});
+  const [shippingCosts, setShippingCosts] = useState({
+    hogar: 0,
+    fruver: 0,
+    supermercado: 0,
+    restaurante: 0,
+  });
+
   const [loadingShipping, setLoadingShipping] = useState(false);
 
   const fetchShippingCosts = async () => {
@@ -44,14 +50,13 @@ const AdminProfile = () => {
         acc[type.type_name.toLowerCase()] = parseFloat(type.shipping_cost);
         return acc;
       }, {});
-      console.log("Shipping Costs Cargados:", costs); // Verifica que los datos se están cargando correctamente
+      console.log("Shipping Costs Cargados:", costs); // Verifica que los datos se carguen correctamente
       setShippingCosts(costs); // Actualiza el estado con los datos cargados
     } catch (error) {
       message.error("Error al cargar los costos de envío.");
       console.error(error);
     }
   };
-  
 
   const updateShippingCosts = async (values) => {
     setLoadingShipping(true);
@@ -68,9 +73,12 @@ const AdminProfile = () => {
   };
 
   useEffect(() => {
-    form.setFieldsValue(shippingCosts); // Sincronizar los datos cargados con el formulario
-  }, [shippingCosts]); // Ejecutar solo cuando shippingCosts cambie
-  
+    fetchShippingCosts(); // Carga los costos de envío al cargar la página
+  }, []);
+
+  useEffect(() => {
+    form.setFieldsValue(shippingCosts); // Actualiza los valores del formulario
+  }, [shippingCosts]);
 
   const getFilteredUsers = () => {
     if (!globalSearchText) return users;
@@ -630,36 +638,59 @@ const AdminProfile = () => {
             </Form>
           )}
         </Modal>
-        <Form
-  form={form}
-  layout="vertical"
-  onFinish={updateShippingCosts} // Maneja la actualización de costos
->
-  <Row gutter={[16, 16]}>
-    {Object.keys(shippingCosts).map((type) => (
-      <Col span={6} key={type}>
-        <Form.Item
-          label={`Costo para ${type.charAt(0).toUpperCase() + type.slice(1)}`}
-          name={type} // El nombre del campo debe coincidir con la clave del estado
-          rules={[
-            {
-              required: true,
-              message: `Por favor ingresa el costo para ${type}`,
-            },
-          ]}
-        >
-          <Input type="number" step="0.01" />
-        </Form.Item>
-      </Col>
-    ))}
-  </Row>
-  <Form.Item>
-    <Button type="primary" htmlType="submit" loading={loadingShipping}>
-      Actualizar Costos
-    </Button>
-  </Form.Item>
-</Form>
 
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={updateShippingCosts} // Maneja la actualización de costos
+        >
+          <Card
+            title="Gestión de Costos de Envío"
+            bordered={true}
+            style={{
+              width: "100%",
+              marginTop: "20px",
+              backgroundColor: "#f9f9f9",
+            }}
+            headStyle={{
+              backgroundColor: "#00983a",
+              color: "#fff",
+              textAlign: "center",
+            }}
+            bodyStyle={{ padding: "20px" }}
+          >
+            <Row gutter={[16, 16]} style={{ textAlign: "center" }}>
+              {Object.keys(shippingCosts).map((type) => (
+                <Col span={6} key={type}>
+                  <Form.Item
+                    label={`Costo para ${
+                      type.charAt(0).toUpperCase() + type.slice(1)
+                    }`}
+                    name={type}
+                    rules={[
+                      {
+                        required: true,
+                        message: `Por favor ingresa el costo para ${type}`,
+                      },
+                    ]}
+                  >
+                    <Input type="number" step="0.01" />
+                  </Form.Item>
+                </Col>
+              ))}
+            </Row>
+            <div style={{ textAlign: "center", marginTop: "20px" }}>
+              <Button
+                type="primary"
+                htmlType="submit"
+                loading={loadingShipping}
+                style={{ backgroundColor: "#00983a", borderColor: "#007a2f" }}
+              >
+                Actualizar Costos
+              </Button>
+            </div>
+          </Card>
+        </Form>
 
         <Modal
           title="Detalles del Pedido"

@@ -33,3 +33,30 @@
     background: #00983a;
 }
   
+.ant-card {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+}
+
+.ant-card-head {
+  border-bottom: none;
+}
+
+.ant-card-body {
+  background-color: #fff;
+  border-radius: 10px;
+}
+
+.ant-btn-primary {
+  background-color: #00983a !important;
+  border-color: #007a2f !important;
+}
+
+.ant-form-item-label > label {
+  color: #333;
+  font-weight: bold;
+}
+
+.ant-input {
+  border-radius: 5px;
+}
