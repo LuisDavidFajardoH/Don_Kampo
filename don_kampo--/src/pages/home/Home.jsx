@@ -251,19 +251,19 @@ const Home = () => {
           </div>
           <div className="user-type-selection">
             <Title level={5}>Selecciona tu tipo de usuario:</Title>
-            <div className="user-type-options">
-              {Object.keys(userTypeCarouselItems).map((type) => (
-                <Button
-                  key={type}
-                  type={userType === type ? "primary" : "default"}
-                  onClick={() => handleUserTypeChange(type)}
-                  className="user-type-button"
-                  style={{ backgroundColor: "#FF914D", borderColor: "#FF914D" }}
-                >
-                  {type}
-                </Button>
+            <Row gutter={[16, 16]} justify="center">
+              {Object.keys(userTypeCarouselItems).map((type, index) => (
+                <Col xs={24} sm={12} md={12} key={index}>
+                  <Button
+                    type={userType === type ? "primary" : "default"}
+                    onClick={() => handleUserTypeChange(type)}
+                    className="user-type-button"
+                  >
+                    {type}
+                  </Button>
+                </Col>
               ))}
-            </div>
+            </Row>
           </div>
         </Modal>
 

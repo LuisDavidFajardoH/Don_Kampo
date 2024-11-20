@@ -101,24 +101,12 @@ const Products = () => {
     filterProducts(selectedCategory, searchQuery);
   }, [selectedCategory, searchQuery]);
 
-  const getBase64Image = (photo) => {
-    // Si la foto es nula, devuelve una imagen por defecto
-    if (!photo) {
-      return "https://via.placeholder.com/150"; // Imagen de respaldo
-    }
-
-    // Si la foto tiene un prefijo incorrecto, corrígelo
-    if (photo.startsWith("data:image/jpeg;base64,dataimage/jpegbase64/")) {
-      return photo.replace(
-        "data:image/jpeg;base64,dataimage/jpegbase64/",
-        "data:image/jpeg;base64,"
-      );
-    }
-    console.log("Fotossssssssssssssssssssssssssssssss:", photo);
-
-    // Si el formato es válido, retorna la foto
-    return photo;
+  const getBase64Image = (photoUrl) => {
+    // Si no hay URL, usar una imagen predeterminada desde public/images
+    return photoUrl || `${process.env.PUBLIC_URL}/images/icon.png`;
   };
+  
+  
 
   const getPriceByUserType = (product) => {
     switch (userType) {
@@ -217,7 +205,7 @@ const Products = () => {
               cover={
                 <img
                   alt={product.name}
-                  src={getBase64Image(product.photo)}
+                  src={getBase64Image(product.photo_url)} // Cambiado para usar photo_url
                   style={{ objectFit: "cover", width: "100%", height: "200px" }}
                 />
               }
@@ -255,10 +243,7 @@ const Products = () => {
                 {cart[product.product_id] ? (
                   <div className="quantity-controls">
                     <Button
-                      onClick={() => {
-                        console.log("Eliminando del carrito:", product);
-                        handleRemoveFromCart(product);
-                      }}
+                      onClick={() => handleRemoveFromCart(product)}
                       className="quantity-button"
                     >
                       -
@@ -267,10 +252,7 @@ const Products = () => {
                       {cart[product.product_id].quantity}
                     </span>
                     <Button
-                      onClick={() => {
-                        console.log("Añadiendo al carrito:", product);
-                        handleAddToCart(product);
-                      }}
+                      onClick={() => handleAddToCart(product)}
                       className="quantity-button"
                     >
                       +

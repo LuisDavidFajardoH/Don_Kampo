@@ -17,6 +17,9 @@ const Checkout = () => {
   const [cartDetails, setCartDetails] = useState([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [orderId, setOrderId] = useState(null);
+  const [needsElectronicInvoice, setNeedsElectronicInvoice] = useState(false);
+  const [companyName, setCompanyName] = useState("");
+  const [companyNit, setCompanyNit] = useState("");
 
   const { cart, clearCart, addToCart, removeFromCart } = useCart();
   const navigate = useNavigate();
@@ -88,7 +91,7 @@ const Checkout = () => {
 
   const getPriceByUserType = (product, selectedVariation) => {
     if (!selectedVariation) return 0;
-  
+
     switch (userType) {
       case "hogar":
         return parseFloat(selectedVariation.price_home) || 0;
@@ -102,7 +105,6 @@ const Checkout = () => {
         return parseFloat(selectedVariation.price_home) || 0;
     }
   };
-  
 
   const calculateSubtotal = () => {
     return cartDetails.reduce((total, product) => {
@@ -110,7 +112,6 @@ const Checkout = () => {
       return total + price * product.quantity;
     }, 0);
   };
-  
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -149,8 +150,25 @@ const Checkout = () => {
       "address",
       "neighborhood",
     ];
-    return requiredFields.every((field) => userData?.[field]?.trim());
+  
+    if (needsElectronicInvoice) {
+      requiredFields.push("companyName", "companyNit");
+    }
+  
+    const isValid = requiredFields.every((field) =>
+      field === "companyName" || field === "companyNit"
+        ? needsElectronicInvoice
+          ? !!eval(field)
+          : true
+        : userData?.[field]?.trim()
+    );
+  
+    console.log("Validación de formulario:", { requiredFields, userData, isValid });
+  
+    return isValid;
   };
+  
+  
 
   const handleAddToCart = (product, selectedVariation) => {
     addToCart(product, selectedVariation);
@@ -162,7 +180,7 @@ const Checkout = () => {
       )
     );
   };
-  
+
   const handleRemoveFromCart = (product) => {
     removeFromCart(product);
     setCartDetails((prevDetails) =>
@@ -175,7 +193,6 @@ const Checkout = () => {
         .filter((item) => item.quantity > 0)
     );
   };
-  
 
   const handlePlaceOrder = async () => {
     if (validateForm()) {
@@ -205,6 +222,9 @@ const Checkout = () => {
           address: userData.address,
           neighborhood: userData.neighborhood,
         },
+        needsElectronicInvoice,
+        companyName: needsElectronicInvoice ? companyName : "",
+        companyNit: needsElectronicInvoice ? companyNit : "",
       };
 
       try {
@@ -387,6 +407,35 @@ const Checkout = () => {
               >
                 ¡Descuento aplicado al costo de envío por ser tu primer pedido!
               </p>
+            )}
+            {userType === "restaurante" && (
+              <>
+                <Form.Item label="¿Necesita factura electrónica?">
+                  <Input
+                    type="checkbox"
+                    checked={needsElectronicInvoice}
+                    onChange={(e) =>
+                      setNeedsElectronicInvoice(e.target.checked)
+                    }
+                  />
+                </Form.Item>
+                {needsElectronicInvoice && (
+                  <>
+                    <Form.Item label="Nombre de la empresa">
+                      <Input
+                        value={companyName}
+                        onChange={(e) => setCompanyName(e.target.value)}
+                      />
+                    </Form.Item>
+                    <Form.Item label="NIT de la empresa">
+                      <Input
+                        value={companyNit}
+                        onChange={(e) => setCompanyNit(e.target.value)}
+                      />
+                    </Form.Item>
+                  </>
+                )}
+              </>
             )}
 
             <Divider />

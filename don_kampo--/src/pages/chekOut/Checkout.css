@@ -7,13 +7,12 @@
   margin-bottom: 5%;
 }
 
-.order-summary-pdf {
-  font-family: Arial, sans-serif;
-  font-size: 12px;
-  line-height: 1.5;
-  color: #333;
+.checkout-container h2 {
+  color: #f57c00;
+  font-weight: bold;
+  margin-bottom: 20px;
+  text-align: center;
 }
-
 
 /* Content Layout */
 .checkout-content {
@@ -22,26 +21,33 @@
   gap: 20px;
   width: 100%;
   max-width: 1200px;
-  margin-top: 1%;
 }
 
 /* Form */
 .checkout-form {
   flex: 1;
-  padding: 20px;
+  padding: 25px;
   background-color: #f9f9f9;
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* Column Spacing in Form */
+.checkout-form .ant-form-item {
+  margin-bottom: 16px;
+}
+
 .checkout-form .ant-row > .ant-col {
   margin-bottom: 16px;
 }
 
+.checkout-form .ant-input {
+  border-radius: 6px;
+  height: 40px;
+}
+
 /* Order Summary */
 .order-summary {
-  width: 300px;
+  width: 350px;
   padding: 20px;
   border: 1px solid #f57c00;
   border-radius: 8px;
@@ -51,8 +57,8 @@
 
 .order-summary h3 {
   color: #f57c00;
-  margin-bottom: 10px;
-  font-size: 1.2em;
+  margin-bottom: 20px;
+  font-size: 1.4em;
   font-weight: bold;
   text-align: center;
 }
@@ -60,6 +66,7 @@
 .order-summary-item {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   margin-bottom: 10px;
   font-weight: 500;
 }
@@ -78,8 +85,9 @@
   color: white;
   border: none;
   padding: 12px;
-  margin-top: 30px;
+  margin-top: 20px;
   font-weight: bold;
+  border-radius: 6px;
 }
 
 .place-order-button:hover,
@@ -88,11 +96,15 @@
   color: white;
 }
 
-/* Hover Effect */
 :where(.css-dev-only-do-not-override-apn68).ant-btn-variant-solid:not(:disabled):not(.ant-btn-disabled):hover {
   background: #EE7723;
   border-color: #EE7723;
   color: #fff;
+}
+
+/* Hover Effect */
+.ant-input:hover {
+  border-color: #f57c00;
 }
 
 /* Media Queries for Responsive Design */
@@ -102,9 +114,8 @@
   }
 
   .order-summary {
-    width: 80%;
+    width: 90%;
     margin-top: 20px;
-    margin-left: 7%;
   }
 
   .checkout-form .ant-row > .ant-col {
