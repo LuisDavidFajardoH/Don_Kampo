@@ -21,6 +21,16 @@
     margin: 0 auto;
     margin-top: -5%;
 }
+.product-card p {
+    color: #00983A;
+    MARGIN-TOP: 4%;
+}
+.pagination{
+ /* style={{ textAlign: "center", marginTop: "20px",marginLeft:"46%" }} */
+    text-align: center;
+    margin-top: 20px;
+    margin-left: 46%;
+}
 
 .product-card {
     border-radius: 8px;
@@ -119,4 +129,16 @@
     color: #ffffff;
     border-color: #EE7723;
     background: #EE7723;
+}
+
+/* media queries celular */
+
+@media (max-width: 768px) {
+    .pagination{
+        text-align: center;
+           margin-left: 36%;
+           margin-top: 2%;
+           margin-bottom: 2%;
+       }
+       
 }
