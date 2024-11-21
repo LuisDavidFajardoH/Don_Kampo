@@ -2,8 +2,23 @@ import React, { useState, useEffect } from "react";
 import Navbar from "../../components/navbar/Navbar";
 import BotonWhatsapp from "../../components/botonWhatsapp/BotonWhatsapp";
 import CustomFooter from "../../components/footer/Footer";
-import { Table, Input, Button, message, Popconfirm, Modal, Form, Row, Col, InputNumber } from "antd";
-import { SearchOutlined, DeleteOutlined, EditOutlined } from "@ant-design/icons";
+import {
+  Table,
+  Input,
+  Button,
+  message,
+  Popconfirm,
+  Modal,
+  Form,
+  Row,
+  Col,
+  InputNumber,
+} from "antd";
+import {
+  SearchOutlined,
+  DeleteOutlined,
+  EditOutlined,
+} from "@ant-design/icons";
 import axios from "axios";
 import "./ManageProducts.css";
 
@@ -13,11 +28,39 @@ const ManageProducts = () => {
   const [loading, setLoading] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [variations, setVariations] = useState([]);
   const [form] = Form.useForm();
 
   useEffect(() => {
     fetchProducts();
   }, []);
+
+  const addVariation = () => {
+    setVariations([
+      ...variations,
+      {
+        quality: "",
+        quantity: "",
+        price_home: "",
+        price_supermarket: "",
+        price_restaurant: "",
+        price_fruver: "",
+      },
+    ]);
+  };
+  
+
+  // Función para eliminar una variación
+  const removeVariation = (index) => {
+    const updatedVariations = variations.filter((_, i) => i !== index);
+    setVariations(updatedVariations);
+  };
+
+  const updateVariation = (index, field, value) => {
+    const updatedVariations = [...variations];
+    updatedVariations[index] = { ...updatedVariations[index], [field]: value };
+    setVariations(updatedVariations);
+  };
 
   // Función para obtener los productos
   const fetchProducts = async () => {
@@ -49,40 +92,24 @@ const ManageProducts = () => {
   // Mostrar modal para editar un producto
   const showEditModal = (product) => {
     setSelectedProduct(product);
-    const { name, description, category, stock, variations } = product;
-    form.setFieldsValue({
-      name,
-      description,
-      category,
-      stock,
-      quality: variations[0]?.quality || "",
-      quantity: variations[0]?.quantity || "",
-      price_home: variations[0]?.price_home || "",
-      price_supermarket: variations[0]?.price_supermarket || "",
-      price_restaurant: variations[0]?.price_restaurant || "",
-      price_fruver: variations[0]?.price_fruver || "",
-    });
+    form.setFieldsValue(product); // Setear datos básicos del producto
+    setVariations(product.variations || []); // Cargar las variaciones existentes
     setIsModalVisible(true);
   };
+  
 
   // Función para manejar la actualización de productos
   const handleUpdateProduct = async (values) => {
     try {
       const updatedProduct = {
         ...values,
-        variations: [
-          {
-            quality: values.quality || "",
-            quantity: values.quantity || 0,
-            price_home: values.price_home,
-            price_supermarket: values.price_supermarket,
-            price_restaurant: values.price_restaurant,
-            price_fruver: values.price_fruver,
-          },
-        ],
+        variations, // Incluir variaciones
       };
 
-      await axios.put(`/api/updateproduct/${selectedProduct.product_id}`, updatedProduct);
+      await axios.put(
+        `/api/updateproduct/${selectedProduct.product_id}`,
+        updatedProduct
+      );
       message.success("Producto actualizado correctamente.");
       setIsModalVisible(false);
       fetchProducts(); // Refrescar lista después de actualizar
@@ -119,7 +146,7 @@ const ManageProducts = () => {
       dataIndex: "category",
       key: "category",
     },
-  
+
     {
       title: "Acciones",
       key: "actions",
@@ -176,67 +203,159 @@ const ManageProducts = () => {
             <Form.Item
               label="Nombre"
               name="name"
-              rules={[{ required: true, message: "Por favor ingresa el nombre del producto" }]}
+              rules={[
+                {
+                  required: true,
+                  message: "Por favor ingresa el nombre del producto",
+                },
+              ]}
             >
               <Input />
             </Form.Item>
             <Form.Item
               label="Descripción"
               name="description"
-              rules={[{ required: true, message: "Por favor ingresa una descripción" }]}
+              rules={[
+                {
+                  required: true,
+                  message: "Por favor ingresa una descripción",
+                },
+              ]}
             >
               <Input />
             </Form.Item>
             <Form.Item
               label="Categoría"
               name="category"
-              rules={[{ required: true, message: "Por favor ingresa una categoría" }]}
+              rules={[
+                { required: true, message: "Por favor ingresa una categoría" },
+              ]}
             >
               <Input />
             </Form.Item>
-            <Form.Item
+            {/* <Form.Item
               label="Stock"
               name="stock"
-              rules={[{ required: true, message: "Por favor ingresa el stock" }]}
+              rules={[
+                { required: true, message: "Por favor ingresa el stock" },
+              ]}
             >
               <Input type="number" />
-            </Form.Item>
-            <Row gutter={[16, 16]}>
-              <Col span={12}>
-                <Form.Item label="Calidad" name="quality">
-                  <Input />
-                </Form.Item>
-              </Col>
-              <Col span={12}>
-                <Form.Item label="Cantidad" name="quantity">
-                  <InputNumber style={{ width: "100%" }} />
-                </Form.Item>
-              </Col>
-            </Row>
-            <Row gutter={[16, 16]}>
-              <Col span={12}>
-                <Form.Item label="Precio Hogar" name="price_home">
-                  <InputNumber style={{ width: "100%" }} />
-                </Form.Item>
-              </Col>
-              <Col span={12}>
-                <Form.Item label="Precio Supermercado" name="price_supermarket">
-                  <InputNumber style={{ width: "100%" }} />
-                </Form.Item>
-              </Col>
-            </Row>
-            <Row gutter={[16, 16]}>
-              <Col span={12}>
-                <Form.Item label="Precio Restaurante" name="price_restaurant">
-                  <InputNumber style={{ width: "100%" }} />
-                </Form.Item>
-              </Col>
-              <Col span={12}>
-                <Form.Item label="Precio Fruver" name="price_fruver">
-                  <InputNumber style={{ width: "100%" }} />
-                </Form.Item>
-              </Col>
-            </Row>
+            </Form.Item> */}
+
+            <div>
+              <h3>Variaciones</h3>
+              {variations.map((variation, index) => (
+                <div
+                  key={index}
+                  style={{
+                    marginBottom: "16px",
+                    padding: "16px",
+                    border: "1px solid #ddd",
+                  }}
+                >
+                  <Row gutter={[16, 16]}>
+                    <Col span={12}>
+                      <Form.Item label={`Calidad (Variación ${index + 1})`}>
+                        <Input
+                          placeholder="Calidad"
+                          value={variation.quality}
+                          onChange={(e) =>
+                            updateVariation(index, "quality", e.target.value)
+                          }
+                        />
+                      </Form.Item>
+                    </Col>
+                    <Col span={12}>
+                      <Form.Item label={`Cantidad (Variación ${index + 1})`}>
+                        <Input
+                          placeholder="Cantidad"
+                          value={variation.quantity}
+                          onChange={(e) =>
+                            updateVariation(index, "quantity", e.target.value)
+                          }
+                        />
+                      </Form.Item>
+                    </Col>
+                  </Row>
+                  <Row gutter={[16, 16]}>
+                    <Col span={12}>
+                      <Form.Item
+                        label={`Precio Hogar (Variación ${index + 1})`}
+                      >
+                        <InputNumber
+                          placeholder="Precio Hogar"
+                          value={variation.price_home}
+                          onChange={(value) =>
+                            updateVariation(index, "price_home", value)
+                          }
+                          style={{ width: "100%" }}
+                        />
+                      </Form.Item>
+                    </Col>
+                    <Col span={12}>
+                      <Form.Item
+                        label={`Precio Supermercado (Variación ${index + 1})`}
+                      >
+                        <InputNumber
+                          placeholder="Precio Supermercado"
+                          value={variation.price_supermarket}
+                          onChange={(value) =>
+                            updateVariation(index, "price_supermarket", value)
+                          }
+                          style={{ width: "100%" }}
+                        />
+                      </Form.Item>
+                    </Col>
+                  </Row>
+                  <Row gutter={[16, 16]}>
+                    <Col span={12}>
+                      <Form.Item
+                        label={`Precio Restaurante (Variación ${index + 1})`}
+                      >
+                        <InputNumber
+                          placeholder="Precio Restaurante"
+                          value={variation.price_restaurant}
+                          onChange={(value) =>
+                            updateVariation(index, "price_restaurant", value)
+                          }
+                          style={{ width: "100%" }}
+                        />
+                      </Form.Item>
+                    </Col>
+                    <Col span={12}>
+                      <Form.Item
+                        label={`Precio Fruver (Variación ${index + 1})`}
+                      >
+                        <InputNumber
+                          placeholder="Precio Fruver"
+                          value={variation.price_fruver}
+                          onChange={(value) =>
+                            updateVariation(index, "price_fruver", value)
+                          }
+                          style={{ width: "100%" }}
+                        />
+                      </Form.Item>
+                    </Col>
+                  </Row>
+                  <Button
+                    type="danger"
+                    onClick={() => removeVariation(index)}
+                    style={{ marginTop: "8px" }}
+                  >
+                    Eliminar Variación
+                  </Button>
+                </div>
+              ))}
+              <Button
+                type="dashed"
+                onClick={addVariation}
+                style={{ marginTop: "16px", width: "100%" }}
+              >
+                Agregar Variación
+              </Button>
+            </div>
+
             <Form.Item>
               <Button type="primary" htmlType="submit" block>
                 Guardar Cambios

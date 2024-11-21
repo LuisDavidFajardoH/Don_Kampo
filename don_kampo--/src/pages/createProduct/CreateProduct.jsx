@@ -66,17 +66,39 @@ const CreateProduct = () => {
   };
 
   const handleSubmit = async (values) => {
-    // Crear un FormData para enviar como multipart/form-data
+    // Crear el objeto de datos del producto
+    const productData = {
+      name: values.name,
+      description: values.description,
+      category: values.category,
+      stock: 100, // Ajusta el stock según sea necesario
+      variations: variations.map((variation) => ({
+        quality: variation.quality,
+        quantity: parseFloat(variation.quantity),
+        price_home: parseFloat(variation.price_home),
+        price_supermarket: parseFloat(variation.price_supermarket),
+        price_restaurant: parseFloat(variation.price_restaurant),
+        price_fruver: parseFloat(variation.price_fruver),
+      })),
+    };
+  
+    // Crear un FormData para incluir la imagen y el JSON completo
     const formData = new FormData();
-    formData.append("name", values.name);
-    formData.append("description", values.description);
-    formData.append("category", values.category);
-    formData.append("stock", 100);
+    
+    // Adjuntar la imagen como binary
     if (imageFile) {
-      formData.append("photo_url", imageFile);
+      formData.append("photo_url", imageFile); // Archivo binario
     }
-    formData.append("variations", JSON.stringify(variations)); // Adjuntar variaciones como JSON
-
+  
+    // Convertir el objeto `productData` a JSON y adjuntarlo al FormData
+    Object.keys(productData).forEach((key) => {
+      if (key === "variations") {
+        formData.append(key, JSON.stringify(productData[key])); // Convertir variaciones a string JSON
+      } else {
+        formData.append(key, productData[key]);
+      }
+    });
+  
     try {
       const response = await axios.post(
         "http://localhost:8080/api/createproduct",
@@ -85,18 +107,29 @@ const CreateProduct = () => {
           headers: { "Content-Type": "multipart/form-data" },
         }
       );
-
+  
       message.success(
         `Producto creado exitosamente con ID: ${response.data.product_id}`
       );
       form.resetFields();
       setImageFile(null);
-      setVariations([]);
+      setVariations([
+        {
+          quality: "",
+          quantity: "",
+          price_home: "",
+          price_supermarket: "",
+          price_restaurant: "",
+          price_fruver: "",
+        },
+      ]);
     } catch (error) {
       message.error("Error al crear el producto.");
       console.error(error);
     }
   };
+  
+  
 
   return (
     <>

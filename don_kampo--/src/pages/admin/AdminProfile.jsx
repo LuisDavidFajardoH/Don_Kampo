@@ -13,6 +13,8 @@ import {
   Input,
   Row,
   Col,
+  Upload,
+  Progress,
 } from "antd";
 import Navbar from "../../components/navbar/Navbar";
 import CustomFooter from "../../components/footer/Footer";
@@ -34,6 +36,9 @@ const AdminProfile = () => {
   const [isUserModalVisible, setIsUserModalVisible] = useState(false);
   const [isOrderModalVisible, setIsOrderModalVisible] = useState(false);
   const [globalSearchText, setGlobalSearchText] = useState("");
+  const [products, setProducts] = useState([]); // Datos cargados del Excel
+  const [progress, setProgress] = useState(0); // Progreso del envío
+
   const [shippingCosts, setShippingCosts] = useState({
     hogar: 0,
     fruver: 0,
@@ -42,6 +47,196 @@ const AdminProfile = () => {
   });
 
   const [loadingShipping, setLoadingShipping] = useState(false);
+
+  const handleExcelUpload = (file) => {
+    const reader = new FileReader();
+  
+    reader.onload = (event) => {
+      const data = new Uint8Array(event.target.result);
+      const workbook = XLSX.read(data, { type: "array" });
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+      const jsonData = XLSX.utils.sheet_to_json(worksheet);
+  
+      const formattedData = jsonData.map((row, index) => {
+        let variations = "";
+        try {
+          // Procesar las variaciones como una cadena JSON separada por comas
+          if (row["Variaciones"]) {
+            const parsedVariations = row["Variaciones"]
+              .split(";")
+              .map((variation) => JSON.parse(variation.trim()));
+            variations = parsedVariations.map((v) => JSON.stringify(v)).join(",");
+          }
+        } catch (error) {
+          console.error("Error al procesar las variaciones:", error);
+          message.error(`Error en la fila ${index + 1}: Variaciones mal formateadas.`);
+        }
+  
+        return {
+          key: index,
+          name: row["Nombre"] || "",
+          description: row["Descripción"] || "",
+          category: row["Categoría"] || "",
+          stock: parseInt(row["Stock"] || "0", 10),
+          variations, // La cadena JSON de las variaciones separada por comas
+          imageFile: null, // Inicializa como null para permitir la carga manual de imágenes
+        };
+      });
+  
+      setProducts(formattedData);
+      message.success("Archivo cargado correctamente.");
+    };
+  
+    reader.readAsArrayBuffer(file);
+    return false; // Evitar la carga automática del archivo
+  };
+  
+  
+  
+
+  const handleSendToAPI = async () => {
+  const validateProducts = () => {
+    for (const product of products) {
+      if (!product.name) {
+        message.error(`El producto con clave ${product.key} no tiene nombre.`);
+        return false;
+      }
+      if (!product.imageFile) {
+        message.error(`El producto ${product.name} no tiene una imagen adjunta.`);
+        return false;
+      }
+      if (!product.category) {
+        message.error(`El producto ${product.name} no tiene categoría.`);
+        return false;
+      }
+    }
+    return true;
+  };
+
+  if (!validateProducts()) return;
+
+  setLoading(true);
+  setProgress(0);
+
+  try {
+    for (let i = 0; i < products.length; i++) {
+      const product = products[i];
+      const formData = new FormData();
+
+      formData.append("name", product.name);
+      formData.append("description", product.description);
+      formData.append("category", product.category);
+      formData.append("stock", product.stock);
+      if (product.imageFile) {
+        formData.append("photo_url", product.imageFile);
+      } else {
+        message.warning(`El producto ${product.name} no tiene imagen. Saltando...`);
+        continue;
+      }
+
+      // Enviar las variaciones como cadena JSON
+      formData.append("variations", `[${product.variations}]`);
+
+      const response = await axios.post("http://localhost:8080/api/createproduct", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      if (response.status === 200) {
+        setProgress(Math.round(((i + 1) / products.length) * 100));
+        message.success(`Producto ${product.name} enviado correctamente.`);
+      }
+    }
+
+    message.success("Todos los productos se enviaron correctamente.");
+  } catch (error) {
+    console.error("Error al enviar productos:", error);
+    message.error("Ocurrió un error al enviar los productos.");
+  } finally {
+    setLoading(false);
+  }
+};
+
+  
+  
+
+  const columns = [
+    { title: "Nombre", dataIndex: "name", key: "name" },
+    { title: "Descripción", dataIndex: "description", key: "description" },
+    { title: "Categoría", dataIndex: "category", key: "category" },
+    { title: "Stock", dataIndex: "stock", key: "stock" },
+    {
+      title: "Estado de Imagen",
+      key: "imageStatus",
+      render: (_, record) =>
+        record.imageFile ? (
+          <span style={{ color: "green" }}>Cargada</span>
+        ) : (
+          <span style={{ color: "red" }}>No cargada</span>
+        ),
+    },
+    {
+      title: "Imagen",
+      key: "image",
+      render: (_, record) => (
+        <Upload
+          accept="image/*"
+          beforeUpload={(file) => {
+            handleImageUpload(file, record.key);
+            return false;
+          }}
+          showUploadList={false}
+        >
+          <Button type="link">Adjuntar Imagen</Button>
+        </Upload>
+      ),
+    },
+  ];
+  
+
+  const handleImageUpload = (file, key) => {
+    const updatedProducts = products.map((product) => {
+      if (product.key === key) {
+        return { ...product, imageFile: file }; // Asocia el archivo binario con el producto
+      }
+      return product;
+    });
+  
+    setProducts(updatedProducts);
+    message.success(`Imagen cargada para el producto con clave: ${key}`);
+  };
+  
+
+  const sendProductsToAPI = async (products) => {
+    try {
+      for (const product of products) {
+        const formData = new FormData();
+
+        // Agregar datos básicos del producto
+        formData.append("name", product.name);
+        formData.append("description", product.description);
+        formData.append("category", product.category);
+        formData.append("stock", product.stock);
+
+        // Agregar la URL o archivo de la imagen si está disponible
+        if (product.photo_url) {
+          formData.append("photo_url", product.photo_url);
+        }
+
+        // Agregar variaciones como JSON
+        formData.append("variations", JSON.stringify(product.variations));
+
+        await axios.post("http://localhost:8080/api/createproduct", formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+      }
+
+      message.success("Productos enviados exitosamente.");
+    } catch (error) {
+      message.error("Error al enviar productos a la API.");
+      console.error(error);
+    }
+  };
 
   const fetchShippingCosts = async () => {
     try {
@@ -127,6 +322,73 @@ const AdminProfile = () => {
       message.error("Error al cargar los pedidos.");
       console.error(error);
     }
+  };
+
+  const uploadProducts = async (products) => {
+    setLoading(true);
+    try {
+      await Promise.all(
+        products.map(async (product) => {
+          const formData = new FormData();
+          formData.append("name", product.name);
+          formData.append("description", product.description);
+          formData.append("category", product.category);
+          formData.append("stock", product.stock);
+
+          // Manejar foto (opcional)
+          if (product.photo_url && typeof product.photo_url === "string") {
+            const response = await fetch(product.photo_url);
+            const blob = await response.blob();
+            formData.append("photo_url", blob);
+          }
+
+          formData.append("variations", JSON.stringify(product.variations));
+
+          await axios.post("/api/createproduct", formData, {
+            headers: { "Content-Type": "multipart/form-data" },
+          });
+        })
+      );
+      message.success("Productos cargados exitosamente.");
+    } catch (error) {
+      message.error("Error al cargar los productos.");
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleImportExcel = async (file) => {
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      const data = new Uint8Array(event.target.result);
+      const workbook = XLSX.read(data, { type: "array" });
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+      const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+      const formattedProducts = jsonData.map((row) => ({
+        name: row["Nombre"] || "",
+        description: row["Descripción"] || "",
+        category: row["Categoría"] || "",
+        stock: row["Stock"] || 0,
+        photo_url: row["URL Imagen"] || null, // Si necesitas cargar binarios, esto se manejará aparte
+        variations: [
+          {
+            quality: row["Calidad"] || "",
+            quantity: row["Cantidad"] || 0,
+            price_home: parseFloat(row["Precio Hogar"] || 0),
+            price_supermarket: parseFloat(row["Precio Supermercado"] || 0),
+            price_restaurant: parseFloat(row["Precio Restaurante"] || 0),
+            price_fruver: parseFloat(row["Precio Fruver"] || 0),
+          },
+        ],
+      }));
+
+      await uploadProducts(formattedProducts);
+    };
+
+    reader.readAsArrayBuffer(file);
   };
 
   const updateOrderStatus = async (orderId, newStatus) => {
@@ -230,17 +492,6 @@ const AdminProfile = () => {
   };
 
   const renderUserTable = () => {
-    const updateUserStatus = async (userId, statusId) => {
-      try {
-        await axios.put(`/api/userstatus/${userId}/${statusId}`);
-        message.success("Estado del usuario actualizado correctamente.");
-        fetchUsers(); // Refresca la lista de usuarios después de actualizar
-      } catch (error) {
-        message.error("Error al actualizar el estado del usuario.");
-        console.error(error);
-      }
-    };
-
     const userColumns = [
       { title: "Nombre", dataIndex: "user_name", key: "user_name" },
       { title: "Apellido", dataIndex: "lastname", key: "lastname" },
@@ -306,7 +557,7 @@ const AdminProfile = () => {
         ),
       },
     ];
-
+  
     return (
       <Card title="Gestión de Usuarios">
         <Button
@@ -325,13 +576,14 @@ const AdminProfile = () => {
         />
         <Table
           dataSource={getFilteredUsers()}
-          columns={userColumns}
+          columns={userColumns} // Ahora está definido correctamente
           rowKey="id"
           pagination={{ pageSize: 5 }}
         />
       </Card>
     );
   };
+  
 
   const renderOrderTable = () => {
     const orderColumns = [
@@ -372,6 +624,7 @@ const AdminProfile = () => {
               <Option value={2}>Enviado</Option>
               <Option value={3}>Entregado</Option>
               <Option value={4}>Cancelado</Option>
+              <Option value={5}>Pagado</Option>
             </Select>
             <Popconfirm
               title="¿Estás seguro de eliminar este pedido?"
@@ -691,6 +944,47 @@ const AdminProfile = () => {
             </div>
           </Card>
         </Form>
+
+        <div>
+          <Card title="Gestión de Productos" style={{ marginTop: 20 }}>
+            <h2>Cargar Productos desde Excel</h2>
+            <Upload
+              accept=".xlsx"
+              beforeUpload={handleExcelUpload}
+              showUploadList={false}
+            >
+              <Button type="primary">Cargar Archivo Excel</Button>
+            </Upload>
+
+            {products.length > 0 && (
+              <>
+                <Table
+                  dataSource={products}
+                  columns={columns}
+                  rowKey="key"
+                  style={{ marginTop: 20 }}
+                  pagination={{ pageSize: 5 }}
+                />
+
+                <Button
+                  type="primary"
+                  onClick={handleSendToAPI}
+                  loading={loading}
+                  style={{ marginTop: 20 }}
+                >
+                  Enviar Productos a la API
+                </Button>
+
+                {loading && (
+                  <div style={{ marginTop: 20 }}>
+                    <Spin spinning={loading} />
+                    <Progress percent={progress} />
+                  </div>
+                )}
+              </>
+            )}
+          </Card>
+        </div>
 
         <Modal
           title="Detalles del Pedido"
