@@ -745,7 +745,7 @@ const AdminProfile = () => {
       <Navbar />
       <div className="admin-profile-container">
         <h2>Bienvenido al Panel de Administración</h2>
-        <p>Aquí puedes gestionar usuarios y pedidos.</p>
+        <p>Aquí puedes gestionar usuarios, pedidos, precios de envios y generar productos masivos.</p>
         {renderUserTable()}
         {renderOrderTable()}
 
