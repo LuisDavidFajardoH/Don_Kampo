@@ -648,6 +648,38 @@ const AdminProfile = () => {
     );
   };
 
+  const downloadSampleExcel = () => {
+    // Datos de ejemplo
+    const exampleData = [
+      {
+        Nombre: "Producto Ejemplo 1",
+        Descripción: "Descripción del producto 1",
+        Categoría: "Categoría 1",
+        Stock: 100,
+        Variaciones: `{"quality":"Alta","quantity":15,"price_home":3,"price_supermarket":3.5,"price_restaurant":4,"price_fruver":4.5},{"quality":"Media","quantity":10,"price_home":2.5,"price_supermarket":3,"price_restaurant":3.5,"price_fruver":4}`,
+      },
+      {
+        Nombre: "Producto Ejemplo 2",
+        Descripción: "Descripción del producto 2",
+        Categoría: "Categoría 2",
+        Stock: 200,
+        Variaciones: `{"quality":"Alta","quantity":15,"price_home":3.0,"price_supermarket":3.5,"price_restaurant":4.0,"price_fruver":4.5}`,
+      },
+    ];
+
+    // Crear un libro de trabajo
+    const workbook = XLSX.utils.book_new();
+
+    // Convertir los datos a una hoja de trabajo
+    const worksheet = XLSX.utils.json_to_sheet(exampleData);
+
+    // Agregar la hoja de trabajo al libro
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Productos Ejemplo");
+
+    // Descargar el archivo Excel
+    XLSX.writeFile(workbook, "Productos_Ejemplo.xlsx");
+  };
+
   const exportFilteredOrdersToExcel = async () => {
     const failedOrders = []; // Lista para almacenar los detalles de órdenes fallidas
     const detailedOrders = []; // Lista para almacenar los detalles exitosos
@@ -745,7 +777,10 @@ const AdminProfile = () => {
       <Navbar />
       <div className="admin-profile-container">
         <h2>Bienvenido al Panel de Administración</h2>
-        <p>Aquí puedes gestionar usuarios, pedidos, precios de envios y generar productos masivos.</p>
+        <p>
+          Aquí puedes gestionar usuarios, pedidos, precios de envios y generar
+          productos masivos.
+        </p>
         {renderUserTable()}
         {renderOrderTable()}
 
@@ -923,6 +958,14 @@ const AdminProfile = () => {
         <div>
           <Card title="Gestión de Productos" style={{ marginTop: 20 }}>
             <h2>Cargar Productos desde Excel</h2>
+            <Button
+              type="primary"
+              onClick={downloadSampleExcel}
+              style={{ marginBottom: "20px", marginRight: "20px" }}
+            >
+              Descargar Excel de Ejemplo
+            </Button>
+
             <Upload
               accept=".xlsx"
               beforeUpload={handleExcelUpload}
