@@ -15,25 +15,29 @@ const Cart = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [shippingCost, setShippingCost] = useState(5000);
   const [shippingCosts, setShippingCosts] = useState({});
-
+  const [isShippingCostsLoaded, setIsShippingCostsLoaded] = useState(false);
 
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchShippingCosts = async () => {
       try {
-        const response = await axios.get("/api/customer-types");
-        const costs = response.data.reduce((acc, type) => {
-          acc[type.type_name.toLowerCase()] = parseFloat(type.shipping_cost);
-          return acc;
-        }, {});
-        setShippingCosts(costs);
+        if (!isShippingCostsLoaded) {
+          // Verifica si ya se cargaron los costos
+          const response = await axios.get("/api/customer-types");
+          const costs = response.data.reduce((acc, type) => {
+            acc[type.type_name.toLowerCase()] = parseFloat(type.shipping_cost);
+            return acc;
+          }, {});
+          setShippingCosts(costs);
+          setIsShippingCostsLoaded(true); // Marca como cargados
+        }
       } catch (error) {
         message.error("Error al cargar los costos de envío.");
         console.error(error);
       }
     };
-  
+
     const setUserShippingCost = () => {
       const loginData = JSON.parse(localStorage.getItem("loginData"));
       if (loginData?.user && Object.keys(shippingCosts).length > 0) {
@@ -41,9 +45,10 @@ const Cart = () => {
         setShippingCost(shippingCosts[userType] || 0);
       }
     };
-  
+
+    // Llama a la función para cargar costos si es necesario
     fetchShippingCosts().then(setUserShippingCost);
-  }, [shippingCosts]);
+  }, [isShippingCostsLoaded]);
 
   useEffect(() => {
     const fetchCartDetails = async () => {
@@ -56,7 +61,9 @@ const Cart = () => {
               return {
                 ...response.data,
                 quantity: cart[product_id].quantity,
-                selectedVariation: cart[product_id].selectedVariation || response.data.variations[0],
+                selectedVariation:
+                  cart[product_id].selectedVariation ||
+                  response.data.variations[0],
               };
             } catch (error) {
               if (error.response && error.response.status === 404) {
@@ -68,7 +75,7 @@ const Cart = () => {
             }
           })
         );
-  
+
         setCartDetails(productDetails.filter((item) => item !== null));
       } catch (error) {
         message.error("Error al cargar los detalles del carrito.");
@@ -76,17 +83,17 @@ const Cart = () => {
         setLoading(false);
       }
     };
-  
+
     fetchCartDetails();
   }, [cart]);
-  
 
   const getPriceByUserType = (product, selectedVariation) => {
     if (!selectedVariation || !product.variations) return 0;
 
     const { quality, quantity } = selectedVariation;
     const selectedProductVariation = product.variations.find(
-      (variation) => variation.quality === quality && variation.quantity === quantity
+      (variation) =>
+        variation.quality === quality && variation.quantity === quantity
     );
 
     if (selectedProductVariation) {
@@ -111,7 +118,8 @@ const Cart = () => {
     return cartDetails.reduce(
       (total, product) =>
         total +
-        getPriceByUserType(product, product.selectedVariation) * product.quantity,
+        getPriceByUserType(product, product.selectedVariation) *
+          product.quantity,
       0
     );
   };
@@ -166,26 +174,56 @@ const Cart = () => {
                 <Card key={product.product_id} className="cart-item">
                   <div className="cart-item-layout">
                     <div className="cart-item-details">
-                      <h4 className="product-name">{product.name}</h4>
-                      <p className="product-category">{product.category}</p>
-                      <p className="product-variation">
-                        Variación: {product.selectedVariation.quality} - {product.selectedVariation.quantity}
-                      </p>
-                      <p className="product-price">
-                        Precio: $
-                        {getPriceByUserType(product, product.selectedVariation).toLocaleString()}
-                      </p>
+                      <img
+                        alt={product.name}
+                        src={
+                          product.photo_url ||
+                          `${process.env.PUBLIC_URL}/images/default.png`
+                        }
+                        style={{
+                          width: "100px", // Ajusta según el tamaño que desees
+                          height: "100px",
+                          objectFit: "cover",
+                          marginRight: "16px", // Espaciado entre la imagen y el texto
+                          borderRadius: "8px", // Esquinas redondeadas (opcional)
+                        }}
+                      />
+                      <div>
+                        <h4 className="product-name">{product.name}</h4>
+                        <p className="product-category">{product.category}</p>
+                        <p className="product-variation">
+                          Variación: {product.selectedVariation.quality} -{" "}
+                          {product.selectedVariation.quantity}
+                        </p>
+                        <p className="product-price">
+                          Precio: $
+                          {getPriceByUserType(
+                            product,
+                            product.selectedVariation
+                          ).toLocaleString()}
+                        </p>
+                      </div>
                     </div>
+
                     <div className="cart-item-quantity">
-                      <Button onClick={() => handleRemoveFromCart(product)}>-</Button>
+                      <Button onClick={() => handleRemoveFromCart(product)}>
+                        -
+                      </Button>
                       <span>{product.quantity}</span>
-                      <Button onClick={() => handleAddToCart(product, product.selectedVariation)}>+</Button>
+                      <Button
+                        onClick={() =>
+                          handleAddToCart(product, product.selectedVariation)
+                        }
+                      >
+                        +
+                      </Button>
                     </div>
                   </div>
                   <p>
                     Subtotal: $
                     {(
-                      getPriceByUserType(product, product.selectedVariation) * product.quantity
+                      getPriceByUserType(product, product.selectedVariation) *
+                      product.quantity
                     ).toLocaleString()}
                   </p>
                 </Card>
