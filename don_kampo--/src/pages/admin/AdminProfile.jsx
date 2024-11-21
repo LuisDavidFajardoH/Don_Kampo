@@ -50,115 +50,93 @@ const AdminProfile = () => {
 
   const handleExcelUpload = (file) => {
     const reader = new FileReader();
-  
+
     reader.onload = (event) => {
       const data = new Uint8Array(event.target.result);
       const workbook = XLSX.read(data, { type: "array" });
       const sheetName = workbook.SheetNames[0];
       const worksheet = workbook.Sheets[sheetName];
       const jsonData = XLSX.utils.sheet_to_json(worksheet);
-  
+
       const formattedData = jsonData.map((row, index) => {
-        let variations = "";
+        let variations = [];
         try {
-          // Procesar las variaciones como una cadena JSON separada por comas
           if (row["Variaciones"]) {
-            const parsedVariations = row["Variaciones"]
-              .split(";")
-              .map((variation) => JSON.parse(variation.trim()));
-            variations = parsedVariations.map((v) => JSON.stringify(v)).join(",");
+            // Procesar las variaciones como un JSON válido
+            variations = JSON.parse(`[${row["Variaciones"]}]`);
           }
         } catch (error) {
           console.error("Error al procesar las variaciones:", error);
-          message.error(`Error en la fila ${index + 1}: Variaciones mal formateadas.`);
+          message.error(
+            `Error en la fila ${index + 1}: Variaciones mal formateadas.`
+          );
         }
-  
+
         return {
           key: index,
           name: row["Nombre"] || "",
           description: row["Descripción"] || "",
           category: row["Categoría"] || "",
           stock: parseInt(row["Stock"] || "0", 10),
-          variations, // La cadena JSON de las variaciones separada por comas
-          imageFile: null, // Inicializa como null para permitir la carga manual de imágenes
+          variations, // Variaciones procesadas
+          imageFile: null,
         };
       });
-  
+
       setProducts(formattedData);
       message.success("Archivo cargado correctamente.");
     };
-  
+
     reader.readAsArrayBuffer(file);
     return false; // Evitar la carga automática del archivo
   };
-  
-  
-  
 
   const handleSendToAPI = async () => {
-  const validateProducts = () => {
-    for (const product of products) {
-      if (!product.name) {
-        message.error(`El producto con clave ${product.key} no tiene nombre.`);
-        return false;
+    setLoading(true);
+    setProgress(0);
+
+    try {
+      for (let i = 0; i < products.length; i++) {
+        const product = products[i];
+        const formData = new FormData();
+        if (product.imageFile) {
+          formData.append("photo_url", product.imageFile);
+        } else {
+          message.warning(
+            `El producto ${product.name} no tiene imagen. Saltando...`
+          );
+          continue;
+        }
+        formData.append("name", product.name);
+        formData.append("description", product.description);
+        formData.append("category", product.category);
+        formData.append("stock", product.stock);
+
+        // Asegurarse de enviar las variaciones correctamente como una cadena JSON
+        formData.append("variations", JSON.stringify(product.variations));
+
+        const response = await axios.post(
+          "http://localhost:8080/api/createproduct",
+          formData,
+          {
+            headers: { "Content-Type": "multipart/form-data" },
+          }
+        );
+
+        if (response.status === 200) {
+          setProgress(Math.round(((i + 1) / products.length) * 100));
+          message.success(`Producto ${product.name} enviado correctamente.`);
+        }
       }
-      if (!product.imageFile) {
-        message.error(`El producto ${product.name} no tiene una imagen adjunta.`);
-        return false;
-      }
-      if (!product.category) {
-        message.error(`El producto ${product.name} no tiene categoría.`);
-        return false;
-      }
+
+      message.success("Todos los productos se enviaron correctamente.");
+    } catch (error) {
+      console.error("Error al enviar productos:", error);
+      message.error("Ocurrió un error al enviar los productos.");
+    } finally {
+      setLoading(false);
     }
-    return true;
   };
-
-  if (!validateProducts()) return;
-
-  setLoading(true);
-  setProgress(0);
-
-  try {
-    for (let i = 0; i < products.length; i++) {
-      const product = products[i];
-      const formData = new FormData();
-
-      formData.append("name", product.name);
-      formData.append("description", product.description);
-      formData.append("category", product.category);
-      formData.append("stock", product.stock);
-      if (product.imageFile) {
-        formData.append("photo_url", product.imageFile);
-      } else {
-        message.warning(`El producto ${product.name} no tiene imagen. Saltando...`);
-        continue;
-      }
-
-      // Enviar las variaciones como cadena JSON
-      formData.append("variations", `[${product.variations}]`);
-
-      const response = await axios.post("http://localhost:8080/api/createproduct", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-
-      if (response.status === 200) {
-        setProgress(Math.round(((i + 1) / products.length) * 100));
-        message.success(`Producto ${product.name} enviado correctamente.`);
-      }
-    }
-
-    message.success("Todos los productos se enviaron correctamente.");
-  } catch (error) {
-    console.error("Error al enviar productos:", error);
-    message.error("Ocurrió un error al enviar los productos.");
-  } finally {
-    setLoading(false);
-  }
-};
-
-  
-  
 
   const columns = [
     { title: "Nombre", dataIndex: "name", key: "name" },
@@ -192,7 +170,6 @@ const AdminProfile = () => {
       ),
     },
   ];
-  
 
   const handleImageUpload = (file, key) => {
     const updatedProducts = products.map((product) => {
@@ -201,11 +178,10 @@ const AdminProfile = () => {
       }
       return product;
     });
-  
+
     setProducts(updatedProducts);
     message.success(`Imagen cargada para el producto con clave: ${key}`);
   };
-  
 
   const sendProductsToAPI = async (products) => {
     try {
@@ -557,7 +533,7 @@ const AdminProfile = () => {
         ),
       },
     ];
-  
+
     return (
       <Card title="Gestión de Usuarios">
         <Button
@@ -583,7 +559,6 @@ const AdminProfile = () => {
       </Card>
     );
   };
-  
 
   const renderOrderTable = () => {
     const orderColumns = [
