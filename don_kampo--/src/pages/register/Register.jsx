@@ -28,7 +28,7 @@ const Register = () => {
   
     setLoading(true);
     try {
-      const response = await axios.post("https://app-4e3ca83d-1758-4989-a888-369bfae706bf.cleverapps.io/api/createusers", {
+      const response = await axios.post("https://don-kampo-api.onrender.com/api/createusers", {
         user_name,
         lastname,
         email,

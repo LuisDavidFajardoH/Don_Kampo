@@ -101,7 +101,7 @@ const CreateProduct = () => {
   
     try {
       const response = await axios.post(
-        "https://app-4e3ca83d-1758-4989-a888-369bfae706bf.cleverapps.io/api/createproduct",
+        "https://don-kampo-api.onrender.com/api/createproduct",
         formData,
         {
           headers: { "Content-Type": "multipart/form-data" },

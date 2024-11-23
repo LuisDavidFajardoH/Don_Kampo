@@ -2,7 +2,7 @@
     "rewrites": [
       {
         "source": "/api/(.*)", 
-        "destination": "https://app-4e3ca83d-1758-4989-a888-369bfae706bf.cleverapps.io/"
+        "destination": "https://don-kampo-api.onrender.com/"
       },
       {
         "source": "/(.*)", 

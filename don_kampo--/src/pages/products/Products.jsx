@@ -39,7 +39,7 @@ const Products = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get("https://app-4e3ca83d-1758-4989-a888-369bfae706bf.cleverapps.io/api/products", {
+        const response = await axios.get("https://don-kampo-api.onrender.com/api/products", {
           withCredentials: true,
         });
 

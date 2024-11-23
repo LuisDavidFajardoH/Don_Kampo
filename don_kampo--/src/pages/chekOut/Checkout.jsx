@@ -29,7 +29,7 @@ const Checkout = () => {
       try {
         // Fetch shipping costs
         const response = await axios.get(
-          "https://app-4e3ca83d-1758-4989-a888-369bfae706bf.cleverapps.io/api/customer-types"
+          "https://don-kampo-api.onrender.com/api/customer-types"
         );
         const costs = response.data.reduce((acc, type) => {
           acc[type.type_name.toLowerCase()] = parseFloat(type.shipping_cost);
@@ -40,7 +40,7 @@ const Checkout = () => {
         // Fetch user data solo si no se ha cargado antes
         if (!userData && loginData?.user) {
           const userResponse = await axios.get(
-            `https://app-4e3ca83d-1758-4989-a888-369bfae706bf.cleverapps.io/api/users/${loginData.user.id}`
+            `https://don-kampo-api.onrender.com/api/users/${loginData.user.id}`
           );
           const user = userResponse.data.user;
           setUserData(user);
@@ -88,7 +88,7 @@ const Checkout = () => {
       const fetchShippingCosts = async () => {
         try {
           const response = await axios.get(
-            "https://app-4e3ca83d-1758-4989-a888-369bfae706bf.cleverapps.io/api/customer-types"
+            "https://don-kampo-api.onrender.com/api/customer-types"
           );
           const costs = response.data.reduce((acc, type) => {
             acc[type.type_name.toLowerCase()] = parseFloat(type.shipping_cost);
@@ -110,7 +110,7 @@ const Checkout = () => {
       if (loginData && loginData.user) {
         try {
           const response = await axios.get(
-            `https://app-4e3ca83d-1758-4989-a888-369bfae706bf.cleverapps.io/api/users/${loginData.user.id}`
+            `https://don-kampo-api.onrender.com/api/users/${loginData.user.id}`
           );
           const user = response.data.user;
           setUserData(user);
@@ -151,7 +151,7 @@ const Checkout = () => {
         const productDetails = await Promise.all(
           Object.keys(cart).map(async (productId) => {
             const response = await axios.get(
-              `https://app-4e3ca83d-1758-4989-a888-369bfae706bf.cleverapps.io/api/getproduct/${productId}`
+              `https://don-kampo-api.onrender.com/api/getproduct/${productId}`
             );
             const selectedVariation =
               cart[productId].selectedVariation || response.data.variations[0]; // Variación predeterminada
@@ -216,7 +216,7 @@ const Checkout = () => {
         };
 
         await axios.put(
-          `https://app-4e3ca83d-1758-4989-a888-369bfae706bf.cleverapps.io/api/updateusers/${loginData.user.id}`,
+          `https://don-kampo-api.onrender.com/api/updateusers/${loginData.user.id}`,
           updatedData
         );
         message.success("Datos actualizados exitosamente.");
@@ -318,7 +318,7 @@ const Checkout = () => {
 
       try {
         const response = await axios.post(
-          "https://app-4e3ca83d-1758-4989-a888-369bfae706bf.cleverapps.io/api/orders/placeOrder",
+          "https://don-kampo-api.onrender.com/api/orders/placeOrder",
           orderData
         );
         if (response.status === 201) {
