@@ -216,7 +216,7 @@ const AdminProfile = () => {
 
   const fetchShippingCosts = async () => {
     try {
-      const response = await axios.get("/api/customer-types");
+      const response = await axios.get("https://don-kampo-api.onrender.com/api/customer-types");
       const costs = response.data.reduce((acc, type) => {
         acc[type.type_name.toLowerCase()] = parseFloat(type.shipping_cost);
         return acc;

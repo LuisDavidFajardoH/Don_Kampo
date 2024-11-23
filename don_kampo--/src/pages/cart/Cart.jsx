@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import Navbar from "../../components/navbar/Navbar";
 import CustomFooter from "../../components/footer/Footer";
 import { useCart } from "../products/CartContext";
-import { Card, Button, message, Divider, Modal } from "antd";
+import { Card, Button, message, Divider } from "antd";
 import BotonWhatsapp from "../../components/botonWhatsapp/BotonWhatsapp";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -12,7 +12,6 @@ const Cart = () => {
   const { cart, removeFromCart, addToCart } = useCart();
   const [cartDetails, setCartDetails] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [isModalVisible, setIsModalVisible] = useState(false);
   const [shippingCost, setShippingCost] = useState(5000);
   const [shippingCosts, setShippingCosts] = useState({});
   const [isShippingCostsLoaded, setIsShippingCostsLoaded] = useState(false);
@@ -23,14 +22,15 @@ const Cart = () => {
     const fetchShippingCosts = async () => {
       try {
         if (!isShippingCostsLoaded) {
-          // Verifica si ya se cargaron los costos
-          const response = await axios.get("https://don-kampo-api.onrender.com/api/customer-types");
+          const response = await axios.get(
+            "https://don-kampo-api.onrender.com/api/customer-types"
+          );
           const costs = response.data.reduce((acc, type) => {
             acc[type.type_name.toLowerCase()] = parseFloat(type.shipping_cost);
             return acc;
           }, {});
           setShippingCosts(costs);
-          setIsShippingCostsLoaded(true); // Marca como cargados
+          setIsShippingCostsLoaded(true);
         }
       } catch (error) {
         message.error("Error al cargar los costos de envío.");
@@ -46,7 +46,6 @@ const Cart = () => {
       }
     };
 
-    // Llama a la función para cargar costos si es necesario
     fetchShippingCosts().then(setUserShippingCost);
   }, [isShippingCostsLoaded]);
 
@@ -55,30 +54,25 @@ const Cart = () => {
       setLoading(true);
       try {
         const productDetails = await Promise.all(
-          Object.keys(cart).map(async (product_id) => {
-            try {
-              const response = await axios.get(`https://don-kampo-api.onrender.com/api/getproduct/${product_id}`);
-              return {
-                ...response.data,
-                quantity: cart[product_id].quantity,
-                selectedVariation:
-                  cart[product_id].selectedVariation ||
-                  response.data.variations[0],
-              };
-            } catch (error) {
-              if (error.response && error.response.status === 404) {
-                removeFromCart({ product_id });
-                return null;
-              } else {
-                throw error;
-              }
-            }
+          Object.entries(cart).map(async ([key, item]) => {
+            const [productId] = key.split('-');
+            
+            const response = await axios.get(
+              `https://don-kampo-api.onrender.com/api/getproduct/${productId}`
+            );
+
+            return {
+              ...response.data,
+              quantity: item.quantity,
+              selectedVariation: item.selectedVariation
+            };
           })
         );
 
-        setCartDetails(productDetails.filter((item) => item !== null));
+        setCartDetails(productDetails.filter(item => item !== null));
       } catch (error) {
         message.error("Error al cargar los detalles del carrito.");
+        console.error(error);
       } finally {
         setLoading(false);
       }
@@ -88,41 +82,48 @@ const Cart = () => {
   }, [cart]);
 
   const getPriceByUserType = (product, selectedVariation) => {
-    if (!selectedVariation || !product.variations) return 0;
+    if (!selectedVariation) return 0;
 
-    const { quality, quantity } = selectedVariation;
-    const selectedProductVariation = product.variations.find(
-      (variation) =>
-        variation.quality === quality && variation.quantity === quantity
-    );
-
-    if (selectedProductVariation) {
-      switch (JSON.parse(localStorage.getItem("loginData"))?.user?.user_type) {
-        case "hogar":
-          return parseFloat(selectedProductVariation.price_home) || 0;
-        case "supermercado":
-          return parseFloat(selectedProductVariation.price_supermarket) || 0;
-        case "restaurante":
-          return parseFloat(selectedProductVariation.price_restaurant) || 0;
-        case "fruver":
-          return parseFloat(selectedProductVariation.price_fruver) || 0;
-        default:
-          return parseFloat(selectedProductVariation.price_home) || 0;
-      }
+    const userType = JSON.parse(localStorage.getItem("loginData"))?.user?.user_type;
+    switch (userType) {
+      case "hogar":
+        return parseFloat(selectedVariation.price_home) || 0;
+      case "supermercado":
+        return parseFloat(selectedVariation.price_supermarket) || 0;
+      case "restaurante":
+        return parseFloat(selectedVariation.price_restaurant) || 0;
+      case "fruver":
+        return parseFloat(selectedVariation.price_fruver) || 0;
+      default:
+        return parseFloat(selectedVariation.price_home) || 0;
     }
-
-    return 0;
   };
 
   const calculateSubtotal = () => {
-    return cartDetails.reduce(
-      (total, product) =>
-        total +
-        getPriceByUserType(product, product.selectedVariation) *
-          product.quantity,
-      0
-    );
+    return cartDetails.reduce((total, product) => {
+      const price = getPriceByUserType(product, product.selectedVariation);
+      return total + (price * product.quantity);
+    }, 0);
   };
+
+  const handleAddToCart = (product) => {
+    if (!product.selectedVariation) {
+      message.error("Por favor selecciona una variación antes de añadir al carrito.");
+      return;
+    }
+  
+    addToCart(product);
+  };
+  
+  const handleRemoveFromCart = (product) => {
+    if (!product.selectedVariation) {
+      console.error("La variación seleccionada no está definida.");
+      return;
+    }
+  
+    removeFromCart(product);
+  };
+  
 
   const handleCheckout = () => {
     if (cartDetails.length > 0) {
@@ -130,30 +131,6 @@ const Cart = () => {
     } else {
       message.warning("No tienes productos en el carrito.");
     }
-  };
-
-  const handleAddToCart = (product, selectedVariation) => {
-    addToCart(product, selectedVariation);
-    setCartDetails((prevDetails) =>
-      prevDetails.map((item) =>
-        item.product_id === product.product_id
-          ? { ...item, quantity: item.quantity + 1 }
-          : item
-      )
-    );
-  };
-
-  const handleRemoveFromCart = (product) => {
-    removeFromCart(product);
-    setCartDetails((prevDetails) =>
-      prevDetails
-        .map((item) =>
-          item.product_id === product.product_id
-            ? { ...item, quantity: Math.max(item.quantity - 1, 0) }
-            : item
-        )
-        .filter((item) => item.quantity > 0)
-    );
   };
 
   const total = calculateSubtotal() + shippingCost;
@@ -171,40 +148,42 @@ const Cart = () => {
           <div className="cart-content">
             <div className="cart-items">
               {cartDetails.map((product) => (
-                <Card key={product.product_id} className="cart-item">
+                <Card
+                  key={`${product.product_id}-${product.selectedVariation.variation_id}`}
+                  className="cart-item"
+                >
                   <div className="cart-item-layout">
                     <div className="cart-item-details">
                       <img
                         alt={product.name}
-                        src={
-                          product.photo_url ||
-                          `${process.env.PUBLIC_URL}/images/default.png`
-                        }
+                        src={product.photo_url}
                         style={{
-                          width: "100px", // Ajusta según el tamaño que desees
+                          width: "100px",
                           height: "100px",
                           objectFit: "cover",
-                          marginRight: "16px", // Espaciado entre la imagen y el texto
-                          borderRadius: "8px", // Esquinas redondeadas (opcional)
                         }}
                       />
                       <div>
-                        <h4 className="product-name">{product.name}</h4>
-                        <p className="product-category">{product.category}</p>
-                        <p className="product-variation">
-                          Variación: {product.selectedVariation.quality} -{" "}
-                          {product.selectedVariation.quantity}
-                        </p>
-                        <p className="product-price">
+                        <h4>{product.name}</h4>
+                        <p>Variación: {product.selectedVariation.quality}</p>
+                        <p>
                           Precio: $
                           {getPriceByUserType(
                             product,
                             product.selectedVariation
                           ).toLocaleString()}
                         </p>
+                        <p>
+                          Subtotal: $
+                          {(
+                            getPriceByUserType(
+                              product,
+                              product.selectedVariation
+                            ) * product.quantity
+                          ).toLocaleString()}
+                        </p>
                       </div>
                     </div>
-
                     <div className="cart-item-quantity">
                       <Button onClick={() => handleRemoveFromCart(product)}>
                         -
@@ -219,13 +198,6 @@ const Cart = () => {
                       </Button>
                     </div>
                   </div>
-                  <p>
-                    Subtotal: $
-                    {(
-                      getPriceByUserType(product, product.selectedVariation) *
-                      product.quantity
-                    ).toLocaleString()}
-                  </p>
                 </Card>
               ))}
             </div>

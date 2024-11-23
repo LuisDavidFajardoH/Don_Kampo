@@ -39,9 +39,12 @@ const Products = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get("https://don-kampo-api.onrender.com/api/products", {
-          withCredentials: true,
-        });
+        const response = await axios.get(
+          "https://don-kampo-api.onrender.com/api/products",
+          {
+            withCredentials: true,
+          }
+        );
 
         // Generar `variation_id` único si no existe
         const updatedProducts = response.data.map((product) => ({
@@ -95,14 +98,13 @@ const Products = () => {
   };
 
   const normalizeString = (str) => {
-    return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    return str
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase();
   };
 
-  const filterProducts = (
-    category,
-    query,
-    productsToFilter = products
-  ) => {
+  const filterProducts = (category, query, productsToFilter = products) => {
     const filtered = productsToFilter.filter((product) => {
       const matchesCategory =
         category === "Todas" || product.category === category;
@@ -158,25 +160,29 @@ const Products = () => {
   };
 
   const handleAddToCart = (product) => {
+    const selectedVariationId = selectedVariations[product.product_id];
     const selectedVariation = product.variations.find(
-      (v) => v.variation_id === selectedVariations[product.product_id]
+      (v) => v.variation_id === selectedVariationId
     );
-
+  
     if (!selectedVariation) {
-      message.error(
-        "Por favor selecciona una variación antes de añadir al carrito."
-      );
+      message.error("Por favor selecciona una variación antes de añadir al carrito.");
       return;
     }
-
-    addToCart({ ...product, selectedVariation });
+  
+    addToCart({
+      ...product,
+      selectedVariation,
+    });
   };
+  
 
   useEffect(() => {
     console.log("Estado del carrito:", cart);
   }, [cart]);
 
   const handleRemoveFromCart = (product) => {
+    console.log("Producto enviado a removeFromCart:", product);
     removeFromCart(product);
   };
 
@@ -242,9 +248,7 @@ const Products = () => {
                     onChange={(value) =>
                       handleVariationChange(product.product_id, value)
                     }
-                    value={
-                      selectedVariations[product.product_id] || undefined
-                    }
+                    value={selectedVariations[product.product_id] || undefined}
                   >
                     {product.variations.map((variation) => (
                       <Option
@@ -264,19 +268,47 @@ const Products = () => {
                       : "Selecciona una variación para ver el precio."}
                   </p>
 
-                  {cart[product.product_id] ? (
+                  {cart[
+                    `${product.product_id}-${
+                      selectedVariations[product.product_id]
+                    }`
+                  ] ? (
                     <div className="quantity-controls">
                       <Button
-                        onClick={() => handleRemoveFromCart(product)}
-                        className="quantity-button"
+                        onClick={() =>
+                          handleRemoveFromCart({
+                            ...product,
+                            selectedVariation: product.variations.find(
+                              (v) =>
+                                v.variation_id ===
+                                selectedVariations[product.product_id]
+                            ),
+                          })
+                        }
                       >
                         -
                       </Button>
+
                       <span className="quantity-text">
-                        {cart[product.product_id].quantity}
+                        {
+                          cart[
+                            `${product.product_id}-${
+                              selectedVariations[product.product_id]
+                            }`
+                          ].quantity
+                        }
                       </span>
                       <Button
-                        onClick={() => handleAddToCart(product)}
+                        onClick={() =>
+                          handleAddToCart({
+                            ...product,
+                            selectedVariation: product.variations.find(
+                              (v) =>
+                                v.variation_id ===
+                                selectedVariations[product.product_id]
+                            ),
+                          })
+                        }
                         className="quantity-button"
                       >
                         +

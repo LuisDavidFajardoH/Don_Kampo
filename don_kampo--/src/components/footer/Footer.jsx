@@ -37,6 +37,14 @@ const CustomFooter = () => {
             </a>
           ))}
         </div>
+        <div className="contact-info">
+          <a href="https://wa.me/3117366666" className="contact-link" target="_blank" rel="noopener noreferrer">
+            WhatsApp: 3117366666
+          </a>
+          <a href="mailto:info@donkampo.com" className="contact-link">
+            Email: info@donkampo.com
+          </a>
+        </div>
       </div>
 
       <div className="footer-bottom">

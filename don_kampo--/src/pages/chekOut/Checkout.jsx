@@ -149,21 +149,21 @@ const Checkout = () => {
     const fetchCartDetails = async () => {
       try {
         const productDetails = await Promise.all(
-          Object.keys(cart).map(async (productId) => {
+          Object.entries(cart).map(async ([key, item]) => {
+            const [productId] = key.split('-');
+            
             const response = await axios.get(
               `https://don-kampo-api.onrender.com/api/getproduct/${productId}`
             );
-            const selectedVariation =
-              cart[productId].selectedVariation || response.data.variations[0]; // Variación predeterminada
 
             return {
               ...response.data,
-              quantity: cart[productId].quantity,
-              selectedVariation,
+              quantity: item.quantity,
+              selectedVariation: item.selectedVariation
             };
           })
         );
-        setCartDetails(productDetails);
+        setCartDetails(productDetails.filter(item => item !== null));
       } catch (error) {
         message.error("Error al cargar los detalles del carrito.");
         console.error(error);
@@ -176,6 +176,7 @@ const Checkout = () => {
   const getPriceByUserType = (product, selectedVariation) => {
     if (!selectedVariation) return 0;
 
+    const userType = loginData?.user?.user_type;
     switch (userType) {
       case "hogar":
         return parseFloat(selectedVariation.price_home) || 0;
@@ -259,28 +260,20 @@ const Checkout = () => {
     return isValid;
   };
 
-  const handleAddToCart = (product, selectedVariation) => {
-    addToCart(product, selectedVariation);
-    setCartDetails((prevDetails) =>
-      prevDetails.map((item) =>
-        item.product_id === product.product_id
-          ? { ...item, quantity: item.quantity + 1 }
-          : item
-      )
-    );
+  const handleAddToCart = (product) => {
+    if (!product.selectedVariation) {
+      message.error("Por favor selecciona una variaci��n antes de añadir al carrito.");
+      return;
+    }
+    addToCart(product);
   };
 
   const handleRemoveFromCart = (product) => {
+    if (!product.selectedVariation) {
+      console.error("La variación seleccionada no está definida.");
+      return;
+    }
     removeFromCart(product);
-    setCartDetails((prevDetails) =>
-      prevDetails
-        .map((item) =>
-          item.product_id === product.product_id
-            ? { ...item, quantity: Math.max(item.quantity - 1, 0) }
-            : item
-        )
-        .filter((item) => item.quantity > 0)
-    );
   };
 
   const handlePlaceOrder = async () => {
@@ -297,8 +290,8 @@ const Checkout = () => {
           variationId: product.selectedVariation.variation_id, // ID de la variación
           price: getPriceByUserType(product, product.selectedVariation),
         })),
-        total: calculateSubtotal() + shippingCost,
-        shippingCost: shippingCost,
+        total: calculateSubtotal() + (discountedShippingCost ?? shippingCost),
+        shippingCost: discountedShippingCost ?? shippingCost,
         shippingMethod: "Overnight",
         estimatedDelivery: estimatedDelivery,
         actual_delivery: currentDate,

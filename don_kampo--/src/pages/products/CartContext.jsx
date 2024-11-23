@@ -44,19 +44,28 @@ export const CartProvider = ({ children }) => {
   const addToCart = (product) => {
     setCart((prevCart) => {
       const newCart = { ...prevCart };
-      const selectedVariation = product.selectedVariation;
 
-      if (newCart[product.product_id]) {
-        newCart[product.product_id].quantity += 1;
+      if (!product?.selectedVariation) {
+        console.error('Error: No hay variación seleccionada');
+        return prevCart;
+      }
+
+      const cartKey = `${product.product_id}-${product.selectedVariation.variation_id}`;
+
+      if (newCart[cartKey]) {
+        newCart[cartKey] = {
+          ...newCart[cartKey],
+          quantity: newCart[cartKey].quantity + 1
+        };
       } else {
-        newCart[product.product_id] = {
-          ...product,
-          price: parseFloat(getPriceByUserType(selectedVariation)),
+        newCart[cartKey] = {
+          product_id: product.product_id,
+          selectedVariation: product.selectedVariation,
           quantity: 1,
-          selectedVariation,
+          price: getPriceByUserType(product.selectedVariation)
         };
       }
-      console.log("Carrito actualizado:", newCart);
+
       return newCart;
     });
   };
@@ -78,14 +87,19 @@ export const CartProvider = ({ children }) => {
   const removeFromCart = (product) => {
     setCart((prevCart) => {
       const newCart = { ...prevCart };
-      if (
-        newCart[product.product_id] &&
-        newCart[product.product_id].quantity > 1
-      ) {
-        newCart[product.product_id].quantity -= 1;
-      } else {
-        delete newCart[product.product_id];
+      const cartKey = `${product.product_id}-${product.selectedVariation.variation_id}`;
+
+      if (newCart[cartKey]) {
+        if (newCart[cartKey].quantity > 1) {
+          newCart[cartKey] = {
+            ...newCart[cartKey],
+            quantity: newCart[cartKey].quantity - 1
+          };
+        } else {
+          delete newCart[cartKey];
+        }
       }
+
       return newCart;
     });
   };
