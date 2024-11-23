@@ -24,39 +24,43 @@ const Checkout = () => {
   const [discountedShippingCost, setDiscountedShippingCost] = useState(null);
   const loginData = JSON.parse(localStorage.getItem("loginData")) || null;
 
-
-
   useEffect(() => {
     const fetchShippingCostsAndUser = async () => {
       try {
         // Fetch shipping costs
-        const response = await axios.get("https://app-4e3ca83d-1758-4989-a888-369bfae706bf.cleverapps.io/api/customer-types");
+        const response = await axios.get(
+          "https://app-4e3ca83d-1758-4989-a888-369bfae706bf.cleverapps.io/api/customer-types"
+        );
         const costs = response.data.reduce((acc, type) => {
           acc[type.type_name.toLowerCase()] = parseFloat(type.shipping_cost);
           return acc;
         }, {});
         setShippingCosts(costs);
-  
+
         // Fetch user data solo si no se ha cargado antes
         if (!userData && loginData?.user) {
-          const userResponse = await axios.get(`https://app-4e3ca83d-1758-4989-a888-369bfae706bf.cleverapps.io/api/users/${loginData.user.id}`);
+          const userResponse = await axios.get(
+            `https://app-4e3ca83d-1758-4989-a888-369bfae706bf.cleverapps.io/api/users/${loginData.user.id}`
+          );
           const user = userResponse.data.user;
           setUserData(user);
-  
+
           const hasOrders =
             userResponse.data.orders && userResponse.data.orders.length > 0;
-  
-          const userType = loginData.user.user_type.toLowerCase();
-          const baseShippingCost = costs[userType] || 0;
-  
+          const shippingPercentage = costs[userType] || 0;
+
+          const totalValue = userResponse.data.cartTotal || 0;
+          const calculatedShippingCost =
+            (totalValue * shippingPercentage) / 100;
+
           if (!hasOrders) {
             setIsFirstOrder(true);
-            setDiscountedShippingCost(baseShippingCost / 2);
+            setDiscountedShippingCost(calculatedShippingCost / 2);
           } else {
-            setDiscountedShippingCost(baseShippingCost);
+            setDiscountedShippingCost(calculatedShippingCost);
           }
-  
-          setShippingCost(baseShippingCost);
+
+          setShippingCost(calculatedShippingCost);
         }
       } catch (error) {
         message.error(
@@ -65,15 +69,13 @@ const Checkout = () => {
         console.error(error);
       }
     };
-  
+
     fetchShippingCostsAndUser();
   }, []); // Se ejecuta solo una vez
-  
 
   const { cart, clearCart, addToCart, removeFromCart } = useCart();
   const navigate = useNavigate();
   const { width, height } = useWindowSize();
-
 
   const userType = loginData?.user?.user_type;
 
@@ -85,7 +87,9 @@ const Checkout = () => {
     if (!Object.keys(shippingCosts).length) {
       const fetchShippingCosts = async () => {
         try {
-          const response = await axios.get("https://app-4e3ca83d-1758-4989-a888-369bfae706bf.cleverapps.io/api/customer-types");
+          const response = await axios.get(
+            "https://app-4e3ca83d-1758-4989-a888-369bfae706bf.cleverapps.io/api/customer-types"
+          );
           const costs = response.data.reduce((acc, type) => {
             acc[type.type_name.toLowerCase()] = parseFloat(type.shipping_cost);
             return acc;
@@ -96,17 +100,18 @@ const Checkout = () => {
           console.error(error);
         }
       };
-  
+
       fetchShippingCosts();
     }
   }, []); // Solo una vez
-  
 
   useEffect(() => {
     const fetchUserData = async () => {
       if (loginData && loginData.user) {
         try {
-          const response = await axios.get(`https://app-4e3ca83d-1758-4989-a888-369bfae706bf.cleverapps.io/api/users/${loginData.user.id}`);
+          const response = await axios.get(
+            `https://app-4e3ca83d-1758-4989-a888-369bfae706bf.cleverapps.io/api/users/${loginData.user.id}`
+          );
           const user = response.data.user;
           setUserData(user);
 
@@ -145,7 +150,9 @@ const Checkout = () => {
       try {
         const productDetails = await Promise.all(
           Object.keys(cart).map(async (productId) => {
-            const response = await axios.get(`https://app-4e3ca83d-1758-4989-a888-369bfae706bf.cleverapps.io/api/getproduct/${productId}`);
+            const response = await axios.get(
+              `https://app-4e3ca83d-1758-4989-a888-369bfae706bf.cleverapps.io/api/getproduct/${productId}`
+            );
             const selectedVariation =
               cart[productId].selectedVariation || response.data.variations[0]; // Variación predeterminada
 
@@ -208,7 +215,10 @@ const Checkout = () => {
           neighborhood: userData.neighborhood,
         };
 
-        await axios.put(`https://app-4e3ca83d-1758-4989-a888-369bfae706bf.cleverapps.io/api/updateusers/${loginData.user.id}`, updatedData);
+        await axios.put(
+          `https://app-4e3ca83d-1758-4989-a888-369bfae706bf.cleverapps.io/api/updateusers/${loginData.user.id}`,
+          updatedData
+        );
         message.success("Datos actualizados exitosamente.");
       } catch (error) {
         message.error("Error al actualizar los datos del usuario.");
@@ -307,7 +317,10 @@ const Checkout = () => {
       };
 
       try {
-        const response = await axios.post("https://app-4e3ca83d-1758-4989-a888-369bfae706bf.cleverapps.io/api/orders/placeOrder", orderData);
+        const response = await axios.post(
+          "https://app-4e3ca83d-1758-4989-a888-369bfae706bf.cleverapps.io/api/orders/placeOrder",
+          orderData
+        );
         if (response.status === 201) {
           setOrderId(response.data.orderId);
           setIsModalVisible(true);
@@ -329,7 +342,6 @@ const Checkout = () => {
   };
 
   const total = calculateSubtotal() + (discountedShippingCost ?? shippingCost);
-
 
   const generateOrderPDF = () => {
     const input = document.getElementById("order-summary-pdf");
