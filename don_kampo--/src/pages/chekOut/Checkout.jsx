@@ -30,7 +30,7 @@ const Checkout = () => {
     const fetchShippingCostsAndUser = async () => {
       try {
         // Fetch shipping costs
-        const response = await axios.get("/api/customer-types");
+        const response = await axios.get("https://app-4e3ca83d-1758-4989-a888-369bfae706bf.cleverapps.io/api/customer-types");
         const costs = response.data.reduce((acc, type) => {
           acc[type.type_name.toLowerCase()] = parseFloat(type.shipping_cost);
           return acc;
@@ -39,7 +39,7 @@ const Checkout = () => {
   
         // Fetch user data solo si no se ha cargado antes
         if (!userData && loginData?.user) {
-          const userResponse = await axios.get(`/api/users/${loginData.user.id}`);
+          const userResponse = await axios.get(`https://app-4e3ca83d-1758-4989-a888-369bfae706bf.cleverapps.io/api/users/${loginData.user.id}`);
           const user = userResponse.data.user;
           setUserData(user);
   
@@ -85,7 +85,7 @@ const Checkout = () => {
     if (!Object.keys(shippingCosts).length) {
       const fetchShippingCosts = async () => {
         try {
-          const response = await axios.get("/api/customer-types");
+          const response = await axios.get("https://app-4e3ca83d-1758-4989-a888-369bfae706bf.cleverapps.io/api/customer-types");
           const costs = response.data.reduce((acc, type) => {
             acc[type.type_name.toLowerCase()] = parseFloat(type.shipping_cost);
             return acc;
@@ -106,7 +106,7 @@ const Checkout = () => {
     const fetchUserData = async () => {
       if (loginData && loginData.user) {
         try {
-          const response = await axios.get(`/api/users/${loginData.user.id}`);
+          const response = await axios.get(`https://app-4e3ca83d-1758-4989-a888-369bfae706bf.cleverapps.io/api/users/${loginData.user.id}`);
           const user = response.data.user;
           setUserData(user);
 
@@ -145,7 +145,7 @@ const Checkout = () => {
       try {
         const productDetails = await Promise.all(
           Object.keys(cart).map(async (productId) => {
-            const response = await axios.get(`/api/getproduct/${productId}`);
+            const response = await axios.get(`https://app-4e3ca83d-1758-4989-a888-369bfae706bf.cleverapps.io/api/getproduct/${productId}`);
             const selectedVariation =
               cart[productId].selectedVariation || response.data.variations[0]; // Variación predeterminada
 
@@ -208,7 +208,7 @@ const Checkout = () => {
           neighborhood: userData.neighborhood,
         };
 
-        await axios.put(`/api/updateusers/${loginData.user.id}`, updatedData);
+        await axios.put(`https://app-4e3ca83d-1758-4989-a888-369bfae706bf.cleverapps.io/api/updateusers/${loginData.user.id}`, updatedData);
         message.success("Datos actualizados exitosamente.");
       } catch (error) {
         message.error("Error al actualizar los datos del usuario.");
@@ -307,7 +307,7 @@ const Checkout = () => {
       };
 
       try {
-        const response = await axios.post("/api/orders/placeOrder", orderData);
+        const response = await axios.post("https://app-4e3ca83d-1758-4989-a888-369bfae706bf.cleverapps.io/api/orders/placeOrder", orderData);
         if (response.status === 201) {
           setOrderId(response.data.orderId);
           setIsModalVisible(true);

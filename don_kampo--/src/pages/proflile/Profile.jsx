@@ -41,13 +41,13 @@ const Profile = () => {
       const loginData = JSON.parse(localStorage.getItem("loginData"));
       if (loginData && loginData.user) {
         try {
-          const response = await axios.get(`/api/users/${loginData.user.id}`);
+          const response = await axios.get(`https://app-4e3ca83d-1758-4989-a888-369bfae706bf.cleverapps.io/api/users/${loginData.user.id}`);
           const user = response.data.user;
           setUserData(user);
           form.setFieldsValue(user);
 
           // Cargar pedidos
-          const ordersResponse = await axios.get("/api/orders");
+          const ordersResponse = await axios.get("https://app-4e3ca83d-1758-4989-a888-369bfae706bf.cleverapps.io/api/orders");
           const userOrders = ordersResponse.data.filter(
             (order) => order.customer_id === loginData.user.id
           );
@@ -55,7 +55,7 @@ const Profile = () => {
           setFilteredOrders(userOrders);
 
           // Cargar productos con variaciones
-          const productsResponse = await axios.get("/api/products");
+          const productsResponse = await axios.get("https://app-4e3ca83d-1758-4989-a888-369bfae706bf.cleverapps.io/api/products");
           setProducts(productsResponse.data);
         } catch (error) {
           message.error("Error al cargar los datos.");
@@ -73,7 +73,7 @@ const Profile = () => {
     try {
       const values = form.getFieldsValue();
       const loginData = JSON.parse(localStorage.getItem("loginData"));
-      await axios.put(`/api/updateusers/${loginData.user.id}`, values);
+      await axios.put(`https://app-4e3ca83d-1758-4989-a888-369bfae706bf.cleverapps.io/api/updateusers/${loginData.user.id}`, values);
       setUserData(values);
       message.success("Datos actualizados exitosamente.");
     } catch (error) {
@@ -84,7 +84,7 @@ const Profile = () => {
 
   const fetchOrderDetails = async (orderId) => {
     try {
-      const response = await axios.get(`/api/orders/${orderId}`);
+      const response = await axios.get(`https://app-4e3ca83d-1758-4989-a888-369bfae706bf.cleverapps.io/api/orders/${orderId}`);
       setSelectedOrder(response.data);
       setIsModalVisible(true);
     } catch (error) {

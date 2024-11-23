@@ -24,7 +24,7 @@ const Cart = () => {
       try {
         if (!isShippingCostsLoaded) {
           // Verifica si ya se cargaron los costos
-          const response = await axios.get("/api/customer-types");
+          const response = await axios.get("https://app-4e3ca83d-1758-4989-a888-369bfae706bf.cleverapps.io/api/customer-types");
           const costs = response.data.reduce((acc, type) => {
             acc[type.type_name.toLowerCase()] = parseFloat(type.shipping_cost);
             return acc;
@@ -57,7 +57,7 @@ const Cart = () => {
         const productDetails = await Promise.all(
           Object.keys(cart).map(async (product_id) => {
             try {
-              const response = await axios.get(`/api/getproduct/${product_id}`);
+              const response = await axios.get(`https://app-4e3ca83d-1758-4989-a888-369bfae706bf.cleverapps.io/api/getproduct/${product_id}`);
               return {
                 ...response.data,
                 quantity: cart[product_id].quantity,

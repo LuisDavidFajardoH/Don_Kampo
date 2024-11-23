@@ -23,7 +23,7 @@ const Login = () => {
     setLoading(true);
     try {
       const response = await axios.post(
-        "/api/login",
+        "https://app-4e3ca83d-1758-4989-a888-369bfae706bf.cleverapps.io/api/login",
         { email, user_password },
         { withCredentials: true } // Permite enviar cookies si el backend lo requiere
       );
@@ -53,7 +53,7 @@ const Login = () => {
     setForgotPasswordLoading(true);
     try {
       const response = await axios.post(
-        "/api/request-password-reset",
+        "https://app-4e3ca83d-1758-4989-a888-369bfae706bf.cleverapps.io/api/request-password-reset",
         {
           email,
         },
@@ -89,7 +89,7 @@ const Login = () => {
 
     try {
       const response = await axios.post(
-        "/api/verify-code-and-reset-password",
+        "https://app-4e3ca83d-1758-4989-a888-369bfae706bf.cleverapps.io/api/verify-code-and-reset-password",
         {
           email,
           code,

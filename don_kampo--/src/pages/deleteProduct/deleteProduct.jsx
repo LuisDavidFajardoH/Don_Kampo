@@ -66,7 +66,7 @@ const ManageProducts = () => {
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      const response = await axios.get("/api/products");
+      const response = await axios.get("https://app-4e3ca83d-1758-4989-a888-369bfae706bf.cleverapps.io/api/products");
       setProducts(response.data);
       message.success("Productos cargados correctamente.");
     } catch (error) {
@@ -80,7 +80,7 @@ const ManageProducts = () => {
   // Función para eliminar un producto
   const deleteProduct = async (productId) => {
     try {
-      await axios.delete(`/api/deleteproduct/${productId}`);
+      await axios.delete(`https://app-4e3ca83d-1758-4989-a888-369bfae706bf.cleverapps.io/api/deleteproduct/${productId}`);
       message.success("Producto eliminado correctamente.");
       fetchProducts(); // Actualizar lista después de eliminar
     } catch (error) {
@@ -107,7 +107,7 @@ const ManageProducts = () => {
       };
 
       await axios.put(
-        `/api/updateproduct/${selectedProduct.product_id}`,
+        `https://app-4e3ca83d-1758-4989-a888-369bfae706bf.cleverapps.io/api/updateproduct/${selectedProduct.product_id}`,
         updatedProduct
       );
       message.success("Producto actualizado correctamente.");

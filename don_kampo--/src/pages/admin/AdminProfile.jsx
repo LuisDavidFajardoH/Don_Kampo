@@ -116,7 +116,7 @@ const AdminProfile = () => {
         formData.append("variations", JSON.stringify(product.variations));
 
         const response = await axios.post(
-          "http://localhost:8080/api/createproduct",
+          "https://app-4e3ca83d-1758-4989-a888-369bfae706bf.cleverapps.io/",
           formData,
           {
             headers: { "Content-Type": "multipart/form-data" },
@@ -202,7 +202,7 @@ const AdminProfile = () => {
         // Agregar variaciones como JSON
         formData.append("variations", JSON.stringify(product.variations));
 
-        await axios.post("http://localhost:8080/api/createproduct", formData, {
+        await axios.post("https://app-4e3ca83d-1758-4989-a888-369bfae706bf.cleverapps.io/api/createproduct", formData, {
           headers: { "Content-Type": "multipart/form-data" },
         });
       }
@@ -232,7 +232,7 @@ const AdminProfile = () => {
   const updateShippingCosts = async (values) => {
     setLoadingShipping(true);
     try {
-      await axios.put("/api/customer-types/shipping-costs", values);
+      await axios.put("https://app-4e3ca83d-1758-4989-a888-369bfae706bf.cleverapps.io/api/customer-types/shipping-costs", values);
       message.success("Costos de envío actualizados exitosamente.");
       fetchShippingCosts(); // Refresca los datos
     } catch (error) {
@@ -281,7 +281,7 @@ const AdminProfile = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get("/api/users");
+      const response = await axios.get("https://app-4e3ca83d-1758-4989-a888-369bfae706bf.cleverapps.io/api/users");
       setUsers(response.data);
     } catch (error) {
       message.error("Error al cargar los usuarios.");
@@ -291,7 +291,7 @@ const AdminProfile = () => {
 
   const fetchOrders = async () => {
     try {
-      const response = await axios.get("/api/orders");
+      const response = await axios.get("https://app-4e3ca83d-1758-4989-a888-369bfae706bf.cleverapps.io/api/orders");
       setOrders(response.data);
       setFilteredOrders(response.data);
     } catch (error) {
@@ -320,7 +320,7 @@ const AdminProfile = () => {
 
           formData.append("variations", JSON.stringify(product.variations));
 
-          await axios.post("/api/createproduct", formData, {
+          await axios.post("https://app-4e3ca83d-1758-4989-a888-369bfae706bf.cleverapps.io/api/createproduct", formData, {
             headers: { "Content-Type": "multipart/form-data" },
           });
         })
@@ -370,7 +370,7 @@ const AdminProfile = () => {
   const updateOrderStatus = async (orderId, newStatus) => {
     try {
       // Cambiamos la URL para incluir directamente el id y el nuevo estado
-      await axios.put(`/api/updatestatus/${orderId}/${newStatus}`);
+      await axios.put(`https://app-4e3ca83d-1758-4989-a888-369bfae706bf.cleverapps.io/api/updatestatus/${orderId}/${newStatus}`);
       message.success("Estado del pedido actualizado correctamente.");
       fetchOrders(); // Refresca la lista de pedidos después de actualizar el estado
     } catch (error) {
@@ -381,7 +381,7 @@ const AdminProfile = () => {
 
   const deleteOrder = async (orderId) => {
     try {
-      await axios.delete(`/api/deleteorders/${orderId}`);
+      await axios.delete(`https://app-4e3ca83d-1758-4989-a888-369bfae706bf.cleverapps.io/api/deleteorders/${orderId}`);
       message.success("Pedido eliminado correctamente.");
       fetchOrders();
     } catch (error) {
@@ -394,7 +394,7 @@ const AdminProfile = () => {
 
   const openUserModal = async (user) => {
     try {
-      const response = await axios.get(`/api/users/${user.id}`);
+      const response = await axios.get(`https://app-4e3ca83d-1758-4989-a888-369bfae706bf.cleverapps.io/api/users/${user.id}`);
       setSelectedUser(response.data);
       setIsUserModalVisible(true);
       form.setFieldsValue(response.data.user); // Actualiza los valores del formulario
@@ -433,7 +433,7 @@ const AdminProfile = () => {
 
   const updateUserDetails = async (values) => {
     try {
-      await axios.put(`/api/updateusers/${selectedUser.user.id}`, values);
+      await axios.put(`https://app-4e3ca83d-1758-4989-a888-369bfae706bf.cleverapps.io/api/updateusers/${selectedUser.user.id}`, values);
       message.success("Usuario actualizado exitosamente.");
       fetchUsers(); // Refresca la lista de usuarios después de actualizar
       setIsUserModalVisible(false);
@@ -451,7 +451,7 @@ const AdminProfile = () => {
   const handleCreateUser = async (values) => {
     setLoading(true);
     try {
-      await axios.post("/api/createusers", {
+      await axios.post("https://app-4e3ca83d-1758-4989-a888-369bfae706bf.cleverapps.io/api/createusers", {
         ...values,
         address: " ",
         neighborhood: " ",
@@ -691,7 +691,7 @@ const AdminProfile = () => {
       const responses = await Promise.all(
         filteredOrders.map(async (order) => {
           try {
-            const response = await axios.get(`/api/orders/${order.id}`);
+            const response = await axios.get(`https://app-4e3ca83d-1758-4989-a888-369bfae706bf.cleverapps.io/api/orders/${order.id}`);
             const { order: orderDetails, items, shippingInfo } = response.data;
 
             // Combinar los detalles de la orden, ítems y envío en un solo objeto
