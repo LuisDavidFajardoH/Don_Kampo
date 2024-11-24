@@ -40,7 +40,7 @@ const Products = () => {
     const fetchProducts = async () => {
       try {
         const response = await axios.get(
-          "https://don-kampo-api.onrender.com/api/products",
+          "http://3.22.98.109:8080/api/products",
           {
             withCredentials: true,
           }

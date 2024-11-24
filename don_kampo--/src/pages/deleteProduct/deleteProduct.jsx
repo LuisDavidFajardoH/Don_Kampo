@@ -66,7 +66,7 @@ const ManageProducts = () => {
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      const response = await axios.get("https://don-kampo-api.onrender.com/api/products");
+      const response = await axios.get("http://3.22.98.109:8080/api/products");
       setProducts(response.data);
       message.success("Productos cargados correctamente.");
     } catch (error) {
@@ -80,7 +80,7 @@ const ManageProducts = () => {
   // Función para eliminar un producto
   const deleteProduct = async (productId) => {
     try {
-      await axios.delete(`https://don-kampo-api.onrender.com/api/deleteproduct/${productId}`);
+      await axios.delete(`http://3.22.98.109:8080/api/deleteproduct/${productId}`);
       message.success("Producto eliminado correctamente.");
       fetchProducts(); // Actualizar lista después de eliminar
     } catch (error) {
@@ -107,7 +107,7 @@ const ManageProducts = () => {
       };
 
       await axios.put(
-        `https://don-kampo-api.onrender.com/api/updateproduct/${selectedProduct.product_id}`,
+        `http://3.22.98.109:8080/api/updateproduct/${selectedProduct.product_id}`,
         updatedProduct
       );
       message.success("Producto actualizado correctamente.");
