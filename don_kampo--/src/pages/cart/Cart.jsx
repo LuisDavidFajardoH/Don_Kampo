@@ -23,7 +23,7 @@ const Cart = () => {
       try {
         if (!isShippingCostsLoaded) {
           const response = await axios.get(
-            "http://3.22.98.109:8080/api/customer-types"
+            "https://api.donkampo.com/api/customer-types"
           );
           const costs = response.data.reduce((acc, type) => {
             acc[type.type_name.toLowerCase()] = parseFloat(type.shipping_cost);
@@ -58,7 +58,7 @@ const Cart = () => {
             const [productId] = key.split('-');
             
             const response = await axios.get(
-              `http://3.22.98.109:8080/api/getproduct/${productId}`
+              `https://api.donkampo.com/api/getproduct/${productId}`
             );
 
             return {

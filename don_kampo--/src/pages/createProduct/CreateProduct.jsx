@@ -101,7 +101,7 @@ const CreateProduct = () => {
   
     try {
       const response = await axios.post(
-        "http://3.22.98.109:8080/api/createproduct",
+        "https://api.donkampo.com/api/createproduct",
         formData,
         {
           headers: { "Content-Type": "multipart/form-data" },
