@@ -1,13 +1,14 @@
 import React from "react";
 import { Layout, Row, Col } from "antd";
 import "./Footer.css";
+import { WhatsAppOutlined, MailOutlined } from '@ant-design/icons';
 
 const { Footer } = Layout;
 
 const categories = [
   {
     title: "Frutas nacionales",
-    img: "/images/frutasProducto.jpg",
+    img: "/images/mangostino.webp",
     link: "/products?category=Frutas",
   },
   { title: "Verduras", img: "/images/verdurasProducto.jpg", link: "/products?category=Verdura" },
@@ -16,7 +17,7 @@ const categories = [
     img: "/images/frutasImportadas.jpg",
     link: "/frutas-importadas",
   },
-  { title: "Hortalizas", img: "/images/slider.jpg", link: "/products?category=Hortalizas" },
+  { title: "Hortalizas", img: "/images/hortalizas.jpg", link: "/products?category=Hortalizas" },
   { title: "Cosecha", img: "/images/organicas.webp", link: "/products?category=Cosecha" },
 ];
 

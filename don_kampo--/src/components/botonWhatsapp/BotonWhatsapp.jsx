@@ -1,6 +1,7 @@
 import React from "react";
 import { FloatingWhatsApp } from "react-floating-whatsapp";
 
+
 const BotonWhatsapp = () => {
   return (
     <FloatingWhatsApp
@@ -10,11 +11,11 @@ const BotonWhatsapp = () => {
       statusMessage="En línea"
       chatMessage="Bienvenido a Don Kampo                   ¿En qué podemos ayudarte?"
       placeholder="Escribe tu mensaje..."
-      darkMode={true}
+      darkMode={false}
       allowClickAway={true}
-      color="black" 
+      color="white" // Aquí sigue siendo el color del botón flotante
     />
-    );
+  );
 };
 
 export default BotonWhatsapp;

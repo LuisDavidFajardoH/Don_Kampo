@@ -22,10 +22,11 @@ body {
   margin: 0;
   padding: 0;
 
-  background-image: url("assets/don_kampo_bg.jpg"); /* Cambia 'background.jpg' por el nombre de tu imagen */
-  background-size: cover; /* Esto asegura que la imagen cubra todo el fondo */
+  background-image: url("assets//don_kampo_bg.jpg"); /* Cambia 'background.jpg' por el nombre de tu imagen */
+  background-size: cover; /* Esto asegura que la imagen cubra todo el fondo sin distorsión */
   background-position: center; /* Centra la imagen */
   background-repeat: no-repeat; /* Evita que la imagen se repita */
+  background-attachment: fixed; /* Fija la imagen en su lugar mientras se desplaza el contenido */
   color: var(--text-color);
 }
 

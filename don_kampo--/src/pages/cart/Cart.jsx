@@ -3,13 +3,14 @@ import Navbar from "../../components/navbar/Navbar";
 import CustomFooter from "../../components/footer/Footer";
 import { useCart } from "../products/CartContext";
 import { Card, Button, message, Divider } from "antd";
+import { DeleteOutlined } from '@ant-design/icons'; // Icono de la papelera (basura)
 import BotonWhatsapp from "../../components/botonWhatsapp/BotonWhatsapp";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "./Cart.css";
 
 const Cart = () => {
-  const { cart, removeFromCart, addToCart } = useCart();
+  const { cart, removeFromCart, removeOneFromCart, addToCart } = useCart();
   const [cartDetails, setCartDetails] = useState([]);
   const [loading, setLoading] = useState(true);
   const [shippingCost, setShippingCost] = useState(5000);
@@ -22,11 +23,9 @@ const Cart = () => {
     const fetchShippingCosts = async () => {
       try {
         if (!isShippingCostsLoaded) {
-          const response = await axios.get(
-            "http://3.22.98.109:8080/api/customer-types"
-          );
+          const response = await axios.get("http://localhost:8080/api/customer-types");
           const costs = response.data.reduce((acc, type) => {
-            acc[type.type_name.toLowerCase()] = parseFloat(type.shipping_cost);
+            acc[type.type_name.toLowerCase()] = parseFloat(type.shipping_percentage) / 100; // Asumimos que shipping_percentage es un porcentaje en formato entero
             return acc;
           }, {});
           setShippingCosts(costs);
@@ -37,16 +36,19 @@ const Cart = () => {
         console.error(error);
       }
     };
-
+    
     const setUserShippingCost = () => {
       const loginData = JSON.parse(localStorage.getItem("loginData"));
       if (loginData?.user && Object.keys(shippingCosts).length > 0) {
         const userType = loginData.user.user_type.toLowerCase();
-        setShippingCost(shippingCosts[userType] || 0);
+        const shippingPercentage = shippingCosts[userType] || 0;
+        const subtotal = calculateSubtotal();
+        setShippingCost(subtotal * shippingPercentage); // Se calcula el costo de envío como un porcentaje del subtotal
       }
     };
-
+    
     fetchShippingCosts().then(setUserShippingCost);
+    
   }, [isShippingCostsLoaded]);
 
   useEffect(() => {
@@ -58,7 +60,7 @@ const Cart = () => {
             const [productId] = key.split('-');
             
             const response = await axios.get(
-              `http://3.22.98.109:8080/api/getproduct/${productId}`
+              `http://localhost:8080/api/getproduct/${productId}`
             );
 
             return {
@@ -114,16 +116,27 @@ const Cart = () => {
   
     addToCart(product);
   };
-  
+
+  // Función para reducir la cantidad de un producto
+  const handleRemoveOneFromCart = (product) => {
+    if (!product.selectedVariation) {
+      console.error("La variación seleccionada no está definida.");
+      return;
+    }
+
+    removeOneFromCart(product); // Reducir cantidad de un producto
+  };
+
+  // Esta función ahora elimina la card completa del carrito
   const handleRemoveFromCart = (product) => {
     if (!product.selectedVariation) {
       console.error("La variación seleccionada no está definida.");
       return;
     }
-  
-    removeFromCart(product);
+
+    // Eliminar todo el producto (toda la card)
+    removeFromCart(product); // Esto actualizará el estado del carrito en el contexto y renderizará la UI
   };
-  
 
   const handleCheckout = () => {
     if (cartDetails.length > 0) {
@@ -165,7 +178,9 @@ const Cart = () => {
                       />
                       <div>
                         <h4>{product.name}</h4>
-                        <p>Variación: {product.selectedVariation.quality}</p>
+                        <p>Categoría: {product.category}</p>
+                        <p>Calidad: {product.selectedVariation?.quality}</p>
+                        <p>Cantidad: {product.selectedVariation?.quantity}</p>
                         <p>
                           Precio: $
                           {getPriceByUserType(
@@ -174,7 +189,7 @@ const Cart = () => {
                           ).toLocaleString()}
                         </p>
                         <p>
-                          Subtotal: $
+                          Subtotal: $ 
                           {(
                             getPriceByUserType(
                               product,
@@ -185,9 +200,7 @@ const Cart = () => {
                       </div>
                     </div>
                     <div className="cart-item-quantity">
-                      <Button onClick={() => handleRemoveFromCart(product)}>
-                        -
-                      </Button>
+                      <Button onClick={() => handleRemoveOneFromCart(product)}>-</Button>
                       <span>{product.quantity}</span>
                       <Button
                         onClick={() =>
@@ -196,6 +209,14 @@ const Cart = () => {
                       >
                         +
                       </Button>
+                    </div>
+                    <div className="cart-item-delete">
+                      {/* Botón de eliminar (basura) */}
+                      <Button
+                        danger
+                        icon={<DeleteOutlined />}
+                        onClick={() => handleRemoveFromCart(product)} // Elimina toda la card (producto completo)
+                      />
                     </div>
                   </div>
                 </Card>

@@ -28,7 +28,7 @@ const Register = () => {
   
     setLoading(true);
     try {
-      const response = await axios.post("http://3.22.98.109:8080/api/createusers", {
+      const response = await axios.post("http://localhost:8080/api/createusers", {
         user_name,
         lastname,
         email,

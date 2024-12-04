@@ -41,22 +41,19 @@ const Profile = () => {
       const loginData = JSON.parse(localStorage.getItem("loginData"));
       if (loginData && loginData.user) {
         try {
-          const response = await axios.get(`http://3.22.98.109:8080/api/users/${loginData.user.id}`);
+          const response = await axios.get(`http://localhost:8080/api/users/${loginData.user.id}`);
           const user = response.data.user;
           setUserData(user);
           form.setFieldsValue(user);
-
+  
           // Cargar pedidos
-          const ordersResponse = await axios.get("http://3.22.98.109:8080/api/orders");
+          const ordersResponse = await axios.get("http://localhost:8080/api/orders");
           const userOrders = ordersResponse.data.filter(
             (order) => order.customer_id === loginData.user.id
           );
+          console.log("Pedidos del usuario:", userOrders); // LOG PARA VERIFICAR LOS DATOS
           setOrders(userOrders);
           setFilteredOrders(userOrders);
-
-          // Cargar productos con variaciones
-          const productsResponse = await axios.get("http://3.22.98.109:8080/api/products");
-          setProducts(productsResponse.data);
         } catch (error) {
           message.error("Error al cargar los datos.");
           console.error(error);
@@ -65,15 +62,15 @@ const Profile = () => {
         message.error("Debe iniciar sesión para ver su perfil.");
       }
     };
-
+  
     fetchUserData();
-  }, [form]);
+  }, [form]);  
 
   const handleSaveChanges = async () => {
     try {
       const values = form.getFieldsValue();
       const loginData = JSON.parse(localStorage.getItem("loginData"));
-      await axios.put(`http://3.22.98.109:8080/api/updateusers/${loginData.user.id}`, values);
+      await axios.put(`http://localhost:8080/api/updateusers/${loginData.user.id}`, values);
       setUserData(values);
       message.success("Datos actualizados exitosamente.");
     } catch (error) {
@@ -84,7 +81,7 @@ const Profile = () => {
 
   const fetchOrderDetails = async (orderId) => {
     try {
-      const response = await axios.get(`http://3.22.98.109:8080/api/orders/${orderId}`);
+      const response = await axios.get(`http://localhost:8080/api/orders/${orderId}`);
       setSelectedOrder(response.data);
       setIsModalVisible(true);
     } catch (error) {
@@ -139,17 +136,19 @@ const Profile = () => {
       const matchTerm =
         order.id.toString().includes(term) ||
         renderStatus(order.status_id).props.text.toLowerCase().includes(term);
-
+  
       const matchDate =
         !range ||
         range.length === 0 ||
         (new Date(order.order_date) >= range[0].startOf("day").toDate() &&
           new Date(order.order_date) <= range[1].endOf("day").toDate());
-
+  
       return matchTerm && matchDate;
     });
+    console.log("Pedidos filtrados:", filtered); 
     setFilteredOrders(filtered);
   };
+  
 
   const handleExportToExcel = () => {
     const worksheet = XLSX.utils.json_to_sheet(filteredOrders);

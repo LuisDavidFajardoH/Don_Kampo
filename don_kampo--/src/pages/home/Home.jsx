@@ -7,15 +7,18 @@ import {
   Row,
   Col,
   Modal,
-  Input,
+  AutoComplete,
+  message,
 } from "antd";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import Navbar from "../../components/navbar/Navbar";
 import CustomFooter from "../../components/footer/Footer";
 import BotonWhatsapp from "../../components/botonWhatsapp/BotonWhatsapp";
 import InstallPrompt from "../install/InstallPrompt";
 import "./Home.css";
+
 
 const { Title, Paragraph } = Typography;
 
@@ -47,10 +50,10 @@ const carouselItems = [
 ];
 
 const categories = [
-  { title: "Frutas nacionales", img: "/images/frutasProducto.jpg" },
+  { title: "Frutas nacionales", img: "/images/mangostino.webp" },
   { title: "Verduras", img: "/images/verdurasProducto.jpg" },
   { title: "Frutas importadas", img: "/images/frutasImportadas.jpg" },
-  { title: "Hortalizas", img: "/images/slider.jpg" },
+  { title: "Hortalizas", img: "/images/hortalizas.jpg" },
 ];
 
 const userTypeCarouselItems = {
@@ -65,15 +68,59 @@ const Home = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [userType, setUserType] = useState(null);
   const [searchValue, setSearchValue] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
   const navigate = useNavigate();
 
   const handleCategoryClick = (category) => {
     navigate(`/products?category=${encodeURIComponent(category)}`);
   };
 
-  // Función para manejar la búsqueda
   const handleSearch = (value) => {
     navigate(`/products?search=${encodeURIComponent(value)}`);
+  };
+
+  const fetchProducts = async (query) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:8080/api/products?search=${query}`,
+        { withCredentials: true }
+      );
+  
+      if (response.data && Array.isArray(response.data)) {
+        // Filtrar productos en el frontend si es necesario
+        const filteredProducts = response.data.filter((product) =>
+          product.name.toLowerCase().includes(query.toLowerCase())
+        );
+  
+        setSearchResults(filteredProducts);
+        console.log("Productos encontrados:", filteredProducts);
+      } else {
+        throw new Error("Respuesta inesperada del backend");
+      }
+    } catch (error) {
+      message.error("Error al cargar los productos.");
+      console.error("Error al obtener productos:", error);
+    }
+  };
+  
+  
+
+  const handleSearchChange = (value) => {
+    setSearchValue(value);
+    if (value) {
+      fetchProducts(value);
+    } else {
+      setSearchResults([]);
+    }
+  };
+
+  const handleSelect = (value) => {
+    const selectedProduct = searchResults.find(
+      (product) => product.title === value
+    );
+    if (selectedProduct) {
+      navigate(selectedProduct.link);
+    }
   };
 
   useEffect(() => {
@@ -112,20 +159,28 @@ const Home = () => {
       <Navbar />
       <div className="home-container">
         {/* Carrusel principal */}
-        {/* Barra de búsqueda */}
-        {/* Barra de búsqueda */}
-        {/* Barra de búsqueda */}
         <div className="search-bar">
-          <input
-            type="text"
+          <AutoComplete
+            options={searchResults.map((product) => ({
+              value: product.name, // Usar "name" del backend
+              key: product.product_id, // Clave única
+              label: (
+                <div className="search-result-item">
+                  <img
+                    src={product.photo_url} // Usar "photo_url" para la miniatura
+                    alt={product.name} // Usar "name" como alt
+                    style={{ width: "50px", marginRight: "10px" }}
+                  />
+                  <span>{product.name}</span> {/* Mostrar el nombre del producto */}
+                </div>
+              ),
+            }))}            
+            style={{ width: 300 }}
+            onSelect={handleSelect}
+            onSearch={handleSearchChange}
             placeholder="Buscar productos, categorías, etc."
-            className="search-input"
-            onChange={(e) => setSearchValue(e.target.value)}
-            onKeyPress={(e) => {
-              if (e.key === "Enter") {
-                handleSearch(e.target.value);
-              }
-            }}
+            value={searchValue}
+            onChange={setSearchValue}
           />
           <Button
             type="primary"
@@ -149,7 +204,7 @@ const Home = () => {
                   <div className="carousel-left">
                     <Title
                       level={2}
-                      className=" carousel-title"
+                      className="carousel-title"
                       style={{ color: "white" }}
                     >
                       {item.title}
@@ -177,16 +232,6 @@ const Home = () => {
               </div>
             ))}
           </Carousel>
-          <Button
-            className="carousel-control left"
-            icon={<LeftOutlined />}
-            onClick={handlePrev}
-          />
-          <Button
-            className="carousel-control right"
-            icon={<RightOutlined />}
-            onClick={handleNext}
-          />
         </div>
 
         {/* Categorías destacadas */}
@@ -228,10 +273,28 @@ const Home = () => {
             </Col>
             <Col xs={24} md={12}>
               <img
-                src="/images/calidad.webp"
+                src="/images/6.jpg"
                 alt="Calidad Don Kampo"
                 className="info-image"
               />
+            </Col>
+          </Row>
+        </div>
+
+        <div className="delivery-section">
+          <Title style={{ color: "#00983a" }} level={3}>
+            No te Preocupes por el Envío:
+          </Title>
+          <Row gutter={[16, 16]} justify="space-between" align="middle">
+            <Col xs={24} sm={12} md={8} lg={8}>
+              <Card hoverable className="delivery-card">
+                <img 
+                  alt="Camión Don Kampo" 
+                  src="/images/37.png"  // Cambia por la ruta correcta de tus imágenes
+                  className="delivery-image"
+                />
+                <Card.Meta title="Entrega a Domicilio!" />
+              </Card>
             </Col>
           </Row>
         </div>

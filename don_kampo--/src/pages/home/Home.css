@@ -464,6 +464,115 @@
   background-color: #ff914d;
   border-color: #ff914d;
 }
+/* Estilos para la nueva sección de "Delivery" */
+.delivery-section {
+  margin-top: 40px;
+  text-align: center;
+  padding: 40px 0;
+  background-color: rgba(65, 94, 78, 0.1); /* Fondo claro para la sección */
+}
+
+/* Títulos dentro de la sección */
+.delivery-section .ant-typography h3 {
+  color: #00983a;
+  font-size: 1.8rem;
+}
+
+/* Ajuste para las tarjetas de entrega */
+.category-card {
+  background-color: rgba(65, 94, 78, 0.178);
+  margin-bottom: 16px; /* Espacio entre las tarjetas */
+}
+
+/* Imagen dentro de las tarjetas */
+.category-image {
+  width: 100%;
+  height: 150px;
+  object-fit: cover; /* Asegura que la imagen cubra el espacio sin distorsionarse */
+}
+
+
+/* Responsividad para dispositivos móviles */
+@media (max-width: 768px) {
+  .delivery-section {
+    padding: 10px; /* Reduce el padding en pantallas pequeñas */
+  }
+
+  .delivery-card {
+    padding: 10px; /* Asegura que el contenido dentro de las cards tenga espacio en móviles */
+  }
+
+  .delivery-section .ant-typography {
+    font-size: 1.2rem; /* Ajusta el tamaño del título */
+  }
+
+  /* Asegura que las imágenes no sobrepasen el ancho de la pantalla */
+  .delivery-image {
+    width: 100%; /* Ajuste de imagen para móviles */
+    max-height: 200px; /* Limita la altura de la imagen para pantallas pequeñas */
+  }
+}
+
+/* Responsividad para tabletas */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .delivery-section {
+    padding: 15px;
+  }
+
+  .delivery-card {
+    padding: 15px; /* Aumenta el padding de las cards en tablets */
+  }
+
+  .delivery-section .ant-typography {
+    font-size: 1.4rem; /* Ajusta el tamaño del título */
+  }
+}
+
+/* Responsividad para pantallas pequeñas */
+@media (max-width: 768px) {
+  .category-card {
+    max-width: 100%; /* Las tarjetas ocupan el 100% del ancho en dispositivos pequeños */
+    margin: 0 auto; /* Centra la tarjeta */
+  }
+
+  .category-image {
+    height: 120px; /* Reduce la altura de la imagen en pantallas pequeñas */
+  }
+}
+
+/* Responsividad para pantallas medianas (tabletas) */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .category-card {
+    max-width: 250px; /* Limita el ancho de las tarjetas en pantallas medianas */
+    margin: 0 auto; /* Centra la tarjeta */
+  }
+
+  .category-image {
+    height: 150px; /* Ajusta la altura de la imagen */
+  }
+}
+
+/* Responsividad para pantallas grandes (escritorio) */
+@media (min-width: 1025px) {
+  .category-card {
+    max-width: 250px;
+    margin: 0 auto;
+  }
+
+  .category-image {
+    height: 150px; /* Tamaño de imagen constante */
+  }
+}
+
+
+/* Aseguramos un buen espacio entre las tarjetas */
+@media (min-width: 768px) {
+  .delivery-card {
+    max-width: 250px; /* Limita el ancho de cada tarjeta */
+    margin: 0 auto; /* Centra la tarjeta */
+  }
+}
+
 
 /* Responsividad para pantallas pequeñas (teléfonos) */
 @media (max-width: 768px) {

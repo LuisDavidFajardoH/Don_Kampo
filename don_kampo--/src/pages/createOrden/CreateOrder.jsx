@@ -64,7 +64,7 @@ const CreateOrder = () => {
 
   const fetchUserDetails = async (userId) => {
     try {
-      const response = await axios.get(`http://3.22.98.109:8080/api/users/${userId}`);
+      const response = await axios.get(`http://localhost:8080/api/users/${userId}`);
       setSelectedUserData(response.data.user);
     } catch (error) {
       message.error("Error al cargar los datos del usuario.");
@@ -80,7 +80,7 @@ const CreateOrder = () => {
     // Fetch usuarios
     const fetchUsers = async () => {
       try {
-        const response = await axios.get("http://3.22.98.109:8080/api/users", {
+        const response = await axios.get("http://localhost:8080/api/users", {
           withCredentials: true,
         });
         setUsers(response.data);
@@ -93,7 +93,7 @@ const CreateOrder = () => {
     // Fetch productos
     const fetchProducts = async () => {
       try {
-        const response = await axios.get("http://3.22.98.109:8080/api/products", {
+        const response = await axios.get("http://localhost:8080/api/products", {
           withCredentials: true,
         });
         setProducts(response.data);
@@ -196,7 +196,7 @@ const CreateOrder = () => {
 
     setLoading(true);
     try {
-      const response = await axios.post("http://3.22.98.109:8080/api/orders/placeOrder", orderData);
+      const response = await axios.post("http://localhost:8080/api/orders/placeOrder", orderData);
       console.log("Respuesta de la API:", response);
 
       if (response.status === 201) {

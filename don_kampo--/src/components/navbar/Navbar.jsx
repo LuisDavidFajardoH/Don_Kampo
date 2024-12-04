@@ -149,7 +149,7 @@ const Navbar = () => {
             Inicio
           </Menu.Item>
           <Button
-            type="primary"
+            type="secondary"
             className="cosechas-button"
             onClick={() => navigate("/products?category=Cosecha")}
             style={{

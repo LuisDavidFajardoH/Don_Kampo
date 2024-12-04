@@ -111,6 +111,7 @@
   /* Responsive*/
 
   .logo {
+    padding-top: 5px;
     color: white;
     font-size: 24px;
     font-weight: bold;
@@ -119,13 +120,13 @@
 
   .menu-desktop {
     display: flex;
-    flex-grow: 1; /* Hace que el menú crezca y ocupe el espacio restante */
+    flex-grow: 2; /* Hace que el menú crezca y ocupe el espacio restante */
     justify-content: flex-end;
     background-color: transparent;
   }
 
   :where(.css-dev-only-do-not-override-apn68).ant-badge .ant-badge-count {
-    background: #4dff87;
+    background: #32d468;
     font-size: 14px;
     min-width: 50px; /* Ancho mínimo más grande */
     padding: 0 8px; /* Mayor padding para espacio adicional */

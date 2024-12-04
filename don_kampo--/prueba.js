@@ -778,7 +778,8 @@ const AdminProfile = () => {
       <div className="admin-profile-container">
         <h2>Bienvenido al Panel de Administración</h2>
         <p>
-        👤 Administra usuarios, 📦 gestiona pedidos, 🚚 configura precios de envíos y 🛒 crea productos fácilmente. ¡Todo en un solo lugar! 🎯
+        👤 Administra usuarios, 📦 gestiona pedidos, 🚚 configura precios de envíos y 🛒 crea productos fácilmente. 
+        ¡Todo en un solo lugar! 🎯
         </p>
         {renderUserTable()}
         {renderOrderTable()}
